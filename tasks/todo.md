@@ -102,10 +102,10 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
 
 ## Showcase and verification
 
-- [ ] **Task 15: `/design-system` route, sections 01–04, accent switcher**
+- [x] **Task 15: `/design-system` route, sections 01–04, accent switcher**
   - Acceptance: thin route (`noindex`); sections Principles, Color tokens (from meta), Type scale, Space/Radius/Elevation match the sheet's layout at 1320 px; 4-swatch accent switcher recolors live.
   - Verify: `pnpm build`; manual at `/design-system`
-  - Acceptance (moved from Task 1): `src/features/design-system/tokens.meta.ts` + sync test against `tokens.css`.
+  - Acceptance (moved from Task 1): token metadata + sync test against `tokens.css`, at `src/lib/tokens/meta.ts` (token values are data; features may not hard-code colors).
   - Files: `src/app/(dev)/design-system/page.tsx`, `src/features/design-system/tokens.meta.ts` (+ test), `src/features/design-system/sections-foundations.tsx`, `src/features/design-system/accent-switcher.tsx`, `src/features/design-system/index.ts`
   - Scope: M
 

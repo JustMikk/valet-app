@@ -70,6 +70,7 @@
   --color-card: var(--card);
   --color-sheet: var(--sheet);
   --color-scrim: var(--scrim);
+  --color-canvas: var(--canvas);
 
   /* shadcn semantic slots (vendor primitives) */
   --color-background: var(--background);
