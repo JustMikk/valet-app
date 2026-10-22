@@ -46,4 +46,4 @@ Fixed while measuring: list and person rows were 1 px short. The export sets `mi
 
 ## Regression baselines
 
-`e2e/design-system.visual.spec.ts-snapshots/section-0N-desktop-win32.png` (6 sections, `maxDiffPixelRatio` 0.002) guard `/design-system` against unintended visual change. They are Windows renders; CI on Linux skips `@visual` until Linux baselines are generated (Docker `mcr.microsoft.com/playwright` image or a CI artifact).
+`e2e/design-system.visual.spec.ts-snapshots/section-0N-desktop-win32.png` (6 sections, `maxDiffPixelRatio` 0.002, per-pixel `threshold` 0.02 so a token color change is caught) guard `/design-system` against unintended visual change. They are Windows renders; CI on Linux skips `@visual` until Linux baselines are generated (Docker `mcr.microsoft.com/playwright` image or a CI artifact).

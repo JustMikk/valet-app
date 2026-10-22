@@ -144,6 +144,8 @@ test.describe("design system vs Design System.dc.html", () => {
         fullPage: true,
         clip: { x: box.x, y: box.y, width: box.width, height: box.height },
         maxDiffPixelRatio: 0.002,
+        // Per-pixel color tolerance. The default (0.2) let a #8E8E8A → #70706C text change pass.
+        threshold: 0.02,
       })
     }
   })
