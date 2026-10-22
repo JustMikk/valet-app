@@ -20,7 +20,7 @@ Environment: Windows 11, Node 24.15.0, pnpm 12.11.2, git 2.53.0.
 - [x] `claude plugin list` shows `agent-skills` enabled; it provides `/spec`, `/plan`, `/build`, `/test`, `/constraints`, `/review` (visible after a restart)
 - [x] shadcn skill installed; `pnpm dlx shadcn@latest info --json` runs
 - [x] `shadcn` MCP connected (tools listed in session after ADR-004)
-- [~] Registry queries: CLI verified both registries (`shadcn view button` ✅, `shadcn search @aceternity -q card` ✅ 100 results). Repeat through the MCP after restart.
+- [x] MCP test queries: `search @shadcn "button"` → 33 items; `search @aceternity "card"` → 100 items (results discarded)
 - [x] This log
 
 ## Tooling (§3.7 / §7)
