@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test"
 
 const PORT = 3100
+// Pixel comparisons against the 1320 px design canvases run in the desktop project only.
+const VISUAL_SPECS = /\.visual\.spec\.ts$/
 
 export default defineConfig({
   testDir: "./e2e",
@@ -10,10 +12,15 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: { baseURL: `http://localhost:${PORT}`, trace: "on-first-retry" },
   projects: [
-    { name: "phone", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
+    {
+      name: "phone",
+      use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } },
+      testIgnore: VISUAL_SPECS,
+    },
     {
       name: "tablet",
       use: { ...devices["Desktop Chrome"], viewport: { width: 820, height: 1180 } },
+      testIgnore: VISUAL_SPECS,
     },
     {
       name: "desktop",

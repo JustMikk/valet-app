@@ -31,7 +31,7 @@ export function ListRow({
     props: mergeProps<"div">(
       {
         className: cn(
-          "flex min-h-16 w-full items-center gap-3 border-0 border-b border-line bg-transparent p-0 text-left text-fg",
+          "box-content flex min-h-16 w-full items-center gap-3 border-0 border-b border-line bg-transparent p-0 text-left text-fg",
           className,
         ),
         children: (

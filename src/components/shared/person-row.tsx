@@ -55,7 +55,12 @@ type PersonRowProps = {
 /** 72 px row for a person in a slot: avatar, name, evidence, state. */
 export function PersonRow({ avatar, name, detail, trailing, className }: PersonRowProps) {
   return (
-    <div className={cn("flex min-h-18 items-center gap-3.5 border-b border-line", className)}>
+    <div
+      className={cn(
+        "box-content flex min-h-18 items-center gap-3.5 border-b border-line",
+        className,
+      )}
+    >
       {avatar}
       <div className="flex min-w-0 flex-1 flex-col gap-0.75">
         <span className="text-17 font-semibold">{name}</span>

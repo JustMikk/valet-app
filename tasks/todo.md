@@ -115,7 +115,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/features/design-system/section-components.tsx`, `src/features/design-system/component-specimens.tsx`, `src/features/design-system/section-rules.tsx`
   - Scope: M
 
-- [ ] **Task 17: Pixel comparison**
+- [x] **Task 17: Pixel comparison**
   - Acceptance: `e2e/design-system.visual.spec.ts` renders the design file and `/design-system` at 1320 px, screenshots each section/component, compares element boxes and computed colors/radii, writes a side-by-side + overlay report; deltas fixed or listed as font-only; baselines committed.
   - Verify: `pnpm exec playwright test e2e/design-system.visual.spec.ts --project=desktop`
   - Files: `e2e/design-system.visual.spec.ts`, `e2e/visual-helpers.ts`, baselines

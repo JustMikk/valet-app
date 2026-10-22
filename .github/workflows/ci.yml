@@ -70,7 +70,8 @@ jobs:
       - run: pnpm build
       # Lighthouse first, on an idle runner: lab metrics inflate under load.
       - run: pnpm perf
-      - run: pnpm test:e2e
+      # @visual baselines are rendered on Windows (local); Linux font rendering differs.
+      - run: pnpm test:e2e --grep-invert @visual
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
