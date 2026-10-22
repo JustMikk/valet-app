@@ -1,4 +1,5 @@
-import { z } from "zod"
+// zod/mini: tree-shakable, so boundary checks on the critical path stay small (ADR-009).
+import { z } from "zod/mini"
 
 import { contrastRatio, fromOklch, parseHex, toHex, toOklch, type Oklch, type Rgb } from "./color"
 
@@ -6,8 +7,7 @@ export type ThemeMode = "light" | "dark"
 
 export const AccentHex = z
   .string()
-  .regex(/^#[0-9a-fA-F]{6}$/, "Accent must be a #RRGGBB color")
-  .transform((hex) => hex.toUpperCase())
+  .check(z.regex(/^#[0-9a-fA-F]{6}$/, "Accent must be a #RRGGBB color"), z.toUpperCase())
 
 /** Regency gold, the default tenant accent. */
 export const DEFAULT_ACCENT = "#C9A24A"

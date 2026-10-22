@@ -15,12 +15,12 @@ type Segment = keyof CoverageCounts
 const SEGMENTS: { key: Segment; words: string; fill: string; swatch: string }[] = [
   { key: "onSite", words: "on site", fill: "bg-ok", swatch: "bg-ok" },
   { key: "late", words: "late", fill: "bg-warn", swatch: "bg-warn" },
-  { key: "expected", words: "expected", fill: "bg-fg-3", swatch: "bg-fg-3" },
+  { key: "expected", words: "expected", fill: "bg-fg-3-line", swatch: "bg-fg-3-line" },
   {
     key: "open",
     words: "open",
     fill: "hatch-open",
-    swatch: "shadow-[inset_0_0_0_1.5px_var(--fg-3)]",
+    swatch: "shadow-[inset_0_0_0_1.5px_var(--fg-3-line)]",
   },
 ]
 

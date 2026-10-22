@@ -1,4 +1,5 @@
-import { z } from "zod"
+// zod/mini: tree-shakable, so boundary checks on the critical path stay small (ADR-009).
+import { z } from "zod/mini"
 
 import type { ThemeMode } from "@/lib/tenant"
 
@@ -16,7 +17,8 @@ export function resolveTheme(preference: ThemePreference, systemDark: boolean): 
 /** Stored preference, or "system" when storage is empty, invalid or unavailable. */
 export function readThemePreference(): ThemePreference {
   try {
-    return ThemePreference.catch("system").parse(localStorage.getItem(THEME_STORAGE_KEY))
+    const stored = ThemePreference.safeParse(localStorage.getItem(THEME_STORAGE_KEY))
+    return stored.success ? stored.data : "system"
   } catch {
     return "system"
   }

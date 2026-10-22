@@ -121,7 +121,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `e2e/design-system.visual.spec.ts`, `e2e/visual-helpers.ts`, baselines
   - Scope: M
 
-- [ ] **Task 18: A11y, perf, size, intake**
+- [x] **Task 18: A11y, perf, size, intake**
   - Acceptance: `/design-system` added to `e2e/routes.ts`; axe clean in both themes × 3 viewports; Lighthouse within budget; bundle ratchet updated with a recorded reason; `docs/DESIGN_INTAKE.md` lists tokens and component sources.
   - Verify: `pnpm check:full`
   - Files: `e2e/routes.ts`, `e2e/a11y.spec.ts`, `.size-limit.json`, `CONSTRAINTS.md`, `docs/DESIGN_INTAKE.md`

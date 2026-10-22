@@ -23,7 +23,10 @@
   --elev: #ffffff;
   --fg: #0b0b0b;
   --fg-2: #5e5e5b;
-  --fg-3: #8e8e8a;
+  /* Text: darkened from the export's #8E8E8A to meet 4.5:1 on bg and surface (OPEN_QUESTIONS D11). */
+  --fg-3: #70706c;
+  /* Graphics (hatch, expected segment, outline rings): the export's value; ≥ 3:1 non-text contrast. */
+  --fg-3-line: #8e8e8a;
   --line: #e6e6e3;
   --hero: #0e0f12;
 
@@ -33,7 +36,8 @@
   --accent-soft: #f7efda;
   --accent-text: #7f611a;
 
-  --ok: #2a7f36;
+  /* Darkened from the export's #2A7F36 to meet 4.5:1 on --ok-soft (D11). */
+  --ok: #257a32;
   --ok-soft: #e5f3e1;
   --warn: #b9480e;
   --warn-soft: #fcede2;
@@ -81,7 +85,8 @@
   --elev: #1e1e21;
   --fg: #f4f4f2;
   --fg-2: #a6a6a1;
-  --fg-3: #76766f;
+  --fg-3: #86867f;
+  --fg-3-line: #76766f;
   --line: #2b2b2e;
   --hero: #1e1e21;
 

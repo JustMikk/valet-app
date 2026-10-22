@@ -20,7 +20,7 @@ const badgeVariants = cva(
         neutral: "bg-surface text-fg",
         muted: "bg-surface text-fg-2",
         faint: "bg-surface text-fg-3",
-        outline: "text-fg-2 shadow-[inset_0_0_0_1.5px_var(--fg-3)]",
+        outline: "text-fg-2 shadow-[inset_0_0_0_1.5px_var(--fg-3-line)]",
       },
       size: {
         md: "h-7.5 gap-1.25 pr-2.75 pl-2 text-14",

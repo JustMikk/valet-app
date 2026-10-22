@@ -136,3 +136,22 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 **Decision.** `zod` 4 is the validation library at every boundary (handoff §7); first use is the tenant accent (`AccentHex`). Tenant accents derive `--accent-soft` and `--accent-text` in OKLCH from the exported gold variants (same lightness, chroma scaled to the accent, gold's hue offset), with text lightness nudged until it meets 4.5:1 on the page background and on the soft fill (D7). The default gold returns the exported values exactly; other accents use one hex in both modes (D8). `TenantTheme` injects the variables as a stylesheet built only from a validated hex.
 
 **Verification.** `src/lib/tenant/*.test.ts`: the formula reproduces exported gold within ΔE_ok < 2 in both modes; all four Settings swatches meet 4.5:1 for accent text (on bg and soft) and for ink on the accent fill.
+
+---
+
+## ADR-009 — Critical-path weight and accessible contrast (Phase 1 verification)
+
+**Date:** 2026-10-22 · **Status:** accepted pending owner review (bar changes flagged in CONSTRAINTS.md)
+
+**Context.** Task 18 measured `/` at LCP 2.76 s (budget 2.5 s) and 199 KiB of JS: the layout preloaded four font files (157 KiB) on every route, and the `@/lib/theme` barrel pulled the client hook — and full `zod` (28 KiB gz) — into every page. axe found 86 serious contrast failures, all from two exported tokens.
+
+**Decisions.**
+
+- **zod/mini** for client-side boundary checks (tenant accent, theme preference): same validation, tree-shakable. Full `zod` remains available where size does not matter.
+- The root layout imports `ThemeScript` from its file, not the barrel, so client code stays out of server-only imports.
+- Only Onest (LCP text) and the icon subset (`display: block`) are preloaded; Bricolage (75 KiB) and Geist Mono swap in. `/` is back to LCP 1.99 s and 175.3 kB JS.
+- **Per-route JS budgets** (`scripts/route-js-size.mjs`, `route-budgets.json`) replace `size-limit`'s whole-export total, so the dev-only `/design-system` chunk (89 KiB) no longer counts against product routes. `size-limit` and `@size-limit/file` removed.
+- **Dev reference routes** (`DEV_ROUTES`, noindex) are axe- and focus-checked but outside the Lighthouse budget; product routes (`ROUTES`) carry all budgets.
+- **Contrast (D11, handoff §8.2 "implement the accessible version and flag")**: `--fg-3` text is darkened (light `#8E8E8A` → `#70706C`, dark `#76766F` → `#86867F`) to meet 4.5:1 on `--bg` and `--surface`; graphics keep the exported value as `--fg-3-line` (non-text needs 3:1, which it meets). `--ok` light `#2A7F36` → `#257A32` to meet 4.5:1 on `--ok-soft`.
+
+**Verification.** `pnpm check:full`: axe and focus clean on both routes × 3 viewports; Lighthouse `/` within budget; per-route JS within budget.

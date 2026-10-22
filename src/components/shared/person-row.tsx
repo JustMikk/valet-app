@@ -25,7 +25,7 @@ export function PersonAvatar({ name, open, className }: PersonAvatarProps) {
       <span
         aria-hidden="true"
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-pill text-fg-2 shadow-[inset_0_0_0_1.5px_var(--fg-3)]",
+          "grid size-11 shrink-0 place-items-center rounded-pill text-fg-2 shadow-[inset_0_0_0_1.5px_var(--fg-3-line)]",
           className,
         )}
       >

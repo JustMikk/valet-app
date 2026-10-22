@@ -2,7 +2,7 @@
 // lighthouse.mjs — CONSTRAINTS.md "Performance: page".
 // Serves the static export (out/) and runs Lighthouse with its default mobile profile
 // (mid-range Android emulation, simulated slow 4G + 4x CPU throttling) on every route
-// in e2e/routes.ts, gating on the median of 3 runs. Requires `pnpm build` first.
+// in ROUTES of e2e/routes.ts, gating on the median of 3 runs. Requires `pnpm build` first.
 // Exit codes: 0 within budget, 1 over budget, 2 could not run.
 import { existsSync, readFileSync } from "node:fs"
 import { createServer } from "node:http"
@@ -19,7 +19,13 @@ if (!existsSync(OUT)) {
   console.error("lighthouse: out/ missing; run `pnpm build` first")
   process.exit(2)
 }
-const routes = [...readFileSync("e2e/routes.ts", "utf8").matchAll(/"(\/[^"]*)"/g)].map((m) => m[1])
+// User-facing routes only (the ROUTES list); dev reference routes are outside the budget.
+const routesList = /export const ROUTES = \[([^\]]*)\]/.exec(readFileSync("e2e/routes.ts", "utf8"))
+if (!routesList) {
+  console.error("lighthouse: ROUTES not found in e2e/routes.ts")
+  process.exit(2)
+}
+const routes = [...routesList[1].matchAll(/"(\/[^"]*)"/g)].map((m) => m[1])
 
 const TYPES = {
   ".html": "text/html",

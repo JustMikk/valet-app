@@ -2,23 +2,28 @@ import type { Metadata } from "next"
 import { Bricolage_Grotesque, Geist_Mono, Onest } from "next/font/google"
 import localFont from "next/font/local"
 
-import { ThemeScript } from "@/lib/theme"
+// Direct import: the @/lib/theme barrel also exports the client hook, which would ship to
+// every route.
+import { ThemeScript } from "@/lib/theme/theme-script"
 import { cn } from "@/lib/utils"
 
 import "./globals.css"
 
 // Display: Bricolage Grotesque with its optical-size axis, as the design export loads it.
+// Not preloaded on every route (75 KiB): it swaps in; routes whose LCP is a display number
+// can preload it themselves (CONSTRAINTS.md performance budget).
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   axes: ["opsz"],
   variable: "--font-bricolage",
+  preload: false,
 })
 
 // UI and body text.
 const onest = Onest({ subsets: ["latin"], variable: "--font-onest" })
 
 // Numbers, codes, timers.
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", preload: false })
 
 // Material Symbols Rounded, subset to src/lib/icons/icon-names.ts (ADR-007).
 // `block` keeps ligature names from flashing as text before the glyphs load.
