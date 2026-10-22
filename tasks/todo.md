@@ -16,8 +16,8 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/app/globals.css`, `docs/DECISIONS.md`
   - Scope: S
 
-- [ ] **Task 3: Fonts and Icon (ADR-007)**
-  - Acceptance: Bricolage Grotesque, Onest and Geist Mono load via `next/font` and feed `--fd`/`--ff`/mono. `material-symbols` is installed and self-hosted. `Icon` supports `name`/`filled`/`weight`/`size`, is `aria-hidden` unless given a `label`. Font weight on the wire is measured and recorded.
+- [x] **Task 3: Fonts and Icon (ADR-007)**
+  - Acceptance: Bricolage Grotesque, Onest and Geist Mono load via `next/font` and feed `--fd`/`--ff`/`--fm`. Material Symbols is a committed subset font built from `icon-names.ts` by `pnpm icons:build` (the full font is 5.4 MB; subset 22.9 KiB). `Icon` supports `name`/`filled`/`weight`/`size`, is `aria-hidden` unless given a `label`.
   - Verify: `pnpm test src/components/shared/icon`; `pnpm build`
   - Files: `src/app/layout.tsx`, `src/components/shared/icon.tsx`, `src/components/shared/icon.test.tsx`, `package.json`, `docs/DECISIONS.md`
   - Scope: M

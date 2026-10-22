@@ -109,3 +109,20 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - Font sizes, line-heights, letter-spacing and radii are theme tokens named after the export's values (`text-36`, `leading-x105`, `tracking-n035`, `rounded-r22`, plus semantic `rounded-card` etc.). Each `text-NN` defaults to `line-height: normal`, matching the export's `font:` shorthand.
 
 **Consequences.** Vendor components that rely on `bg-accent` for hover would show the tenant color until audited; the audit is part of each install. Verified by computed-style probe (light, dark, admin scopes).
+
+---
+
+## ADR-007 — Fonts via next/font; Material Symbols as a committed subset
+
+**Date:** 2026-10-22 · **Status:** accepted
+
+**Context.** The design uses Bricolage Grotesque (display), Onest (UI), Geist Mono (numbers) and Material Symbols Rounded (icons, FILL 0/1, weight 400–700). The app must work offline (PWA) and stay inside the LCP budget. The complete Material Symbols Rounded variable font is 5.4 MB (`material-symbols` npm 0.48.1), and icon fonts use `font-display: block`, so on slow 4G icons would stay invisible for seconds.
+
+**Decision.**
+
+- Text fonts load through `next/font/google` (self-hosted at build time; Bricolage with its `opsz` axis as in the export).
+- Icons: `src/components/shared/icon-names.ts` lists every glyph the app may render. `pnpm icons:build` (`scripts/build-icon-font.mjs`) downloads a Google Fonts subset for exactly those names (`icon_names=`, same axes as the export: opsz 20..48, wght 400..700, FILL 0..1, GRAD 0) into `src/fonts/`, which is committed and loaded with `next/font/local`. 25 glyphs = 22.9 KiB.
+- The `Icon` component accepts only `IconName`, so an unlisted name is a type error. A test fails if the committed font was built from a different list.
+- No `material-symbols` npm dependency; lucide (shadcn default) is not used for product icons.
+
+**Consequences.** Adding an icon means adding its name and running `pnpm icons:build` (network needed once). Sources: `node_modules/next/dist/docs/01-app/03-api-reference/02-components/font.md`; verified fonts load (`document.fonts`) and glyphs render in a static-export screenshot.

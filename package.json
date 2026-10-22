@@ -27,7 +27,8 @@
     "perf": "node scripts/lighthouse.mjs",
     "check:fast": "pnpm typecheck && pnpm lint && pnpm secrets && pnpm guard --warn-bar-change",
     "check:task": "pnpm check:fast && pnpm test:coverage && pnpm coverage:changed && pnpm boundaries",
-    "check:full": "pnpm check:task && pnpm format:check && pnpm build && pnpm perf && pnpm size && pnpm deps:scan && pnpm secrets:history && pnpm test:e2e"
+    "check:full": "pnpm check:task && pnpm format:check && pnpm build && pnpm perf && pnpm size && pnpm deps:scan && pnpm secrets:history && pnpm test:e2e",
+    "icons:build": "node scripts/build-icon-font.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

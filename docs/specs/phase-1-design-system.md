@@ -105,7 +105,7 @@ e2e/design-system.visual.spec.ts      pixel comparison against docs/inputs/desig
 
 ```tsx
 const statusBadgeVariants = cva(
-  "rounded-pill text-label-sm inline-flex h-7.5 items-center gap-1.25 pr-2.75 pl-2",
+  "text-label-sm inline-flex h-7.5 items-center gap-1.25 rounded-pill pr-2.75 pl-2",
   {
     variants: {
       tone: {

@@ -93,6 +93,7 @@
   --font-display: var(--fd);
   --font-mono: var(--fm);
   --font-heading: var(--fd);
+  --font-icon: var(--font-material-symbols);
 
   /*
    * Font sizes used by the design export, named by px. Line-height defaults to `normal`, which
