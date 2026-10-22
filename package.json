@@ -18,7 +18,7 @@
     "test:coverage": "vitest run --coverage",
     "test:a11y": "playwright test e2e/a11y.spec.ts",
     "guard": "node scripts/floor-guard.mjs",
-    "secrets": "gitleaks git --pre-commit --redact --no-banner",
+    "secrets": "node scripts/secrets.mjs",
     "secrets:history": "gitleaks git --redact --no-banner",
     "boundaries": "depcruise --validate .dependency-cruiser.cjs src",
     "coverage:changed": "node scripts/changed-coverage.mjs --min 80",
