@@ -72,7 +72,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/ui/toggle.tsx`, `src/components/ui/toggle-group.tsx`, `src/components/shared/underline-tabs.tsx`, `src/components/shared/chip-group.tsx`, `src/components/shared/tabs-chips.test.tsx`
   - Scope: M
 
-- [ ] **Task 11: TextField, SystemBanner**
+- [x] **Task 11: TextField, SystemBanner**
   - Acceptance: Field + Input at 56 px / radius 16 / surface / focus inset / accent caret; label, helper, error wired (`aria-invalid`, `aria-describedby`). SystemBanner warn/neutral with icon.
   - Verify: `pnpm test src/components/shared`
   - Files: `src/components/ui/field.tsx`, `src/components/ui/input.tsx`, `src/components/shared/text-field.tsx`, `src/components/shared/system-banner.tsx`, `src/components/shared/field-banner.test.tsx`
