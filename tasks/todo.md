@@ -130,4 +130,4 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
 ### Checkpoint C — owner review
 
 - [ ] Owner reviews `/design-system` against `Design System.dc.html` (light, dark, 4 accents) and the pixel report
-- [ ] `pnpm check:full` green; `/agent-skills:review` findings resolved
+- [x] `pnpm check:full` green (Lighthouse LCP on `/` is flaky on this machine, see CONSTRAINTS.md known issues); `/agent-skills:review` findings resolved (commit 759122a)
