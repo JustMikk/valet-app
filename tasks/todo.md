@@ -10,7 +10,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/styles/tokens.css`
   - Scope: S
 
-- [ ] **Task 2: Tailwind theme + shadcn variable mapping (ADR-006)**
+- [x] **Task 2: Tailwind theme + shadcn variable mapping (ADR-006)**
   - Acceptance: `globals.css` imports tokens and maps them in `@theme inline` (colors, radii, shadows, fonts). shadcn semantic variables point at our tokens. Type-scale `@utility` classes exist. The `--accent`/`--card` collision is resolved and recorded. The scaffold `.dark` variant is replaced by `[data-theme=dark]`.
   - Verify: `pnpm build`; a scratch render shows `bg-surface`, `text-fg-2`, `text-hero` resolve (checked in Task 15 too)
   - Files: `src/app/globals.css`, `docs/DECISIONS.md`

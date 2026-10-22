@@ -91,3 +91,21 @@ ESLint additions: `no-explicit-any`, `no-non-null-assertion`, `ban-ts-comment` (
 Project-specific rules (device APIs, tokens only, component size) are ESLint rules, not new tools. The floor guard is `scripts/floor-guard.mjs`, adapted from the agent-skills reference; it blocks code-level floor violations everywhere and lets bar changes (new exceptions, loosened thresholds) through locally with a warning, blocking them in CI unless the owner labels the PR `constraints-change-approved`.
 
 **Consequences.** Lighthouse gates on the median of 3 runs and runs before Playwright, because a single lab run on a busy machine inflated LCP from ~1.7 s to 4.3 s. Bundle budget is a ratchet until route groups exist (Phase 2).
+
+---
+
+## ADR-006 — Design tokens own `--accent` and `--card`; shadcn slots map onto tokens
+
+**Date:** 2026-10-22 · **Status:** accepted
+
+**Context.** The design export names its tokens `--accent` (tenant gold, primary actions) and `--card` (glass card fill), and DESIGN_README says to use these exact names. shadcn's theme uses the same two names for different things: a subtle hover fill and an opaque card surface.
+
+**Decision.**
+
+- The design tokens keep their names and meaning. `bg-accent` is the tenant accent; `bg-card` is the glass fill.
+- shadcn's other semantic slots (`--background`, `--foreground`, `--primary`, `--secondary`, `--muted`, `--popover`, `--border`, `--input`, `--ring`, `--destructive`, `--accent-foreground`, `--card-foreground`) are mapped onto design tokens in `globals.css`, declared on `:root, [data-theme]` so they resolve inside every theme scope.
+- Each vendor primitive is audited when installed: any `bg-accent` / `bg-card` used for hover or surfaces is replaced in its variants with `bg-surface` / `bg-elev`, and the edit is listed in `docs/DESIGN_INTAKE.md`.
+- `dark:` follows `data-theme`, not the `.dark` class.
+- Font sizes, line-heights, letter-spacing and radii are theme tokens named after the export's values (`text-36`, `leading-x105`, `tracking-n035`, `rounded-r22`, plus semantic `rounded-card` etc.). Each `text-NN` defaults to `line-height: normal`, matching the export's `font:` shorthand.
+
+**Consequences.** Vendor components that rely on `bg-accent` for hover would show the tenant color until audited; the audit is part of each install. Verified by computed-style probe (light, dark, admin scopes).

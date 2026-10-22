@@ -1,44 +1,194 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "../styles/tokens.css";
 
-@custom-variant dark (&:is(.dark *));
+/* `dark:` follows data-theme (set on <html> by the theme script, or on any scoped element). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * shadcn semantic variables mapped onto the design tokens (ADR-006). Declared on every theme
+ * scope so they resolve per scope. `--accent` and `--card` are NOT remapped: in this project
+ * they keep the design export's meaning (tenant accent, glass card fill).
+ */
+:root,
+[data-theme] {
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card-foreground: var(--fg);
+  --popover: var(--elev);
+  --popover-foreground: var(--fg);
+  --primary: var(--fg);
+  --primary-foreground: var(--bg);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--fg);
+  --muted: var(--surface);
+  --muted-foreground: var(--fg-2);
+  --accent-foreground: var(--accent-ink);
+  --destructive: var(--bad);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--fg);
+  --radius: 1rem;
+}
+
+/* Font families: next/font variables are set on <html> in the root layout. */
+:root {
+  --ff: var(--font-onest), system-ui, sans-serif;
+  --fd: var(--font-bricolage), var(--font-onest), sans-serif;
+  --fm: var(--font-geist-mono), ui-monospace, monospace;
+}
 
 @theme inline {
+  /* Design tokens */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-elev: var(--elev);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-line: var(--line);
+  --color-hero: var(--hero);
+  --color-hero-fg: var(--hero-fg);
+  --color-hero-fg-2: var(--hero-fg-2);
+  --color-hero-fg-3: var(--hero-fg-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-chrome: var(--chrome);
+  --color-card: var(--card);
+  --color-sheet: var(--sheet);
+  --color-scrim: var(--scrim);
+
+  /* shadcn semantic slots (vendor primitives) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Families */
+  --font-sans: var(--ff);
+  --font-display: var(--fd);
+  --font-mono: var(--fm);
+  --font-heading: var(--fd);
+
+  /*
+   * Font sizes used by the design export, named by px. Line-height defaults to `normal`, which
+   * is what the export's `font:` shorthand produces; set leading-* explicitly where it gives one.
+   */
+  --text-11: 11px;
+  --text-11--line-height: normal;
+  --text-12: 12px;
+  --text-12--line-height: normal;
+  --text-13: 13px;
+  --text-13--line-height: normal;
+  --text-14: 14px;
+  --text-14--line-height: normal;
+  --text-15: 15px;
+  --text-15--line-height: normal;
+  --text-16: 16px;
+  --text-16--line-height: normal;
+  --text-17: 17px;
+  --text-17--line-height: normal;
+  --text-18: 18px;
+  --text-18--line-height: normal;
+  --text-19: 19px;
+  --text-19--line-height: normal;
+  --text-20: 20px;
+  --text-20--line-height: normal;
+  --text-21: 21px;
+  --text-21--line-height: normal;
+  --text-22: 22px;
+  --text-22--line-height: normal;
+  --text-24: 24px;
+  --text-24--line-height: normal;
+  --text-26: 26px;
+  --text-26--line-height: normal;
+  --text-28: 28px;
+  --text-28--line-height: normal;
+  --text-30: 30px;
+  --text-30--line-height: normal;
+  --text-32: 32px;
+  --text-32--line-height: normal;
+  --text-34: 34px;
+  --text-34--line-height: normal;
+  --text-36: 36px;
+  --text-36--line-height: normal;
+  --text-38: 38px;
+  --text-38--line-height: normal;
+  --text-40: 40px;
+  --text-40--line-height: normal;
+  --text-44: 44px;
+  --text-44--line-height: normal;
+  --text-48: 48px;
+  --text-48--line-height: normal;
+  --text-52: 52px;
+  --text-52--line-height: normal;
+  --text-56: 56px;
+  --text-56--line-height: normal;
+  --text-60: 60px;
+  --text-60--line-height: normal;
+  --text-64: 64px;
+  --text-64--line-height: normal;
+  --text-72: 72px;
+  --text-72--line-height: normal;
+
+  /* Unitless line-heights (×n). Px line-heights use the spacing scale: leading-6 = 24px. */
+  --leading-x090: 0.9;
+  --leading-x095: 0.95;
+  --leading-x100: 1;
+  --leading-x102: 1.02;
+  --leading-x105: 1.05;
+  --leading-x108: 1.08;
+  --leading-x110: 1.1;
+  --leading-x115: 1.15;
+  --leading-x120: 1.2;
+  --leading-x125: 1.25;
+  --leading-x130: 1.3;
+  --leading-x135: 1.35;
+  --leading-x140: 1.4;
+  --leading-x145: 1.45;
+  --leading-x150: 1.5;
+  --leading-x155: 1.55;
+
+  /* Letter-spacing: n = negative, p = positive, in thousandths of an em. */
+  --tracking-n050: -0.05em;
+  --tracking-n045: -0.045em;
+  --tracking-n040: -0.04em;
+  --tracking-n035: -0.035em;
+  --tracking-n030: -0.03em;
+  --tracking-n025: -0.025em;
+  --tracking-n020: -0.02em;
+  --tracking-n015: -0.015em;
+  --tracking-n010: -0.01em;
+  --tracking-p020: 0.02em;
+  --tracking-p040: 0.04em;
+  --tracking-p050: 0.05em;
+  --tracking-p060: 0.06em;
+
+  /* Radii: px-named from the export, plus semantic aliases. shadcn's sm..4xl stay for vendor code. */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,89 +196,144 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-r3: 3px;
+  --radius-r4: 4px;
+  --radius-r8: 8px;
+  --radius-r9: 9px;
+  --radius-r10: 10px;
+  --radius-r12: 12px;
+  --radius-r14: 14px;
+  --radius-r16: 16px;
+  --radius-r18: 18px;
+  --radius-r20: 20px;
+  --radius-r22: 22px;
+  --radius-r24: 24px;
+  --radius-r28: 28px;
+  --radius-r30: 30px;
+  --radius-r32: 32px;
+  --radius-chip: 10px;
+  --radius-tile: 14px;
+  --radius-field: 16px;
+  --radius-card: 22px;
+  --radius-hero: 28px;
+  --radius-dialog: 28px;
+  --radius-sheet: 30px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-float: var(--shadow);
+  --shadow-sheet: var(--sheet-shadow);
+  --shadow-card-line: var(--card-line);
+
+  /* Motion (DESIGN_README "Motion") */
+  --ease-soft: var(--ease-out-soft);
+  --ease-spring: var(--ease-sheet);
+  --ease-overshoot: var(--ease-pop);
+  --ease-knob: var(--ease-toggle);
+  --animate-rise: vw-rise var(--duration-rise) var(--ease-out-soft) both;
+  --animate-screen: vw-screen var(--duration-screen) var(--ease-out-soft) both;
+  --animate-sheet-up: vw-up var(--duration-sheet) var(--ease-sheet) both;
+  --animate-fade: vw-fade var(--duration-screen) var(--ease-out-soft) both;
+  --animate-pop: vw-pop 0.5s var(--ease-pop) both;
+  --animate-shine: vw-shine 3.6s 1s ease-in-out infinite;
+  --animate-pulse-ring: vw-pulse 2.4s var(--ease-out-soft) infinite;
+
+  @keyframes vw-rise {
+    0% {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes vw-screen {
+    0% {
+      opacity: 0;
+      transform: scale(1.015);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes vw-up {
+    0% {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes vw-fade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes vw-pop {
+    0% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes vw-shine {
+    0% {
+      background-position: 160% 0;
+    }
+    55%,
+    100% {
+      background-position: -60% 0;
+    }
+  }
+  @keyframes vw-pulse {
+    0% {
+      transform: scale(0.35);
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* Reduced motion: drop the loops (shine, pulse), keep fades (DESIGN_README "Motion"). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shine,
+  .animate-pulse-ring {
+    animation: none;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-line;
+  }
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+  html {
+    @apply font-sans antialiased;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-bg text-fg;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
-  }
-  html {
-    @apply font-sans;
   }
 }
