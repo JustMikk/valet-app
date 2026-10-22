@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Bricolage_Grotesque, Geist_Mono, Onest } from "next/font/google"
 import localFont from "next/font/local"
 
+import { ThemeScript } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 
 import "./globals.css"
@@ -36,6 +37,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      // The theme script sets data-theme on <html> before hydration.
+      suppressHydrationWarning
       className={cn(
         "h-full",
         bricolage.variable,
@@ -44,7 +47,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         materialSymbols.variable,
       )}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ThemeScript />
+        {children}
+      </body>
     </html>
   )
 }

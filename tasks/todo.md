@@ -28,7 +28,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/lib/tenant/accent.ts`, `src/lib/tenant/accent.test.ts`, `src/lib/tenant/tenant-theme-provider.tsx`, `src/lib/tenant/index.ts`
   - Scope: M
 
-- [ ] **Task 5: Theme mode (light / dark / system)**
+- [x] **Task 5: Theme mode (light / dark / system)**
   - Acceptance: preference persisted (try/catch, safe without storage). An inline no-flash script sets `data-theme` before paint in the static export. `useThemeMode()` hook. Schema-validated storage read.
   - Verify: `pnpm test src/lib/theme`; `pnpm build` then load `out/` with dark preference → no light flash
   - Files: `src/lib/theme/theme.ts`, `src/lib/theme/theme.test.ts`, `src/lib/theme/theme-script.tsx`, `src/lib/theme/index.ts`, `src/app/layout.tsx`
