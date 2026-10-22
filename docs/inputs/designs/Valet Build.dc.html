@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap">
+<style>body{margin:0;background:#ECEBE7;font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#0B0B0B}a{color:#7F611A}a:hover{color:#0B0B0B}*{animation-iteration-count:1!important}</style>
+</helmet>
+<div style="position:sticky;top:0;z-index:200;padding:16px 64px;background:rgba(236,235,231,.92);backdrop-filter:blur(12px);display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid rgba(0,0,0,.1)">
+  <span style="font:600 13px 'Geist Mono';color:#5E5E5B;margin-right:8px">SHOWING</span>
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="7"><button onClick="{{ g.pick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for>
+  <span style="font:400 13px 'Geist';color:#5E5E5B;margin-left:8px">One group mounts at a time to keep the canvas fast.</span>
+</div>
+<sc-if value="{{ showStaff }}" hint-placeholder-val="{{ true }}"><section id="staff" style="padding:56px 64px 80px;display:flex;flex-direction:column;gap:56px;width:3060px">
+  <div style="display:flex;flex-direction:column;gap:12px;max-width:860px">
+    <span style="font:600 13px 'Geist Mono';color:#7F611A;letter-spacing:.06em">BUILD · STAFF PWA · v1</span>
+    <span style="font:600 44px/1.05 'Geist';letter-spacing:-.035em">Staff app, every page, phone to desktop</span>
+    <span style="font:400 16px/1.55 'Geist';color:#5E5E5B">Baseline 2b (Bricolage Grotesque + Onest), dark mode uses 2d's glass. Every frame is the same live, responsive app: phones get the floating glass tab bar, tablets a rail, desktops a labelled sidebar with content capped at 1120px. Tap anything; clock-in opens as a full screen on phone and a centered sheet on wider screens.</span>
+  </div>
+
+  <sc-if value="{{ phones.length }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <span style="font:600 22px 'Geist';letter-spacing:-.02em">Phone · 390 × 844</span>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+      <sc-for list="{{ phones }}" as="p" hint-placeholder-count="10">
+        <div data-screen-label="{{ p.label }}" style="display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 13px 'Geist Mono';color:#5E5E5B">{{ p.label }}</span>
+          <div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;box-shadow:0 0 0 9px #141414,0 0 0 10px #2a2a2a,0 40px 80px rgba(0,0,0,.18);margin:10px">
+            <div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:6px 32px 0 40px;box-sizing:border-box;pointer-events:none;color:{{ p.sbColor }};font:600 16px -apple-system,system-ui"><span>5:48</span><span style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:99px;background:#000"></span><span style="display:flex;gap:6px;align-items:center"><span style="width:18px;height:11px;border-radius:2px;background:currentColor;opacity:.9"></span><span style="width:26px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1.5px currentColor;padding:2px;box-sizing:border-box"><span style="display:block;width:70%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div>
+            <dc-import name="Staff PWA" route="{{ p.route }}" mode="{{ p.mode }}" theme="{{ p.theme }}" sim="{{ p.sim }}" ob-step="{{ p.ob }}" banner="{{ p.banner }}" step="{{ p.step }}" no-location="{{ p.noLoc }}" safe-top="{{ 54 }}" width="{{ 390 }}" height="{{ 844 }}" hint-size="390px,844px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div></sc-if>
+
+  <sc-if value="{{ tablets.length }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <span style="font:600 22px 'Geist';letter-spacing:-.02em">Tablet · 834 × 1112</span>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+      <sc-for list="{{ tablets }}" as="p" hint-placeholder-count="2">
+        <div data-screen-label="{{ p.label }}" style="display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 13px 'Geist Mono';color:#5E5E5B">{{ p.label }}</span>
+          <div style="position:relative;width:834px;height:1112px;border-radius:36px;overflow:hidden;box-shadow:0 0 0 12px #141414,0 40px 80px rgba(0,0,0,.18);margin:12px">
+            <dc-import name="Staff PWA" route="{{ p.route }}" mode="{{ p.mode }}" theme="{{ p.theme }}" width="{{ 834 }}" height="{{ 1112 }}" hint-size="834px,1112px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div></sc-if>
+
+  <sc-if value="{{ desktops.length }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <span style="font:600 22px 'Geist';letter-spacing:-.02em">Desktop · 1440 × 900</span>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <sc-for list="{{ desktops }}" as="p" hint-placeholder-count="4">
+        <div data-screen-label="{{ p.label }}" style="display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 13px 'Geist Mono';color:#5E5E5B">{{ p.label }}</span>
+          <div style="width:1440px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 30px 70px rgba(0,0,0,.14);background:#DAD9D5">
+            <div style="height:40px;display:flex;align-items:center;gap:8px;padding:0 16px"><span style="width:12px;height:12px;border-radius:99px;background:#FF5F57"></span><span style="width:12px;height:12px;border-radius:99px;background:#FEBC2E"></span><span style="width:12px;height:12px;border-radius:99px;background:#28C840"></span><span style="margin:0 auto;height:26px;padding:0 60px;border-radius:8px;background:rgba(255,255,255,.7);font:500 13px/26px 'Geist';color:#5E5E5B">app.regencyvalet.com</span></div>
+            <div style="position:relative;height:900px"><dc-import name="Staff PWA" route="{{ p.route }}" mode="{{ p.mode }}" theme="{{ p.theme }}" width="{{ 1440 }}" height="{{ 900 }}" hint-size="1440px,900px"></dc-import></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div></sc-if>
+</section></sc-if>
+<sc-if value="{{ showAdmin }}" hint-placeholder-val="{{ false }}"><section id="admin" style="padding:56px 64px 80px;border-top:1px solid rgba(0,0,0,.1);display:flex;flex-direction:column;gap:56px;width:3060px">
+  <div style="display:flex;flex-direction:column;gap:12px;max-width:860px">
+    <span style="font:600 13px 'Geist Mono';color:#7F611A;letter-spacing:.06em">BUILD · ADMIN / DISPATCH · v1</span>
+    <span style="font:600 44px/1.05 'Geist';letter-spacing:-.035em">Admin app, every page, phone to desktop</span>
+    <span style="font:400 16px/1.55 'Geist';color:#5E5E5B">Live Board is 1a on phone and the desktop board on wider screens. Phone uses Live · Events · Hours · Inbox · More (Staff, Venues, Invoices, Settings); tablet gets an icon rail, desktop a labelled sidebar. Changing the accent in Settings recolors the whole app live.</span>
+  </div>
+
+  <sc-if value="{{ aPhones.length }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <span style="font:600 22px 'Geist';letter-spacing:-.02em">Phone · 390 × 844</span>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+      <sc-for list="{{ aPhones }}" as="p" hint-placeholder-count="10">
+        <div data-screen-label="{{ p.label }}" style="display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 13px 'Geist Mono';color:#5E5E5B">{{ p.label }}</span>
+          <div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;box-shadow:0 0 0 9px #141414,0 0 0 10px #2a2a2a,0 40px 80px rgba(0,0,0,.18);margin:10px">
+            <div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:6px 32px 0 40px;box-sizing:border-box;pointer-events:none;color:{{ p.sbColor }};font:600 16px -apple-system,system-ui"><span>5:48</span><span style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:99px;background:#000"></span><span style="display:flex;gap:6px;align-items:center"><span style="width:18px;height:11px;border-radius:2px;background:currentColor;opacity:.9"></span><span style="width:26px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1.5px currentColor;padding:2px;box-sizing:border-box"><span style="display:block;width:70%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div>
+            <dc-import name="Admin" route="{{ p.route }}" theme="{{ p.theme }}" safe-top="{{ 54 }}" width="{{ 390 }}" height="{{ 844 }}" hint-size="390px,844px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div></sc-if>
+
+  <sc-if value="{{ aTablets.length }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <span style="font:600 22px 'Geist';letter-spacing:-.02em">Tablet · 834 × 1112</span>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+      <sc-for list="{{ aTablets }}" as="p" hint-placeholder-count="2">
+        <div data-screen-label="{{ p.label }}" style="display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 13px 'Geist Mono';color:#5E5E5B">{{ p.label }}</span>
+          <div style="position:relative;width:834px;height:1112px;border-radius:36px;overflow:hidden;box-shadow:0 0 0 12px #141414,0 40px 80px rgba(0,0,0,.18);margin:12px">
+            <dc-import name="Admin" route="{{ p.route }}" theme="{{ p.theme }}" width="{{ 834 }}" height="{{ 1112 }}" hint-size="834px,1112px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div></sc-if>
+
+  <sc-if value="{{ aDesktops.length }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <span style="font:600 22px 'Geist';letter-spacing:-.02em">Desktop · 1440 × 900</span>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <sc-for list="{{ aDesktops }}" as="p" hint-placeholder-count="4">
+        <div data-screen-label="{{ p.label }}" style="display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 13px 'Geist Mono';color:#5E5E5B">{{ p.label }}</span>
+          <div style="width:1440px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12),0 30px 70px rgba(0,0,0,.14);background:#DAD9D5">
+            <div style="height:40px;display:flex;align-items:center;gap:8px;padding:0 16px"><span style="width:12px;height:12px;border-radius:99px;background:#FF5F57"></span><span style="width:12px;height:12px;border-radius:99px;background:#FEBC2E"></span><span style="width:12px;height:12px;border-radius:99px;background:#28C840"></span><span style="margin:0 auto;height:26px;padding:0 60px;border-radius:8px;background:rgba(255,255,255,.7);font:500 13px/26px 'Geist';color:#5E5E5B">app.regencyvalet.com/dispatch</span></div>
+            <div style="position:relative;height:900px"><dc-import name="Admin" route="{{ p.route }}" theme="{{ p.theme }}" width="{{ 1440 }}" height="{{ 900 }}" hint-size="1440px,900px"></dc-import></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div></sc-if>
+</section></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { g: 0 };
+  renderVals() {
+    const P = (label, route, o = {}) => ({ label, route, mode: o.mode || 'due', theme: o.theme || 'light', sim: o.sim || 'inside', ob: o.ob || 'invite', banner: o.banner || null, step: o.step, noLoc: !!o.noLoc, sbColor: o.theme === 'dark' || route === 'clock' && ['camera', 'confirm'].includes(o.step) ? '#fff' : '#0B0B0B' });
+    const G = [['Staff · onboarding', 'staff', 'phones', 0, 3], ['Staff · home', 'staff', 'phones', 3, 6], ['Staff · clock-in', 'staff', 'phones', 6, 10], ['Staff · shifts', 'staff', 'phones', 10, 14], ['Staff · inbox & profile', 'staff', 'phones', 14, 17], ['Staff · dark', 'staff', 'phones', 17, 20], ['Staff · tablet', 'staff', 'tab'], ['Staff · desktop 1', 'staff', 'desk', 0, 3], ['Staff · desktop 2', 'staff', 'desk', 3, 6], ['Admin · live & events', 'admin', 'aPhones', 0, 4], ['Admin · hours & staff', 'admin', 'aPhones', 4, 8], ['Admin · billing & inbox', 'admin', 'aPhones', 8, 12], ['Admin · dark', 'admin', 'aPhones', 12, 15], ['Admin · tablet', 'admin', 'aTabletsOnly'], ['Admin · desktop 1', 'admin', 'aDesk', 0, 3], ['Admin · desktop 2', 'admin', 'aDesk', 3, 6], ['Admin · desktop 3', 'admin', 'aDesk', 6, 10]];
+    const cur = G[this.state.g];
+    const all = this.lists(P);
+    const pick = (k, a, b) => cur[2] === k ? all[k].slice(a ?? 0, b ?? 99) : [];
+    return {
+      groups: G.map((g, i) => ({ label: g[0], pick: () => this.setState({ g: i }), style: { height: 36, padding: '0 14px', border: 0, borderRadius: 999, cursor: 'pointer', font: "600 13px 'Geist'", background: i === this.state.g ? '#0B0B0B' : 'rgba(0,0,0,.07)', color: i === this.state.g ? '#fff' : '#0B0B0B' } })),
+      showStaff: cur[1] === 'staff', showAdmin: cur[1] === 'admin',
+      phones: pick('phones', cur[3], cur[4]),
+      tablets: cur[2] === 'tab' ? all.tablets : [], desktops: cur[2] === 'desk' ? all.desktops.slice(cur[3], cur[4]) : [],
+      aPhones: pick('aPhones', cur[3], cur[4]), aTablets: cur[2] === 'aTabletsOnly' ? all.aTablets : [], aDesktops: cur[2] === 'aDesk' ? all.aDesktops.slice(cur[3], cur[4]) : []
+    };
+  }
+  lists(P) {
+    return {
+      phones: [
+        P('P01 · ONBOARDING · INVITE', 'onboarding'), P('P02 · ONBOARDING · INSTALL', 'onboarding', { ob: 'install' }), P('P03 · ONBOARDING · PUSH', 'onboarding', { ob: 'push' }),
+        P('P04 · HOME · BEFORE WINDOW', 'home', { mode: 'before', banner: 'install' }), P('P05 · HOME · DUE NOW', 'home'), P('P06 · HOME · ON SHIFT', 'home', { mode: 'onshift', banner: 'sync' }),
+        P('P07 · CLOCK · OUTSIDE FENCE', 'clock', { step: 'outside', sim: 'outside' }), P('P08 · CLOCK · APPROVAL REQUEST', 'clock', { step: 'approval' }), P('P09 · CLOCK · LOCATION OFF', 'clock', { step: 'denied' }), P('P10 · CLOCK · OFFLINE SAVED', 'clock', { step: 'offline' }),
+        P('P11 · MY SHIFTS', 'shifts'), P('P12 · SHIFT DETAIL', 'shift'), P('P13 · DROP SHIFT', 'drop'), P('P14 · OPEN SHIFTS', 'open', { noLoc: true }),
+        P('P15 · INBOX', 'inbox'), P('P16 · NOTIFICATIONS', 'notifs'), P('P17 · PROFILE · PUSH OFF', 'profile', { banner: 'push' }),
+        P('P18 · DARK · HOME ON SHIFT', 'home', { mode: 'onshift', theme: 'dark' }), P('P19 · DARK · OPEN SHIFTS', 'open', { theme: 'dark' }), P('P20 · DARK · INBOX', 'inbox', { theme: 'dark' })
+      ],
+      aPhones: [P('A01 · LIVE BOARD', 'live'), P('A02 · EVENTS', 'events'), P('A03 · EVENT ROSTER', 'event'), P('A04 · NEW EVENT', 'newEvent'), P('A05 · HOURS REVIEW', 'hours'), P('A06 · STAFF', 'staff'), P('A07 · STAFF PROFILE', 'person'), P('A08 · VENUE GEOFENCE', 'venue'), P('A09 · INVOICE', 'invoice'), P('A10 · INBOX', 'inbox'), P('A11 · ANNOUNCEMENT', 'broadcast'), P('A12 · SETTINGS', 'settings'), P('A13 · DARK · LIVE BOARD', 'live', { theme: 'dark' }), P('A14 · DARK · EVENTS', 'events', { theme: 'dark' }), P('A15 · DARK · HOURS', 'hours', { theme: 'dark' })],
+      aTablets: [P('AT01 · EVENTS', 'events'), P('AT02 · DARK · LIVE BOARD', 'live', { theme: 'dark' })],
+      aDesktops: [P('AD01 · LIVE BOARD', 'live'), P('AD02 · EVENTS', 'events'), P('AD03 · EVENT ROSTER', 'event'), P('AD04 · HOURS REVIEW', 'hours'), P('AD05 · STAFF', 'staff'), P('AD06 · VENUE GEOFENCE', 'venue'), P('AD07 · INVOICES', 'invoices'), P('AD08 · DARK · INBOX', 'inbox', { theme: 'dark' }), P('AD09 · SETTINGS', 'settings'), P('AD10 · DARK · LIVE BOARD', 'live', { theme: 'dark' })],
+      tablets: [P('T01 · HOME · DUE NOW', 'home'), P('T02 · DARK · MY SHIFTS', 'shifts', { theme: 'dark' })],
+      desktops: [P('D01 · HOME · DUE NOW', 'home'), P('D02 · OPEN SHIFTS', 'open'), P('D03 · SHIFT DETAIL', 'shift'), P('D04 · DARK · INBOX', 'inbox', { theme: 'dark' }), P('D05 · CLOCK-IN SHEET', 'clock'), P('D06 · ONBOARDING', 'onboarding', { ob: 'desktop' })]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="{{ L.page }}">
+  <sc-if value="{{ is.inbox }}" hint-placeholder-val="{{ true }}">
+    <div style="{{ L.chatWrap }}">
+      <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--line)">
+        <div style="width:52px;height:52px;border-radius:16px;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);flex:none"><img src="assets/regency-logo.png" alt="" style="width:44px;height:auto"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 22px/1.2 var(--fd);letter-spacing:-.02em">Regency Dispatch</span><span style="font:400 14px var(--ff);color:var(--fg-2)">Jamie, Alex and the dispatch team · usually reply in minutes</span></div>
+        <button onClick="{{ toNotifs }}" aria-label="Notifications" style="position:relative;width:48px;height:48px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);cursor:pointer;font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1">notifications<span style="position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:9px;background:var(--bad)"></span></button>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:18px 0 110px">
+        <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="5">
+          <div style="{{ m.row }}">
+            <sc-if value="{{ m.isDay }}" hint-placeholder-val="{{ false }}"><span style="align-self:center;font:600 12px var(--ff);color:var(--fg-3);letter-spacing:.04em">{{ m.text }}</span></sc-if>
+            <sc-if value="{{ m.isMsg }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ m.who }}" hint-placeholder-val="{{ false }}"><span style="font:600 12px var(--ff);color:var(--fg-2);padding:0 6px">{{ m.who }}</span></sc-if>
+              <div style="{{ m.bubble }}">
+                <sc-if value="{{ m.ref }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;font:600 12px var(--ff);opacity:.75"><span style="font-family:'Material Symbols Rounded';font-size:15px">event</span>{{ m.ref }}</span></sc-if>
+                <sc-if value="{{ m.img }}" hint-placeholder-val="{{ false }}"><div style="height:150px;border-radius:14px;background:repeating-linear-gradient(45deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center;font:500 12px 'Geist Mono',monospace;color:var(--fg-2)">{{ m.img }}</div></sc-if>
+                <span>{{ m.text }}</span>
+                <sc-if value="{{ m.event }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toOpen }}" style="margin-top:4px;border:0;border-radius:14px;padding:12px 14px;background:var(--elev);color:var(--fg);text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px var(--ff)">{{ m.event }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">Sat Oct 31 · 7 PM – 1 AM · 4 spots</span></span><span style="font:600 14px var(--ff);color:var(--accent-text)">Claim</span></button></sc-if>
+              </div>
+              <span style="{{ m.metaStyle }}">{{ m.meta }}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="{{ L.composer }}">
+        <button aria-label="Attach photo" style="width:48px;height:48px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);cursor:pointer;font-family:'Material Symbols Rounded';font-size:24px;flex:none">add_photo_alternate</button>
+        <input value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" placeholder="Message dispatch" style="flex:1;min-width:0;height:48px;border:0;outline:0;border-radius:999px;background:var(--surface);padding:0 18px;font:400 17px var(--ff);color:var(--fg)">
+        <button onClick="{{ send }}" aria-label="Send" style="{{ sendStyle }}" style-active="transform:scale(.92)">arrow_upward</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.notifs }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.narrow }}">
+      <span style="font:700 40px/1 var(--fd);letter-spacing:-.035em">Notifications</span>
+      <sc-for list="{{ notifGroups }}" as="g" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font:600 13px var(--ff);color:var(--fg-3);letter-spacing:.04em;padding:8px 0">{{ g.label }}</span>
+          <sc-for list="{{ g.items }}" as="n" hint-placeholder-count="3">
+            <button onClick="{{ n.go }}" style="min-height:72px;display:flex;align-items:center;gap:14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);padding:10px 0;cursor:pointer;text-align:left;animation:var(--anim-rise)">
+              <div style="{{ n.iconStyle }}">{{ n.icon }}</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font:600 16px/1.3 var(--ff)">{{ n.title }}</span><span style="font:400 14px/1.35 var(--ff);color:var(--fg-2)">{{ n.body }}</span></div>
+              <span style="font:500 13px var(--ff);color:var(--fg-3);flex:none">{{ n.time }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.profile }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.split }}">
+      <div style="display:flex;flex-direction:column;gap:22px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:72px;height:72px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font:700 24px var(--fd)">JE</div>
+          <div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 30px/1.1 var(--fd);letter-spacing:-.03em">Jordan Ellis</span><span style="font:400 15px var(--ff);color:var(--fg-2)">jordan.ellis@gmail.com · Regency Valet Parking</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font:600 20px var(--fd);letter-spacing:-.015em">Permissions</span>
+          <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+            <sc-for list="{{ perms }}" as="p" hint-placeholder-count="4">
+              <div style="min-height:68px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)">
+                <span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">{{ p.icon }}</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 17px var(--ff)">{{ p.label }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">{{ p.note }}</span></div>
+                <sc-if value="{{ p.fix }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.fix }}" style="height:40px;padding:0 16px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 15px var(--ff);cursor:pointer" style-active="transform:scale(.96)">Turn on</button></sc-if>
+                <sc-if value="{{ p.ok }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:4px;font:600 14px var(--ff);color:var(--ok)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">check_circle</span>On</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:22px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font:600 20px var(--fd);letter-spacing:-.015em">Notify me about</span>
+          <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+            <sc-for list="{{ prefs }}" as="p" hint-placeholder-count="4">
+              <button onClick="{{ p.toggle }}" disabled="{{ p.locked }}" style="min-height:64px;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);padding:0;text-align:left;cursor:pointer">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 17px var(--ff)">{{ p.label }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">{{ p.note }}</span></div>
+                <span style="{{ p.track }}"><span style="{{ p.knob }}"></span></span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <div style="min-height:60px;display:flex;align-items:center;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 17px var(--ff)">Language</span><span style="font:500 15px var(--ff);color:var(--fg-2)">English</span></div>
+          <div style="min-height:60px;display:flex;align-items:center;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 17px var(--ff)">Theme</span><span style="font:500 15px var(--ff);color:var(--fg-2)">Match device</span></div>
+          <button style="min-height:60px;display:flex;align-items:center;border:0;border-bottom:1px solid var(--line);background:transparent;padding:0;color:var(--bad);font:600 17px var(--ff);cursor:pointer">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { view: this.props.view || 'inbox', draft: '', sent: [], push: !!this.props.pushOn, prefs: { open: true, remind: true, change: true, msg: true } };
+  componentDidUpdate(p) { if (p.view !== this.props.view && this.props.view) this.setState({ view: this.props.view }); if (p.pushOn !== this.props.pushOn) this.setState({ push: !!this.props.pushOn }); }
+  send() { const t = this.state.draft.trim(); if (!t) return; const id = Date.now(); this.setState(s => ({ draft: '', sent: [...s.sent, { id, text: t, st: 'Sending…' }] })); setTimeout(() => this.mark(id, 'Delivered'), 700); setTimeout(() => this.mark(id, 'Read by Jamie'), 2200); }
+  mark(id, st) { this.setState(s => ({ sent: s.sent.map(m => m.id === id ? { ...m, st } : m) })); }
+  renderVals() {
+    const P = this.props, S = this.state, bp = P.bp || 'phone', ph = bp === 'phone', st = P.safeTop ?? 0;
+    const go = (r, p) => P.go && P.go(r, p);
+    const view = S.view;
+    const them = { alignSelf: 'flex-start', maxWidth: '82%', padding: '12px 15px', borderRadius: '20px 20px 20px 6px', background: 'var(--surface)', color: 'var(--fg)', font: "400 16px/1.45 var(--ff)", display: 'flex', flexDirection: 'column', gap: 8 };
+    const me = { ...them, alignSelf: 'flex-end', borderRadius: '20px 20px 6px 20px', background: 'var(--fg)', color: 'var(--bg)' };
+    const bc = { ...them, maxWidth: '90%', background: 'var(--accent-soft)', boxShadow: 'inset 0 0 0 1px var(--accent)' };
+    const metaL = { font: "500 12px var(--ff)", color: 'var(--fg-3)', padding: '0 6px' };
+    const raw = [
+      { day: 'TODAY · FRI OCT 23' },
+      { who: 'Jamie · Dispatch', text: 'Hi Jordan, Priya at the front desk is your contact tonight. Park in the east lot, level B1.', ref: 're: The Grand Hotel · Fri', meta: '2:10 PM', b: them },
+      { text: 'Got it, thanks! See you there.', meta: '2:14 PM · Read', b: me, mine: true },
+      { who: 'Announcement to all staff', text: 'Halloween at Maison Blanc needs 4 more attendants. Costumes optional, black suit required.', event: 'Maison Blanc · Halloween', meta: '3:00 PM · broadcast · replies come here', b: bc },
+      { who: 'Alex · Dispatch', text: 'Use the side entrance on Mission St. Front drive is blocked until 6:30.', img: 'PHOTO · PARKING MAP', meta: '5:38 PM', b: them }
+    ];
+    const msgs = [...raw, ...S.sent.map(m => ({ text: m.text, meta: m.st, b: me, mine: true }))].map(m => m.day ? { isDay: true, text: m.day, row: { display: 'flex', flexDirection: 'column', padding: '6px 0' } }
+      : { isMsg: true, who: m.who, text: m.text, ref: m.ref, img: m.img, event: m.event, meta: m.meta, bubble: m.b, metaStyle: { ...metaL, alignSelf: m.mine ? 'flex-end' : 'flex-start' }, row: { display: 'flex', flexDirection: 'column', gap: 4, animation: 'var(--anim-rise)' } });
+    const ic = (t) => ({ width: 44, height: 44, borderRadius: 999, flex: 'none', display: 'grid', placeItems: 'center', fontFamily: "'Material Symbols Rounded'", fontSize: 22, fontVariationSettings: "'FILL' 1", background: `var(--${t}-soft, var(--surface))`, color: `var(--${t}, var(--fg))` });
+    const N = (icon, tone, title, body, time, to) => ({ icon, iconStyle: ic(tone), title, body, time, go: () => go(to) });
+    const notifGroups = [
+      { label: 'TODAY', items: [N('timer', 'accent', 'Clock-in is open', 'The Grand Hotel starts at 6:00 PM. Tap to clock in.', '5:45 PM', 'home'), N('chat_bubble', 'info', 'New message from Alex', 'Use the side entrance on Mission St…', '5:38 PM', 'inbox'), N('add_circle', 'ok', 'New open shift · 4 spots', 'Maison Blanc · Halloween, Sat Oct 31, 7 PM – 1 AM', '3:00 PM', 'open')] },
+      { label: 'EARLIER', items: [N('edit_calendar', 'warn', 'Schedule change', 'Osteria Nove on Tue Oct 27 now starts 5:30 PM (was 6:00 PM).', 'Thu', 'shift'), N('check_circle', 'ok', 'Hours approved', 'Maison Blanc, Thu Oct 22 · 5h 12m', 'Thu', 'shifts'), N('event_available', 'info', 'You were assigned', 'Harbor Pavilion · Wedding, Sat Oct 24', 'Wed', 'shift')] }
+    ];
+    const perms = [
+      { icon: 'location_on', label: 'Location', note: 'Read only when you clock in or out', ok: true },
+      { icon: 'photo_camera', label: 'Camera', note: 'Used for the clock-in selfie', ok: true },
+      S.push ? { icon: 'notifications', label: 'Notifications', note: 'Shift alerts and messages', ok: true } : { icon: 'notifications_off', label: 'Notifications are off', note: 'You may miss shift changes. There is no text backup.', fix: () => this.setState({ push: true }) },
+      { icon: 'install_mobile', label: 'Installed on Home Screen', note: 'Needed for alerts on iPhone', ok: true }
+    ];
+    const tog = (on, locked) => ({ track: { width: 52, height: 32, borderRadius: 999, background: on ? (locked ? 'var(--fg-3)' : 'var(--ok)') : 'var(--surface-2)', position: 'relative', flex: 'none', transition: 'background .2s' }, knob: { position: 'absolute', top: 3, left: on ? 23 : 3, width: 26, height: 26, borderRadius: 999, background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,.2)', transition: 'left .22s cubic-bezier(.3,.7,.4,1.3)' } });
+    const prefs = [['open', 'New open shifts', 'When a shift you can claim is posted'], ['remind', 'Shift reminders', '24 hours and 1 hour before'], ['msg', 'Messages', 'From dispatch'], ['change', 'Changes & cancellations', 'Always on, since these affect your shifts', true]].map(([k, l, n, locked]) => ({ label: l, note: n, locked: !!locked, toggle: () => !locked && this.setState(s => ({ prefs: { ...s.prefs, [k]: !s.prefs[k] } })), ...tog(S.prefs[k], locked) }));
+    const can = !!S.draft.trim();
+    const pad = ph ? `${st + 82}px 20px ${view === 'inbox' ? 0 : 140}px` : bp === 'tablet' ? '32px 32px 0' : '40px 48px 0';
+    return {
+      is: { inbox: view === 'inbox', notifs: view === 'notifs', profile: view === 'profile' },
+      L: { page: { width: '100%', maxWidth: 1120, margin: '0 auto', boxSizing: 'border-box', padding: pad, display: 'flex', flexDirection: 'column', gap: 24, minHeight: '100%' },
+        chatWrap: { width: '100%', maxWidth: 760, margin: '0 auto', display: 'flex', flexDirection: 'column', minHeight: '100%' },
+        composer: { position: ph ? 'absolute' : 'sticky', left: ph ? 16 : 'auto', right: ph ? 16 : 'auto', bottom: ph ? 108 : 0, zIndex: 12, display: 'flex', gap: 8, alignItems: 'center', padding: 8, borderRadius: 999, background: 'var(--chrome)', backdropFilter: 'var(--blur)', boxShadow: 'var(--shadow)', marginBottom: ph ? 0 : 24 },
+        narrow: { width: '100%', maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: ph ? 0 : 48 },
+        split: { display: 'grid', gridTemplateColumns: bp === 'desktop' ? 'repeat(2,minmax(0,1fr))' : 'minmax(0,1fr)', gap: 32, alignItems: 'start', paddingBottom: ph ? 0 : 48 } },
+      msgs, notifGroups, perms, prefs, draft: S.draft,
+      onDraft: e => this.setState({ draft: e.target.value }), onKey: e => { if (e.key === 'Enter') this.send(); }, send: () => this.send(),
+      sendStyle: { width: 48, height: 48, border: 0, borderRadius: 999, flex: 'none', cursor: can ? 'pointer' : 'default', background: can ? 'var(--accent)' : 'var(--surface)', color: can ? 'var(--accent-ink)' : 'var(--fg-3)', fontFamily: "'Material Symbols Rounded'", fontSize: 24, transition: 'all .2s' },
+      toNotifs: () => go('notifs'), toOpen: () => go('open')
+    };
+  }
+}
+</script>
+</body>
+</html>

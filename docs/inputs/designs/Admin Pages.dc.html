@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="{{ L.page }}">
+  <sc-if value="{{ head.show }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <span style="font:700 40px/1 var(--fd);letter-spacing:-.035em">{{ head.title }}</span>
+        <span style="font:400 16px var(--ff);color:var(--fg-2)">{{ head.sub }}</span>
+      </div>
+      <sc-if value="{{ head.cta }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ head.cta.fn }}" style="height:48px;padding:0 20px 0 14px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 16px var(--ff);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none" style-active="transform:scale(.96)"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ head.cta.icon }}</span>{{ head.cta.label }}</button>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ tabs.length }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.label }}<sc-if value="{{ t.n }}" hint-placeholder-val="{{ false }}"><span style="{{ t.nStyle }}">{{ t.n }}</span></sc-if></button></sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.events }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:28px">
+      <sc-for list="{{ eventDays }}" as="d" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 13px var(--ff);color:var(--fg-3);letter-spacing:.05em">{{ d.label }}</span>
+          <div style="{{ L.grid }}">
+            <sc-for list="{{ d.items }}" as="e" hint-placeholder-count="2">
+              <button onClick="{{ e.open }}" style="{{ e.style }}" style-active="transform:scale(.985)">
+                <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="{{ e.chip }}"><span style="font-family:'Material Symbols Rounded';font-size:16px;font-variation-settings:'FILL' 1">{{ e.icon }}</span>{{ e.status }}</span><span style="margin-left:auto;font:600 15px 'Geist Mono',monospace;color:var(--fg-2)">{{ e.time }}</span></div>
+                <div style="display:flex;flex-direction:column;gap:2px;width:100%"><span style="font:600 21px/1.2 var(--fd);letter-spacing:-.02em">{{ e.venue }}</span><span style="font:400 15px var(--ff);color:var(--fg-2)">{{ e.kind }}</span></div>
+                <div style="display:flex;flex-direction:column;gap:6px;width:100%">
+                  <div style="display:flex;height:8px;border-radius:9px;background:var(--surface-2);overflow:hidden;gap:2px"><span style="{{ e.barOn }}"></span><span style="{{ e.barConf }}"></span></div>
+                  <div style="display:flex;justify-content:space-between;font:500 14px var(--ff);color:var(--fg-2)"><span>{{ e.cov }}</span><span style="{{ e.openStyle }}">{{ e.openText }}</span></div>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.event }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.split }}">
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="align-self:flex-start;height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px var(--ff);background:var(--ok-soft);color:var(--ok)"><span style="width:8px;height:8px;border-radius:9px;background:var(--ok);margin:0 2px"></span>Live now · Fri Oct 23</span>
+          <span style="font:700 44px/1 var(--fd);letter-spacing:-.04em">The Grand Hotel</span>
+          <span style="font:400 16px var(--ff);color:var(--fg-2)">Corporate dinner · 6:00 – 11:00 PM · 400 Market St</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <sc-for list="{{ evStats }}" as="s" hint-placeholder-count="3"><div style="padding:14px 16px;border-radius:20px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line);display:flex;flex-direction:column;gap:4px"><span style="font:700 32px/1 var(--fd);letter-spacing:-.03em;color:{{ s.color }}">{{ s.n }}</span><span style="font:500 13px var(--ff);color:var(--fg-2)">{{ s.l }}</span></div></sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:600 20px var(--fd);letter-spacing:-.015em">Crew</span><button onClick="{{ openFill }}" style="height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 14px var(--ff);cursor:pointer;display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:20px">person_add</span>Add staff</button></div>
+          <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+            <sc-for list="{{ roster }}" as="p" hint-placeholder-count="6">
+              <div style="min-height:68px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding:6px 0">
+                <span style="{{ p.av }}">{{ p.ini }}</span>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 16px var(--ff)">{{ p.name }}</span><span style="font:400 14px var(--ff);color:var(--fg-2)">{{ p.detail }}</span></div>
+                <span style="{{ p.chip }}">{{ p.status }}</span>
+                <sc-if value="{{ p.act }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.act.fn }}" style="height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 14px var(--ff);cursor:pointer;flex:none" style-active="transform:scale(.95)">{{ p.act.label }}</button></sc-if>
+              </div>
+            </sc-for>
+            <sc-for list="{{ openSlots }}" as="o" hint-placeholder-count="2">
+              <div style="min-height:68px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><span style="width:44px;height:44px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);border:1.5px dashed var(--fg-3);box-sizing:border-box;flex:none"></span><span style="flex:1;font:500 16px var(--ff);color:var(--fg-2)">Open spot · posted to staff</span><span style="font:500 13px var(--ff);color:var(--fg-3)">{{ o }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="padding:20px;border-radius:24px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line);display:flex;flex-direction:column;gap:12px">
+          <span style="font:600 18px var(--fd)">Instructions for crew</span>
+          <span style="font:400 15px/1.55 var(--ff);color:var(--fg-2)">Ask for Priya at the front desk. Black suit, no sneakers. Staff park in the east lot, B1. Front drive closed until 6:30; use the Mission St side entrance.</span>
+          <button style="align-self:flex-start;height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 14px var(--ff);cursor:pointer">Edit</button>
+        </div>
+        <button onClick="{{ toBroadcast }}" style="height:54px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 16px var(--ff);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">campaign</span>Message this crew</button>
+        <button onClick="{{ toVenue }}" style="height:54px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 16px var(--ff);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">location_on</span>Venue &amp; geofence</button>
+        <button style="height:54px;border:0;border-radius:999px;background:transparent;color:var(--bad);font:600 16px var(--ff);cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--line)">Cancel event</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.newEvent }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.form }}">
+      <sc-for list="{{ formFields }}" as="f" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">{{ f.label }}</span><div style="height:56px;border-radius:16px;background:var(--surface);padding:0 16px;display:flex;align-items:center;gap:10px;font:400 17px var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--fg-2)">{{ f.icon }}</span><span style="flex:1">{{ f.value }}</span><sc-if value="{{ f.chev }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--fg-2)">expand_more</span></sc-if></div></div>
+      </sc-for>
+      <div style="display:flex;align-items:center;justify-content:space-between;min-height:64px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+        <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 17px var(--ff)">Staff needed</span><span style="font:400 13px var(--ff);color:var(--fg-2)">Unassigned spots post as open shifts</span></div>
+        <div style="display:flex;align-items:center;gap:6px"><button onClick="{{ dec }}" style="width:44px;height:44px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font-family:'Material Symbols Rounded';font-size:22px;cursor:pointer" style-active="transform:scale(.9)">remove</button><span style="width:44px;text-align:center;font:700 26px var(--fd);font-variant-numeric:tabular-nums">{{ need }}</span><button onClick="{{ inc }}" style="width:44px;height:44px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font-family:'Material Symbols Rounded';font-size:22px;cursor:pointer" style-active="transform:scale(.9)">add</button></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Instructions</span><textarea rows="3" placeholder="Dress code, who to report to, where staff park" style="border:0;outline:0;border-radius:16px;background:var(--surface);padding:14px 16px;font:400 17px/1.4 var(--ff);color:var(--fg);resize:none"></textarea></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font:500 15px var(--ff)">How to fill</span>
+        <sc-for list="{{ fillModes }}" as="m" hint-placeholder-count="2"><button onClick="{{ m.pick }}" style="{{ m.style }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">{{ m.icon }}</span><span style="flex:1;display:flex;flex-direction:column;gap:2px;text-align:left"><span style="font:600 16px var(--ff)">{{ m.label }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">{{ m.note }}</span></span></button></sc-for>
+      </div>
+      <div style="display:flex;gap:10px"><button onClick="{{ toEvents }}" style="flex:1;height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 17px var(--ff);cursor:pointer">Save draft</button><button onClick="{{ toEvent }}" style="flex:2;height:56px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Publish event</button></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.staff }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="height:52px;border-radius:999px;background:var(--surface);display:flex;align-items:center;gap:10px;padding:0 18px;max-width:520px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--fg-2)">search</span><span style="font:400 16px var(--ff);color:var(--fg-3)">Search 42 staff</span></div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ false }}"><div style="{{ L.thead }}"><span>Name</span><span>Status</span><span>Next shift</span><span style="text-align:right">This week</span></div></sc-if>
+      <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+        <sc-for list="{{ people }}" as="p" hint-placeholder-count="8">
+          <button onClick="{{ p.open }}" style="{{ L.trow }}">
+            <span style="display:flex;align-items:center;gap:12px;min-width:0"><span style="{{ p.av }}">{{ p.ini }}</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:600 16px var(--ff)">{{ p.name }}</span><span style="font:400 14px var(--ff);color:var(--fg-2)">{{ p.email }}</span></span></span>
+            <span style="{{ p.chip }}">{{ p.status }}</span>
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ false }}"><span style="font:400 15px var(--ff);color:var(--fg-2)">{{ p.next }}</span><span style="font:600 15px 'Geist Mono',monospace;text-align:right">{{ p.hours }}</span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.person }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.split }}">
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:16px"><span style="width:80px;height:80px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font:700 28px var(--fd);flex:none">JE</span><div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 34px/1.05 var(--fd);letter-spacing:-.03em">Jordan Ellis</span><span style="font:400 15px var(--ff);color:var(--fg-2)">Valet attendant · joined Mar 2026</span></div></div>
+        <div style="display:flex;gap:10px">
+          <a href="tel:+14155550123" style="flex:1;height:52px;border-radius:999px;background:var(--surface);display:flex;align-items:center;justify-content:center;gap:8px;font:600 16px var(--ff);color:var(--fg);text-decoration:none"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">call</span>Call</a>
+          <button onClick="{{ toInbox }}" style="flex:1;height:52px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 16px var(--ff);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">chat_bubble</span>Message</button>
+        </div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ personRows }}" as="r" hint-placeholder-count="4"><div style="min-height:58px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 16px var(--ff)">{{ r.k }}</span><span style="{{ r.style }}">{{ r.v }}</span></div></sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font:600 20px var(--fd);letter-spacing:-.015em">Recent shifts</span>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ personShifts }}" as="s" hint-placeholder-count="4"><div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 16px var(--ff)">{{ s.venue }}</span><span style="font:400 14px var(--ff);color:var(--fg-2)">{{ s.when }}</span></div><span style="font:600 15px 'Geist Mono',monospace">{{ s.h }}</span></div></sc-for>
+        </div>
+        <button style="margin-top:8px;height:52px;border:0;border-radius:999px;background:transparent;color:var(--bad);font:600 16px var(--ff);cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--line)">Deactivate</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.venues }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.grid }}">
+      <sc-for list="{{ venues }}" as="v" hint-placeholder-count="4">
+        <button onClick="{{ v.open }}" style="{{ v.style }}" style-active="transform:scale(.985)">
+          <div style="position:relative;height:120px;border-radius:16px;background:repeating-linear-gradient(90deg,transparent 0 31px,var(--line) 31px 32px),repeating-linear-gradient(0deg,transparent 0 31px,var(--line) 31px 32px),var(--surface);overflow:hidden;width:100%"><span style="position:absolute;left:50%;top:50%;width:{{ v.ring }};height:{{ v.ring }};transform:translate(-50%,-50%);border-radius:999px;background:var(--ok-soft);box-shadow:inset 0 0 0 2px var(--ok)"></span><span style="position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:3px;background:var(--fg)"></span></div>
+          <div style="display:flex;flex-direction:column;gap:2px;width:100%"><span style="font:600 20px/1.2 var(--fd);letter-spacing:-.02em">{{ v.name }}</span><span style="font:400 14px var(--ff);color:var(--fg-2)">{{ v.addr }}</span></div>
+          <div style="display:flex;justify-content:space-between;width:100%;font:500 14px var(--ff);color:var(--fg-2)"><span>Geofence {{ v.r }}</span><span>{{ v.upcoming }}</span></div>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.venue }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.split }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="position:relative;height:{{ mapH }};border-radius:24px;background:repeating-linear-gradient(90deg,transparent 0 39px,var(--line) 39px 40px),repeating-linear-gradient(0deg,transparent 0 39px,var(--line) 39px 40px),var(--surface);overflow:hidden">
+          <span style="position:absolute;left:50%;top:50%;width:{{ fencePx }};height:{{ fencePx }};transform:translate(-50%,-50%);border-radius:999px;background:var(--ok-soft);box-shadow:inset 0 0 0 2px var(--ok);transition:width .3s cubic-bezier(.3,.7,.4,1),height .3s cubic-bezier(.3,.7,.4,1)"></span>
+          <span style="position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:5px;background:var(--fg);box-shadow:0 0 0 4px var(--bg)"></span>
+          <span style="position:absolute;left:16px;bottom:14px;height:32px;padding:0 12px;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);display:flex;align-items:center;font:600 13px var(--ff)">Drag pin to the valet stand</span>
+        </div>
+        <span style="font:400 14px/1.45 var(--ff);color:var(--fg-3)">Staff can clock in only inside the green area. Outside it, they can request your approval.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 34px/1.05 var(--fd);letter-spacing:-.03em">The Grand Hotel</span><span style="font:400 15px var(--ff);color:var(--fg-2)">400 Market St, San Francisco · PT</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:500 16px var(--ff)">Clock-in radius</span><span style="font:700 26px var(--fd);font-variant-numeric:tabular-nums">{{ radius }} m</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ radii }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.pick }}" style="{{ r.style }}">{{ r.label }}</button></sc-for></div>
+          <span style="font:400 13px var(--ff);color:var(--fg-2)">150 m suits most hotels. Go wider for big garages or remote lots.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <div style="min-height:58px;display:flex;align-items:center;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 16px var(--ff)">Venue contact</span><span style="font:500 15px var(--ff);color:var(--fg-2)">Priya · front desk</span></div>
+          <div style="min-height:58px;display:flex;align-items:center;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 16px var(--ff)">Default dress code</span><span style="font:500 15px var(--ff);color:var(--fg-2)">Black suit</span></div>
+          <div style="min-height:58px;display:flex;align-items:center;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 16px var(--ff)">Bill rate</span><span style="font:600 15px 'Geist Mono',monospace">$38.00 / h</span></div>
+        </div>
+        <button onClick="{{ back }}" style="height:56px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Save venue</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.hours }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <sc-if value="{{ hoursReview }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line);flex-wrap:wrap">
+          <span style="font-family:'Material Symbols Rounded';font-size:26px;color:var(--ok);font-variation-settings:'FILL' 1">task_alt</span>
+          <span style="flex:1;min-width:200px;font:500 16px/1.4 var(--ff)">{{ cleanText }}</span>
+          <button onClick="{{ approveClean }}" disabled="{{ cleanDone }}" style="{{ cleanBtn }}" style-active="transform:scale(.96)">{{ cleanLabel }}</button>
+        </div>
+      </sc-if>
+      <div style="{{ L.grid }}">
+        <sc-for list="{{ entries }}" as="h" hint-placeholder-count="4">
+          <div style="{{ h.style }}">
+            <div style="display:flex;align-items:center;gap:12px"><span style="{{ h.av }}">{{ h.ini }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 16px var(--ff)">{{ h.name }}</span><span style="font:400 14px var(--ff);color:var(--fg-2)">{{ h.venue }}</span></div><span style="font:700 22px var(--fd);font-variant-numeric:tabular-nums">{{ h.total }}</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="padding:10px 12px;border-radius:14px;background:var(--surface);display:flex;flex-direction:column;gap:2px"><span style="font:500 12px var(--ff);color:var(--fg-2)">IN</span><span style="font:600 16px 'Geist Mono',monospace">{{ h.in }}</span></div>
+              <div style="padding:10px 12px;border-radius:14px;background:var(--surface);display:flex;flex-direction:column;gap:2px"><span style="font:500 12px var(--ff);color:var(--fg-2)">OUT</span><span style="font:600 16px 'Geist Mono',monospace;color:{{ h.outColor }}">{{ h.out }}</span></div>
+            </div>
+            <sc-if value="{{ h.flag }}" hint-placeholder-val="{{ true }}"><span style="display:flex;gap:8px;align-items:flex-start;font:500 14px/1.4 var(--ff);color:var(--warn)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">flag</span>{{ h.flag }}</span></sc-if>
+            <sc-if value="{{ h.pending }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:8px"><button onClick="{{ h.adjust }}" style="flex:1;height:48px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 15px var(--ff);cursor:pointer" style-active="transform:scale(.96)">Adjust</button><button onClick="{{ h.approve }}" style="flex:1;height:48px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 15px var(--ff);cursor:pointer" style-active="transform:scale(.96)">Approve</button></div>
+            </sc-if>
+            <sc-if value="{{ h.done }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:6px;align-items:center;font:600 14px var(--ff);color:var(--ok);animation:var(--anim-rise)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">check_circle</span>{{ h.doneText }}</span></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.invoices }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ false }}"><div style="{{ L.thead }}"><span>Venue · period</span><span>Status</span><span>Hours</span><span style="text-align:right">Amount</span></div></sc-if>
+      <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+        <sc-for list="{{ invoices }}" as="i" hint-placeholder-count="5">
+          <button onClick="{{ i.open }}" style="{{ L.trow }}">
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:600 16px var(--ff)">{{ i.venue }}</span><span style="font:400 14px var(--ff);color:var(--fg-2)">{{ i.period }}</span></span>
+            <span style="{{ i.chip }}">{{ i.status }}</span>
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ false }}"><span style="font:500 15px 'Geist Mono',monospace;color:var(--fg-2)">{{ i.hours }}</span></sc-if>
+            <span style="font:600 16px 'Geist Mono',monospace;text-align:right">{{ i.amt }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.invoice }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.form }}">
+      <div style="padding:24px;border-radius:28px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line);display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 13px 'Geist Mono',monospace;color:var(--fg-3)">INV-2026-0142 · DRAFT</span><span style="font:700 30px/1.1 var(--fd);letter-spacing:-.03em">Harbor Pavilion</span><span style="font:400 15px var(--ff);color:var(--fg-2)">Oct 16 – 31, 2026 · from approved hours</span></div><img src="assets/regency-logo.png" alt="" style="height:44px;width:auto"></div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ lines }}" as="l" hint-placeholder-count="3"><div style="min-height:60px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px var(--ff)">{{ l.what }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">{{ l.calc }}</span></div><span style="font:600 15px 'Geist Mono',monospace">{{ l.amt }}</span></div></sc-for>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:500 16px var(--ff)">Total due</span><span style="font:700 40px/1 var(--fd);letter-spacing:-.035em">$5,282.00</span></div>
+        <span style="display:flex;gap:8px;align-items:flex-start;font:500 14px/1.4 var(--ff);color:var(--warn)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">info</span>2 entries from Oct 24 are still in review and not included.</span>
+      </div>
+      <div style="display:flex;gap:10px"><button style="flex:1;height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 16px var(--ff);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:22px">download</span>PDF</button><button onClick="{{ sendInvoice }}" style="{{ sendBtn }}" style-active="transform:scale(.97)">{{ sendLabel }}</button></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.inbox }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.inbox }}">
+      <sc-if value="{{ showThreads }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ threads }}" as="t" hint-placeholder-count="5">
+            <button onClick="{{ t.open }}" style="{{ t.style }}">
+              <span style="{{ t.av }}">{{ t.ini }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div style="display:flex;gap:8px;align-items:baseline"><span style="flex:1;font:600 16px var(--ff);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</span><span style="font:500 13px var(--ff);color:var(--fg-3)">{{ t.time }}</span></div><span style="font:400 14px var(--ff);color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.last }}</span></div>
+              <sc-if value="{{ t.unread }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:10px;border-radius:9px;background:var(--accent);flex:none"></span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showThread }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)"><span style="width:44px;height:44px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font:600 15px var(--ff)">JE</span><div style="flex:1;display:flex;flex-direction:column"><span style="font:600 17px var(--ff)">Jordan Ellis</span><span style="font:400 13px var(--ff);color:var(--fg-2)">On site · The Grand Hotel</span></div></div>
+          <sc-for list="{{ thread }}" as="m" hint-placeholder-count="4"><div style="{{ m.style }}">{{ m.text }}<span style="{{ m.metaStyle }}">{{ m.meta }}</span></div></sc-for>
+          <div style="display:flex;gap:8px;padding:8px;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);margin-top:8px"><input placeholder="Reply to Jordan" style="flex:1;min-width:0;height:44px;border:0;outline:0;border-radius:999px;background:var(--surface);padding:0 16px;font:400 16px var(--ff);color:var(--fg)"><button aria-label="Send" style="width:44px;height:44px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-family:'Material Symbols Rounded';font-size:22px;cursor:pointer">arrow_upward</button></div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.broadcast }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.form }}">
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Send to</span><div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ audiences }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.pick }}" style="{{ a.style }}">{{ a.label }}</button></sc-for></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Message</span><textarea rows="5" style="border:0;outline:0;border-radius:16px;background:var(--surface);padding:14px 16px;font:400 17px/1.45 var(--ff);color:var(--fg);resize:none">Front drive is closed until 6:30. Use the Mission St side entrance and stage keys at the side podium.</textarea></div>
+      <div style="display:flex;gap:10px;align-items:center;padding:14px 16px;border-radius:18px;background:var(--surface);font:500 14px/1.4 var(--ff);color:var(--fg-2)"><span style="font-family:'Material Symbols Rounded';font-size:20px">notifications_active</span>{{ reachText }}</div>
+      <button onClick="{{ sendBroadcast }}" style="{{ sendBtn }}" style-active="transform:scale(.97)">{{ bcLabel }}</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.settings }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.split }}">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <span style="font:600 20px var(--fd);letter-spacing:-.015em">Branding</span>
+          <div style="display:flex;align-items:center;gap:16px;padding:16px;border-radius:22px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line)"><div style="width:72px;height:72px;border-radius:18px;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);flex:none"><img src="assets/regency-logo.png" alt="" style="width:60px;height:auto"></div><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 16px var(--ff)">Regency Valet Parking</span><span style="font:400 13px var(--ff);color:var(--fg-2)">Logo shows in the staff app and on invoices</span></div><button style="height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 14px var(--ff);cursor:pointer">Replace</button></div>
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Accent color</span><div style="display:flex;gap:10px"><sc-for list="{{ swatches }}" as="s" hint-placeholder-count="4"><button onClick="{{ s.pick }}" aria-label="{{ s.c }}" style="{{ s.style }}"></button></sc-for></div><span style="font:400 13px var(--ff);color:var(--fg-2)">Used only for primary buttons. Status colors never change.</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font:600 20px var(--fd);letter-spacing:-.015em">Clock-in rules</span>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ rules }}" as="r" hint-placeholder-count="5">
+            <button onClick="{{ r.toggle }}" style="min-height:66px;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);padding:0;text-align:left;cursor:pointer">
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 16px var(--ff)">{{ r.label }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">{{ r.note }}</span></div>
+              <sc-if value="{{ r.value }}" hint-placeholder-val="{{ true }}"><span style="font:600 15px var(--ff);color:var(--fg-2)">{{ r.value }}</span></sc-if>
+              <sc-if value="{{ r.isToggle }}" hint-placeholder-val="{{ false }}"><span style="{{ r.track }}"><span style="{{ r.knob }}"></span></span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:70;animation:vwFade .2s"></div>
+    <div style="{{ L.sheet }}">
+      <span style="align-self:center;width:40px;height:5px;border-radius:9px;background:var(--line)"></span>
+      <sc-if value="{{ sheetIs.adjust }}" hint-placeholder-val="{{ false }}">
+        <span style="font:700 28px/1.1 var(--fd);letter-spacing:-.025em">Adjust Sam Rivera's hours</span>
+        <span style="font:400 15px/1.4 var(--ff);color:var(--fg-2)">Harbor Pavilion · Sat Oct 24. No clock-out was recorded, so it auto-closed at the scheduled end.</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px var(--ff)">In</span><div style="height:56px;border-radius:16px;background:var(--surface);display:flex;align-items:center;padding:0 16px;font:600 18px 'Geist Mono',monospace">3:52 PM</div></div><div style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px var(--ff)">Out</span><div style="height:56px;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--fg);display:flex;align-items:center;padding:0 16px;font:600 18px 'Geist Mono',monospace">11:10 PM</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px var(--ff)">Reason (shared with Sam)</span><div style="min-height:56px;border-radius:16px;background:var(--surface);display:flex;align-items:center;padding:0 16px;font:400 16px var(--ff)">Confirmed with Marco, left after last car</div></div>
+        <button onClick="{{ saveAdjust }}" style="height:56px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Save &amp; approve · 7h 18m</button>
+      </sc-if>
+      <sc-if value="{{ sheetIs.invite }}" hint-placeholder-val="{{ false }}">
+        <span style="font:700 28px/1.1 var(--fd);letter-spacing:-.025em">Invite staff</span>
+        <span style="font:400 15px/1.4 var(--ff);color:var(--fg-2)">They get an email link to join Regency. No app store needed.</span>
+        <div style="min-height:56px;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--fg);display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 12px"><span style="height:34px;padding:0 12px;border-radius:999px;background:var(--elev);display:flex;align-items:center;font:500 14px var(--ff)">kai.morgan@gmail.com</span><span style="height:34px;padding:0 12px;border-radius:999px;background:var(--elev);display:flex;align-items:center;font:500 14px var(--ff)">ana.ruiz@outlook.com</span><span style="font:400 15px var(--ff);color:var(--fg-3)">Add email…</span></div>
+        <button onClick="{{ closeSheet }}" style="height:56px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Send 2 invites</button>
+      </sc-if>
+      <sc-if value="{{ sheetIs.fill }}" hint-placeholder-val="{{ false }}">
+        <span style="font:700 28px/1.1 var(--fd);letter-spacing:-.025em">Fill 2 open spots</span>
+        <span style="font:400 15px/1.4 var(--ff);color:var(--fg-2)">Available and not already working tonight.</span>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ avail }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.pick }}" style="min-height:62px;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);padding:0;cursor:pointer;text-align:left"><span style="width:40px;height:40px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font:600 14px var(--ff);flex:none">{{ a.ini }}</span><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 16px var(--ff)">{{ a.name }}</span><span style="font:400 13px var(--ff);color:var(--fg-2)">{{ a.note }}</span></span><span style="{{ a.box }}">{{ a.mark }}</span></button></sc-for>
+        </div>
+        <button onClick="{{ closeSheet }}" style="height:56px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">{{ fillLabel }}</button>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { tab: null, need: 8, fill: 'open', approved: {}, cleanDone: false, radius: 150, sheet: null, picks: { KM: true }, sent: false, bc: false, aud: 'event', thread: false, rules: { selfie: true, early: true } };
+  componentDidUpdate(p) { if (p.view !== this.props.view) this.setState({ tab: null, sheet: null, sent: false, bc: false, thread: false }); }
+  renderVals() {
+    const P = this.props, S = this.state, bp = P.bp || 'phone', ph = bp === 'phone', desk = bp === 'desktop', st = P.safeTop ?? 0;
+    const view = P.view || 'events', go = (r, p) => P.go && P.go(r, p), set = v => this.setState(v);
+    const T = { ok: ['var(--ok-soft)', 'var(--ok)'], warn: ['var(--warn-soft)', 'var(--warn)'], bad: ['var(--bad-soft)', 'var(--bad)'], info: ['var(--info-soft)', 'var(--info)'], neutral: ['var(--surface-2)', 'var(--fg-2)'], strong: ['var(--fg)', 'var(--bg)'], accent: ['var(--accent-soft)', 'var(--accent-text)'] };
+    const chip = k => ({ justifySelf: 'start', alignSelf: 'center', height: 28, padding: '0 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4, font: "600 13px var(--ff)", whiteSpace: 'nowrap', background: T[k][0], color: T[k][1] });
+    const av = (sz = 44) => ({ width: sz, height: sz, borderRadius: 999, background: 'var(--surface-2)', display: 'grid', placeItems: 'center', font: `600 ${sz > 40 ? 15 : 13}px var(--ff)`, flex: 'none' });
+    const card = { border: 0, textAlign: 'left', color: 'var(--fg)', display: 'flex', flexDirection: 'column', gap: 12, padding: 18, borderRadius: 22, background: 'var(--card)', backdropFilter: 'var(--blur)', boxShadow: 'var(--card-line)', transition: 'transform .16s', animation: 'var(--anim-rise)', cursor: 'pointer' };
+    const tabStyle = on => ({ height: 40, padding: '0 16px', border: 0, borderRadius: 999, cursor: 'pointer', flex: 'none', display: 'flex', alignItems: 'center', gap: 6, font: `${on ? 600 : 500} 15px var(--ff)`, background: on ? 'var(--fg)' : 'var(--surface)', color: on ? 'var(--bg)' : 'var(--fg-2)', transition: 'all .2s' });
+    const mkTabs = (defs, def) => { const cur = S.tab || def; return { cur, list: defs.map(([k, l, n]) => ({ label: l, n, go: () => set({ tab: k }), style: tabStyle(cur === k), nStyle: { minWidth: 20, height: 20, borderRadius: 99, padding: '0 6px', boxSizing: 'border-box', background: cur === k ? 'var(--bg)' : 'var(--fg)', color: cur === k ? 'var(--fg)' : 'var(--bg)', font: "700 11px/20px var(--ff)", textAlign: 'center' } })) }; };
+
+    let tabs = [], head = { show: true, title: '', sub: '', cta: null };
+    // events
+    const EV = [
+      ['TODAY · FRI OCT 23', [['The Grand Hotel', 'Corporate dinner', '6:00 PM', 8, 6, 4, 'live'], ['The Laurel Club', 'Members night', '7:30 PM', 6, 4, 0, 'short']]],
+      ['SAT OCT 24', [['Harbor Pavilion', 'Wedding', '4:00 PM', 8, 8, 0, 'full']]],
+      ['NEXT WEEK', [['Harbor Pavilion', 'Sunday brunch', 'Sun 10 AM', 5, 2, 0, 'short'], ['Osteria Nove', 'Dinner service', 'Tue 5:30 PM', 2, 2, 0, 'full'], ['The Grand Hotel', 'Board dinner', 'Wed 5 PM', 4, 3, 0, 'short'], ['Maison Blanc', 'Halloween gala', 'Sat 7 PM', 10, 6, 0, 'short'], ['Westfield Gala', 'Charity auction', 'Sun Nov 1', 6, 0, 0, 'draft']]]
+    ];
+    const evT = mkTabs([['upcoming', 'Upcoming'], ['short', 'Short-staffed', 4], ['draft', 'Drafts', 1], ['past', 'Past']], 'upcoming');
+    const SM = { live: ['ok', 'Live', 'sensors'], short: ['warn', 'Short', 'error'], full: ['neutral', 'Full', 'check_circle'], draft: ['neutral', 'Draft', 'edit'] };
+    const eventDays = EV.map(([label, items]) => ({ label, items: items.filter(e => evT.cur === 'upcoming' || evT.cur === 'past' || (evT.cur === 'short' ? e[6] === 'short' : e[6] === 'draft')).map((e, i) => {
+      const [venue, kind, time, need, conf, on, s] = e; const open = need - conf; const sm = SM[s];
+      return { venue, kind, time, status: s === 'short' ? `${open} open` : sm[1], icon: sm[2], chip: chip(sm[0]), style: { ...card, animationDelay: i * 50 + 'ms' }, open: () => go('event'),
+        cov: s === 'live' ? `${on} on site · ${conf} of ${need} confirmed` : `${conf} of ${need} confirmed`,
+        openText: open ? `${open} unfilled` : 'Fully staffed', openStyle: { color: open ? 'var(--warn)' : 'var(--fg-2)', fontWeight: 600 },
+        barOn: { width: (on / need * 100) + '%', background: 'var(--ok)', borderRadius: 9, transition: 'width .6s' }, barConf: { width: ((conf - on) / need * 100) + '%', background: 'var(--fg)', borderRadius: 9, opacity: .8 } };
+    }) })).filter(d => d.items.length);
+    // roster
+    const R = [['JE', 'Jordan Ellis', 'In 5:51 PM · 38 m · selfie ok', 'On site', 'ok'], ['MP', 'Maya Patel', 'In 5:44 PM · 22 m', 'On site', 'ok'], ['DK', 'Devon Kim', 'In 5:47 PM · 61 m', 'On site', 'ok'], ['LT', 'Luis Torres', 'Requested 5:52 PM · 420 m, garage L3', 'Approval', 'warn', 'Review'], ['AB', 'Ari Brooks', 'Starts 6:00 PM · not clocked in', 'Late 4m', 'bad', 'Call'], ['SR', 'Sam Rivera', 'Confirmed · arrives with 2nd wave', 'Expected', 'neutral']];
+    const roster = R.map(([ini, name, detail, status, tone, act]) => ({ ini, name, detail, status, chip: chip(tone), av: av(), act: act ? { label: act, fn: () => act === 'Review' ? go('hours') : null } : null }));
+    // people
+    const PP = [['JE', 'Jordan Ellis', 'jordan.ellis@gmail.com', 'On shift', 'ok', 'Tonight · Grand Hotel', '17h 30m'], ['MP', 'Maya Patel', 'maya.p@gmail.com', 'On shift', 'ok', 'Tonight · Grand Hotel', '22h 05m'], ['SR', 'Sam Rivera', 'sam.rivera@icloud.com', 'Active', 'neutral', 'Sat · Harbor Pavilion', '9h 40m'], ['AB', 'Ari Brooks', 'ari.b@gmail.com', 'Alerts off', 'warn', 'Tonight · Grand Hotel', '12h 00m'], ['LT', 'Luis Torres', 'ltorres@outlook.com', 'Active', 'neutral', 'Tonight · Grand Hotel', '15h 20m'], ['KM', 'Kai Morgan', 'kai.morgan@gmail.com', 'Invited', 'info', 'Not joined yet', '—'], ['NO', 'Nia Okafor', 'nia.okafor@gmail.com', 'Active', 'neutral', 'Sun · Harbor brunch', '6h 15m'], ['RC', 'Rob Chen', 'rob.chen@gmail.com', 'Inactive', 'neutral', '—', '—']];
+    const stT = mkTabs([['all', 'All', null], ['active', 'Active'], ['invited', 'Invited', 1], ['alerts', 'Alerts off', 1]], 'all');
+    const people = PP.filter(p => stT.cur === 'all' || (stT.cur === 'invited' ? p[3] === 'Invited' : stT.cur === 'alerts' ? p[3] === 'Alerts off' : !['Invited', 'Inactive'].includes(p[3]))).map(([ini, name, email, status, tone, next, hours]) => ({ ini, name, email, status, chip: chip(tone), next, hours, av: av(), open: () => go('person') }));
+    // hours
+    const HE = [['SR', 'Sam Rivera', 'Harbor Pavilion · Sat Oct 24', '3:52 PM', '11:30 PM', '7h 38m', 'No clock-out. Auto-closed at scheduled end.', true], ['LT', 'Luis Torres', 'Grand Hotel · Thu Oct 22', '5:52 PM', '11:02 PM', '5h 10m', 'Clocked in 420 m away, approved by Jamie (garage).'], ['AB', 'Ari Brooks', 'Osteria Nove · Tue Oct 20', '5:41 PM', '9:12 PM', '3h 31m', 'Left 1h 18m early. Note: "family emergency".'], ['MP', 'Maya Patel', 'Maison Blanc · Thu Oct 22', '5:48 PM', '11:06 PM', '5h 18m', 'Synced 2h late (was offline). Times are from the phone.']];
+    const hT = mkTabs([['review', 'Needs review', HE.filter(h => !S.approved[h[1]]).length || null], ['approved', 'Approved']], 'review');
+    const entries = HE.filter(h => hT.cur === 'review' ? true : S.approved[h[1]]).map(([ini, name, venue, inn, out, total, flag, red], i) => { const done = S.approved[name]; return { ini, name, venue, in: inn, out: done === 'adj' ? '11:10 PM' : out, total: done === 'adj' ? '7h 18m' : total, flag: done ? null : flag, outColor: red && !done ? 'var(--warn)' : 'var(--fg)', av: av(40), pending: !done, done: !!done, doneText: done === 'adj' ? 'Adjusted & approved · Sam notified' : 'Approved', style: { ...card, cursor: 'default', gap: 14, animationDelay: i * 50 + 'ms', opacity: done ? .75 : 1, transition: 'opacity .3s' },
+      approve: () => set({ approved: { ...S.approved, [name]: 'ok' } }), adjust: () => set({ sheet: 'adjust' }) }; });
+    // invoices
+    const IV = [['Harbor Pavilion', 'Oct 16 – 31', 'Draft', 'neutral', '139.0 h', '$5,282.00'], ['The Grand Hotel', 'Oct 16 – 31', 'Draft', 'neutral', '96.5 h', '$3,667.00'], ['Maison Blanc', 'Oct 1 – 15', 'Overdue 6d', 'bad', '72.0 h', '$2,736.00'], ['The Grand Hotel', 'Oct 1 – 15', 'Paid', 'ok', '126.5 h', '$4,807.00'], ['Osteria Nove', 'Oct 1 – 15', 'Sent', 'info', '40.0 h', '$1,400.00']];
+    const invoices = IV.map(([venue, period, status, tone, hours, amt]) => ({ venue, period, status, chip: chip(tone), hours, amt, open: () => go('invoice') }));
+    // threads
+    const TH = [['JE', 'Jordan Ellis', 'Which entrance should I use tonight?', '5:39 PM', true], ['LT', 'Luis Torres', 'I’m on garage level 3, GPS is off', '5:52 PM', true], ['all', 'Announcement · All staff', 'Halloween at Maison Blanc needs 4 more…', '3:00 PM'], ['MP', 'Maya Patel', 'Thanks! See you there', '2:14 PM'], ['GH', 'Grand Hotel crew · 6', 'Front drive closed until 6:30', '1:30 PM']];
+    const threads = TH.map(([ini, name, last, time, unread], i) => ({ ini: ini === 'all' ? '' : ini, name, last, time, unread, av: ini === 'all' ? { ...av(), background: 'var(--accent-soft)' } : av(), open: () => set({ thread: true }),
+      style: { minHeight: 72, display: 'flex', alignItems: 'center', gap: 12, border: 0, borderBottom: '1px solid var(--line)', background: !ph && i === 0 ? 'var(--surface)' : 'transparent', borderRadius: !ph && i === 0 ? 16 : 0, color: 'var(--fg)', padding: !ph ? '6px 12px' : '6px 0', cursor: 'pointer', textAlign: 'left' } }));
+    const bub = (me) => ({ alignSelf: me ? 'flex-end' : 'flex-start', maxWidth: '80%', padding: '12px 15px', borderRadius: me ? '20px 20px 6px 20px' : '20px 20px 20px 6px', background: me ? 'var(--fg)' : 'var(--surface)', color: me ? 'var(--bg)' : 'var(--fg)', font: "400 16px/1.45 var(--ff)", display: 'flex', flexDirection: 'column', gap: 4 });
+    const thread = [['Hi Jordan, Priya at the front desk is your contact tonight. Park in the east lot, level B1.', '2:10 PM · Jamie', true], ['Got it, thanks! See you there.', '2:14 PM', false], ['Which entrance should I use tonight? Front looks blocked.', '5:39 PM', false]].map(([text, meta, me]) => ({ text, meta, style: bub(me), metaStyle: { font: "500 12px var(--ff)", opacity: .6 } }));
+    // header + tabs per view
+    const H = {
+      events: ['Events', '7 upcoming · 4 short-staffed', { label: 'New event', icon: 'add', fn: () => go('newEvent') }],
+      newEvent: ['New event', 'Spots you don\u2019t assign are posted as open shifts'],
+      staff: ['Staff', '42 people · 1 invite pending', { label: 'Invite', icon: 'person_add', fn: () => set({ sheet: 'invite' }) }],
+      venues: ['Venues', '6 venues · default radius 150 m', { label: 'Add venue', icon: 'add_location_alt', fn: () => go('venue') }],
+      hours: ['Hours', 'Pay period Oct 19 – 25 · locks Mon 9 AM'],
+      invoices: ['Invoices', 'Built from approved hours', { label: 'New invoice', icon: 'request_quote', fn: () => go('invoice') }],
+      inbox: ['Inbox', '2 unread', { label: 'Announce', icon: 'campaign', fn: () => go('broadcast') }],
+      broadcast: ['Announcement', 'Sent as a push notification and in each person\u2019s inbox'],
+      settings: ['Settings', 'Regency Valet Parking']
+    }[view];
+    if (H) head = { show: true, title: H[0], sub: H[1], cta: H[2] || null }; else head = { show: false };
+    if (view === 'events') tabs = evT.list; if (view === 'staff') tabs = stT.list; if (view === 'hours') tabs = hT.list;
+    if (view === 'inbox' && ph && S.thread) head = { show: false };
+    const cleanN = 18;
+    const radii = [100, 150, 250, 400].map(r => ({ label: r + ' m', pick: () => set({ radius: r }), style: tabStyle(S.radius === r) }));
+    const avail = [['KM', 'Kai Morgan', 'Free tonight · worked here 3×'], ['NO', 'Nia Okafor', 'Free tonight'], ['RC', 'Rob Chen', 'Free · last shift 3 weeks ago']].map(([ini, name, note]) => { const on = !!S.picks[ini]; return { ini, name, note, mark: on ? 'check' : '', pick: () => set({ picks: { ...S.picks, [ini]: !on } }), box: { width: 28, height: 28, borderRadius: 8, display: 'grid', placeItems: 'center', fontFamily: "'Material Symbols Rounded'", fontSize: 20, background: on ? 'var(--fg)' : 'transparent', color: 'var(--bg)', boxShadow: on ? 'none' : 'inset 0 0 0 2px var(--line)', transition: 'all .15s' } }; });
+    const nPick = Object.values(S.picks).filter(Boolean).length;
+    const tog = on => ({ track: { width: 52, height: 32, borderRadius: 999, background: on ? 'var(--ok)' : 'var(--surface-2)', position: 'relative', flex: 'none', transition: 'background .2s' }, knob: { position: 'absolute', top: 3, left: on ? 23 : 3, width: 26, height: 26, borderRadius: 999, background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,.2)', transition: 'left .22s cubic-bezier(.3,.7,.4,1.3)' } });
+    const rule = (label, note, value, key) => ({ label, note, value: key ? null : value, isToggle: !!key, ...(key ? tog(S.rules[key]) : {}), toggle: () => key && set({ rules: { ...S.rules, [key]: !S.rules[key] } }) });
+    const pad = ph ? `${st + 82}px 20px 140px` : bp === 'tablet' ? '32px 32px 56px' : '40px 48px 64px';
+    const primaryBtn = (done) => ({ flex: 2, height: 56, border: 0, borderRadius: 999, font: "600 17px var(--ff)", cursor: 'pointer', background: done ? 'var(--ok)' : 'var(--accent)', color: done ? '#fff' : 'var(--accent-ink)', transition: 'background .3s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 });
+    return {
+      is: Object.fromEntries(['events', 'event', 'newEvent', 'staff', 'person', 'venues', 'venue', 'hours', 'invoices', 'invoice', 'inbox', 'broadcast', 'settings'].map(k => [k, view === k])),
+      head, tabs, wide: !ph, eventDays, roster, openSlots: ['Posted 2:00 PM', 'Posted 2:00 PM'], people, entries, invoices, threads, thread,
+      evStats: [{ n: 4, l: 'On site', color: 'var(--ok)' }, { n: 2, l: 'Need you', color: 'var(--warn)' }, { n: 2, l: 'Unfilled', color: 'var(--fg)' }],
+      formFields: [{ label: 'Venue', icon: 'location_on', value: 'Harbor Pavilion', chev: true }, { label: 'Date', icon: 'calendar_month', value: 'Sun Nov 8, 2026', chev: true }, { label: 'Time (venue, PT)', icon: 'schedule', value: '10:00 AM – 3:00 PM' }, { label: 'Event name', icon: 'edit', value: 'Sunday brunch' }],
+      need: S.need, inc: () => set({ need: Math.min(40, S.need + 1) }), dec: () => set({ need: Math.max(1, S.need - 1) }),
+      fillModes: [['open', 'Post as open shifts', 'First to claim gets it', 'bolt'], ['assign', 'Assign people now', 'Pick names; the rest post as open', 'how_to_reg']].map(([k, l, n, ic]) => ({ label: l, note: n, icon: ic, pick: () => set({ fill: k }), style: { minHeight: 64, border: 0, borderRadius: 16, padding: '0 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', color: 'var(--fg)', background: S.fill === k ? 'var(--accent-soft)' : 'var(--surface)', boxShadow: S.fill === k ? 'inset 0 0 0 1.5px var(--accent)' : 'none', transition: 'all .2s' } })),
+      personRows: [{ k: 'Phone', v: '(415) 555-0123' }, { k: 'Email', v: 'jordan.ellis@gmail.com' }, { k: 'App installed', v: 'Yes · iPhone' }, { k: 'Notifications', v: 'On' }, { k: 'Hours this pay period', v: '17h 30m' }].map(r => ({ ...r, style: { font: "500 15px var(--ff)", color: 'var(--fg-2)' } })),
+      personShifts: [['The Grand Hotel', 'Tonight · in 5:51 PM', 'live'], ['Maison Blanc', 'Thu Oct 22', '5h 12m'], ['Osteria Nove', 'Tue Oct 20', '4h 52m'], ['Westfield Gala', 'Sat Oct 17', '4h 18m']].map(([venue, when, h]) => ({ venue, when, h })),
+      venues: [['The Grand Hotel', '400 Market St', 150, '3 upcoming'], ['Harbor Pavilion', 'Pier 3, The Embarcadero', 250, '2 upcoming'], ['Maison Blanc', '88 Fillmore St', 150, '1 upcoming'], ['Osteria Nove', '1201 Valencia St', 100, '1 upcoming'], ['The Laurel Club', '2 Laurel Ave', 150, 'Tonight'], ['Westfield Gala', 'Westfield Centre, L4', 400, 'Draft']].map(([name, addr, r, upcoming], i) => ({ name, addr, r: r + ' m', upcoming, ring: Math.round(r / 400 * 100 + 20) + 'px', style: { ...card, animationDelay: i * 50 + 'ms' }, open: () => go('venue') })),
+      radius: S.radius, radii, fencePx: Math.round(S.radius / 400 * (ph ? 260 : 380) + 40) + 'px', mapH: ph ? '300px' : '440px',
+      hoursReview: hT.cur === 'review', cleanDone: S.cleanDone,
+      cleanText: S.cleanDone ? `${cleanN} entries approved. Staff can see them now.` : `${cleanN} entries have no flags: on time, inside the geofence, with a selfie.`,
+      cleanLabel: S.cleanDone ? 'Approved' : `Approve ${cleanN}`, approveClean: () => set({ cleanDone: true }),
+      cleanBtn: { height: 44, padding: '0 18px', border: 0, borderRadius: 999, font: "600 15px var(--ff)", cursor: S.cleanDone ? 'default' : 'pointer', background: S.cleanDone ? 'var(--ok-soft)' : 'var(--fg)', color: S.cleanDone ? 'var(--ok)' : 'var(--bg)', transition: 'all .3s' },
+      lines: [['Wedding · Sat Oct 24', '8 staff · 58.5 h × $38.00', '$2,223.00'], ['Sunday brunch · Oct 18', '5 staff · 24.5 h × $38.00', '$931.00'], ['Corporate lunch · Oct 21', '7 staff · 56.0 h × $38.00', '$2,128.00']].map(([what, calc, amt]) => ({ what, calc, amt })),
+      sendInvoice: () => set({ sent: true }), sendLabel: S.sent ? 'Sent to billing@harborpavilion.com' : 'Send invoice', sendBtn: primaryBtn(S.sent || S.bc),
+      showThreads: !ph || !S.thread, showThread: !ph ? true : S.thread,
+      audiences: [['event', 'Grand Hotel crew · 6'], ['tonight', 'Everyone working tonight · 10'], ['all', 'All staff · 42']].map(([k, l]) => ({ label: l, pick: () => set({ aud: k }), style: tabStyle(S.aud === k) })),
+      reachText: { event: '6 people · all have notifications on', tonight: '10 people · 1 has notifications off and will see it in their inbox', all: '42 people · 3 have notifications off and will see it in their inbox' }[S.aud],
+      sendBroadcast: () => set({ bc: true }), bcLabel: S.bc ? 'Sent · 6 delivered' : 'Send announcement',
+      swatches: ['#C9A24A', '#8E1B2A', '#1F3A5F', '#2F5D46'].map(c => ({ c, pick: () => P.onAccent && P.onAccent(c), style: { width: 48, height: 48, borderRadius: 999, border: 0, cursor: 'pointer', background: c, boxShadow: (P.accent || '#C9A24A').toUpperCase() === c.toUpperCase() ? '0 0 0 3px var(--bg), 0 0 0 5px var(--fg)' : 'inset 0 0 0 1px rgba(0,0,0,.1)', transition: 'box-shadow .2s' } })),
+      rules: [rule('Clock-in window', 'How early staff can clock in', '15 min before'), rule('Default geofence', 'New venues start with this radius', '150 m'), rule('Location accuracy needed', 'Readings looser than this retry', '±75 m'), rule('Selfie at clock-in', 'Front camera photo with each clock-in', null, 'selfie'), rule('Flag early clock-outs', 'More than 30 min before scheduled end', null, 'early')],
+      sheet: !!S.sheet, sheetIs: { adjust: S.sheet === 'adjust', invite: S.sheet === 'invite', fill: S.sheet === 'fill' }, closeSheet: () => set({ sheet: null }),
+      saveAdjust: () => set({ sheet: null, approved: { ...S.approved, 'Sam Rivera': 'adj' } }),
+      avail, fillLabel: nPick ? `Assign ${nPick} · notify them` : 'Pick someone',
+      openFill: () => set({ sheet: 'fill' }), toBroadcast: () => go('broadcast'), toVenue: () => go('venue'), toEvents: () => go('events'), toEvent: () => go('event'), toInbox: () => go('inbox'), back: () => P.back && P.back(),
+      L: {
+        page: { width: '100%', maxWidth: 1160, margin: '0 auto', boxSizing: 'border-box', padding: pad, display: 'flex', flexDirection: 'column', gap: 22 },
+        grid: { display: 'grid', gridTemplateColumns: desk ? 'repeat(3,minmax(0,1fr))' : bp === 'tablet' ? 'repeat(2,minmax(0,1fr))' : 'minmax(0,1fr)', gap: 12 },
+        split: { display: 'grid', gridTemplateColumns: desk ? 'minmax(0,1.4fr) minmax(0,1fr)' : 'minmax(0,1fr)', gap: 32, alignItems: 'start' },
+        form: { width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 20 },
+        inbox: { display: 'grid', gridTemplateColumns: ph ? 'minmax(0,1fr)' : 'minmax(280px,360px) minmax(0,1fr)', gap: 28, alignItems: 'start' },
+        thead: { display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,.8fr)', gap: 16, padding: '0 4px', font: "600 13px var(--ff)", color: 'var(--fg-3)', letterSpacing: '.02em' },
+        trow: ph ? { minHeight: 72, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: 12, border: 0, borderBottom: '1px solid var(--line)', background: 'transparent', color: 'var(--fg)', padding: '8px 0', cursor: 'pointer', textAlign: 'left' }
+          : { minHeight: 72, display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,.8fr)', alignItems: 'center', gap: 16, border: 0, borderBottom: '1px solid var(--line)', background: 'transparent', color: 'var(--fg)', padding: '8px 4px', cursor: 'pointer', textAlign: 'left' },
+        sheet: ph ? { position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 71, background: 'var(--sheet)', backdropFilter: 'var(--blur-lg)', borderRadius: '30px 30px 0 0', padding: '12px 20px 32px', display: 'flex', flexDirection: 'column', gap: 16, animation: 'vwUp .32s cubic-bezier(.2,.9,.3,1)' }
+          : { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 480, zIndex: 71, background: 'var(--sheet)', backdropFilter: 'var(--blur-lg)', borderRadius: 28, padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 30px 80px rgba(0,0,0,.25)', animation: 'vwFade .25s' }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

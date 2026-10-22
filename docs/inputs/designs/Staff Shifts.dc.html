@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="{{ L.page }}">
+  <sc-if value="{{ is.list }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <span style="font:700 40px/1 var(--fd);letter-spacing:-.035em">My shifts</span>
+      <div style="display:flex;gap:26px;border-bottom:1px solid var(--line)">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+      </div>
+      <div style="{{ L.cards }}">
+        <sc-for list="{{ shifts }}" as="s" hint-placeholder-count="4">
+          <button onClick="{{ s.open }}" style="{{ s.style }}" style-active="transform:scale(.985)">
+            <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="{{ s.badgeStyle }}"><span style="font-family:'Material Symbols Rounded';font-size:16px;font-variation-settings:'FILL' 1">{{ s.icon }}</span>{{ s.badge }}</span><span style="margin-left:auto;font:500 14px var(--ff);color:var(--fg-2)">{{ s.date }}</span></div>
+            <span style="font:600 22px/1.2 var(--fd);letter-spacing:-.02em">{{ s.venue }}</span>
+            <div style="display:flex;justify-content:space-between;width:100%;font:400 15px var(--ff);color:var(--fg-2)"><span>{{ s.time }}</span><span style="font-weight:600;color:var(--fg)">{{ s.right }}</span></div>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.detail }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.split }}">
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <span style="align-self:flex-start;height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px var(--ff);background:var(--surface);color:var(--fg-2)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">event_available</span>Confirmed · Sat Oct 24</span>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 52px/1 var(--fd);letter-spacing:-.045em">4:00 PM</span><span style="font:600 26px/1.15 var(--fd);letter-spacing:-.02em">Harbor Pavilion · Wedding</span><span style="font:400 16px var(--ff);color:var(--fg-2)">4:00 – 11:30 PM · 7h 30m · venue time (PT)</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:var(--surface);font:500 15px/1.35 var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--fg-2)">lock_clock</span>Clock-in opens Sat 3:45 PM, 15 min before start.</div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <a href="https://maps.google.com/?q=Pier+3+The+Embarcadero" target="_blank" style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);color:var(--fg);text-decoration:none"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">location_on</span><span style="flex:1;font:400 17px var(--ff)">Pier 3, The Embarcadero</span><span style="font:600 15px var(--ff);color:var(--fg-2)">Directions</span><span style="font-family:'Material Symbols Rounded';font-size:22px">open_in_new</span></a>
+          <div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">person</span><span style="flex:1;font:400 17px var(--ff)">Report to Marco, events lead</span><a href="tel:+14155550199" style="width:44px;height:44px;border-radius:999px;background:var(--surface);display:grid;place-items:center;color:var(--fg);text-decoration:none;font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">call</a></div>
+          <div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">group</span><span style="flex:1;font:400 17px var(--ff)">Crew of 8 attendants</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:24px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line)">
+          <span style="font:600 20px var(--fd);letter-spacing:-.015em">Instructions</span>
+          <span style="font:400 16px/1.55 var(--ff);color:var(--fg-2)">Black suit, white shirt, no sneakers. Park personal cars in Lot C (north side). Key box is at the valet podium; sign keys out with Marco. Guest arrival peaks 4:30–5:30 PM.</span>
+        </div>
+        <button onClick="{{ toChat }}" style="height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 17px var(--ff);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">chat_bubble</span>Message dispatch</button>
+        <button onClick="{{ toDrop }}" style="height:56px;border:0;border-radius:999px;background:transparent;color:var(--bad);font:600 17px var(--ff);cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--line)" style-active="transform:scale(.97)">Can't make it</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.drop }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.narrow }}">
+      <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 34px/1.08 var(--fd);letter-spacing:-.03em">Can't make Harbor Pavilion?</span><span style="font:400 16px/1.45 var(--ff);color:var(--fg-2)">Sat Oct 24 · 4:00 – 11:30 PM. Your spot reopens right away so someone else can take it.</span></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:18px;background:var(--warn-soft);color:var(--warn);font:600 15px/1.4 var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">schedule</span>This is less than 24 hours before start, so dispatch will be alerted that it's a late drop.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font:500 15px var(--ff)">Reason</span>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ reasons }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.pick }}" style="{{ r.style }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">{{ r.icon }}</span>{{ r.label }}</button></sc-for>
+        </div>
+        <textarea rows="2" placeholder="Add a note for dispatch (optional)" style="border:0;outline:0;border-radius:16px;background:var(--surface);padding:14px 16px;font:400 17px/1.4 var(--ff);color:var(--fg);resize:none"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button onClick="{{ backDetail }}" style="flex:1;height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 17px var(--ff);cursor:pointer">Keep shift</button>
+        <button onClick="{{ confirmDrop }}" disabled="{{ noReason }}" style="{{ dropBtn }}">Drop shift</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.open }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 40px/1 var(--fd);letter-spacing:-.035em">Open shifts</span><span style="font:400 16px var(--ff);color:var(--fg-2)">First to claim gets it. Claims are confirmed instantly.</span></div>
+      <sc-if value="{{ noLoc }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;align-items:center;padding:12px 16px;border-radius:18px;background:var(--warn-soft);color:var(--warn);font:600 14px/1.4 var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">location_disabled</span>Location is off. You can claim, but you won't be able to clock in until it's on.</div></sc-if>
+      <div style="{{ L.cards }}">
+        <sc-for list="{{ open }}" as="o" hint-placeholder-count="4">
+          <div style="{{ o.style }}">
+            <div style="display:flex;align-items:center;gap:8px"><span style="font:600 13px var(--ff);color:var(--fg-2);letter-spacing:.02em">{{ o.date }}</span><span style="{{ o.spotsStyle }}">{{ o.spots }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 22px/1.2 var(--fd);letter-spacing:-.02em">{{ o.venue }}</span><span style="font:400 15px var(--ff);color:var(--fg-2)">{{ o.time }}</span></div>
+            <sc-if value="{{ o.conflict }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:6px;align-items:center;font:600 14px var(--ff);color:var(--warn)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">event_busy</span>{{ o.conflict }}</span></sc-if>
+            <button onClick="{{ o.claim }}" style="{{ o.btn }}" style-active="transform:scale(.97)">{{ o.cta }}</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.result }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.narrow }}">
+      {{ resIcon }}
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 38px/1.05 var(--fd);letter-spacing:-.035em">{{ res.title }}</span><span style="font:400 17px/1.45 var(--ff);color:var(--fg-2)">{{ res.body }}</span></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button onClick="{{ res.primary }}" style="height:56px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">{{ res.primaryLabel }}</button>
+        <button onClick="{{ toOpen }}" style="height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 17px var(--ff);cursor:pointer">Back to open shifts</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { view: this.props.view || 'list', tab: 'upcoming', reason: null, result: this.props.result || 'claimed' };
+  componentDidUpdate(p) { if (p.view !== this.props.view && this.props.view) this.setState({ view: this.props.view, result: this.props.result || this.state.result }); }
+  renderVals() {
+    const P = this.props, S = this.state, bp = P.bp || 'phone', ph = bp === 'phone', st = P.safeTop ?? 0, E = React.createElement;
+    const go = (r, p) => P.go && P.go(r, p);
+    const RT = { list: 'shifts', detail: 'shift', drop: 'drop', open: 'open', result: 'result' };
+    const set = v => { this.setState(v); if (v.view && P.go) P.go(RT[v.view], { result: v.result }); };
+    const view = S.view;
+    const TONE = { ok: ['var(--ok-soft)', 'var(--ok)'], neutral: ['var(--surface-2)', 'var(--fg-2)'], strong: ['var(--fg)', 'var(--bg)'], warn: ['var(--warn-soft)', 'var(--warn)'] };
+    const badge = k => ({ height: 28, padding: '0 10px 0 7px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4, font: "600 13px var(--ff)", background: TONE[k][0], color: TONE[k][1] });
+    const card = { border: 0, textAlign: 'left', cursor: 'pointer', color: 'var(--fg)', display: 'flex', flexDirection: 'column', gap: 10, padding: 18, borderRadius: 22, background: 'var(--card)', backdropFilter: 'var(--blur)', boxShadow: 'var(--card-line)', transition: 'transform .16s', animation: 'var(--anim-rise)' };
+    const up = [
+      { badge: 'Today · on now', icon: 'timer', t: 'strong', date: 'Fri Oct 23', venue: 'The Grand Hotel', time: '6:00 – 11:00 PM', right: '5h' },
+      { badge: 'Confirmed', icon: 'event_available', t: 'neutral', date: 'Sat Oct 24', venue: 'Harbor Pavilion · Wedding', time: '4:00 – 11:30 PM', right: '7h 30m' },
+      { badge: 'Confirmed', icon: 'event_available', t: 'neutral', date: 'Tue Oct 27', venue: 'Osteria Nove', time: '5:30 – 10:30 PM', right: '5h' },
+      { badge: 'Claimed', icon: 'bolt', t: 'neutral', date: 'Sat Oct 31', venue: 'Maison Blanc · Halloween', time: '7:00 PM – 1:00 AM', right: '6h' }
+    ];
+    const past = [
+      { badge: 'Approved', icon: 'check_circle', t: 'ok', date: 'Thu Oct 22', venue: 'Maison Blanc', time: 'In 5:52 PM · Out 11:04 PM', right: '5h 12m' },
+      { badge: 'In review', icon: 'hourglass_top', t: 'neutral', date: 'Tue Oct 20', venue: 'Osteria Nove', time: 'In 5:41 PM · Out 10:33 PM', right: '4h 52m' },
+      { badge: 'Approved', icon: 'check_circle', t: 'ok', date: 'Sat Oct 17', venue: 'Westfield Gala', time: 'In 7:48 PM · Out 12:06 AM', right: '4h 18m' }
+    ];
+    const list = (S.tab === 'upcoming' ? up : past).map((s, i) => ({ ...s, badgeStyle: badge(s.t), style: { ...card, animationDelay: i * 60 + 'ms' }, open: () => i === 0 && S.tab === 'upcoming' ? go('home') : set({ view: 'detail' }) }));
+    const tabs = [['upcoming', 'Upcoming'], ['past', 'Past']].map(([k, l]) => ({ label: l, go: () => set({ tab: k }), style: { padding: '0 2px 14px', border: 0, background: 'transparent', cursor: 'pointer', font: `${S.tab === k ? 600 : 500} 19px/1 var(--ff)`, color: S.tab === k ? 'var(--fg)' : 'var(--fg-3)', borderBottom: S.tab === k ? '3px solid var(--fg)' : '3px solid transparent', marginBottom: -1, transition: 'color .2s, border-color .2s' } }));
+    const reasons = [['sick', 'I\u2019m sick', 'sick'], ['ride', 'Transport problem', 'directions_car'], ['family', 'Family emergency', 'family_restroom'], ['other', 'Something else', 'more_horiz']].map(([k, l, ic]) => ({ label: l, icon: ic, pick: () => set({ reason: k }), style: { minHeight: 56, border: 0, borderRadius: 16, padding: '0 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left', font: `${S.reason === k ? 600 : 500} 17px var(--ff)`, background: S.reason === k ? 'var(--accent-soft)' : 'var(--surface)', color: S.reason === k ? 'var(--accent-text)' : 'var(--fg)', boxShadow: S.reason === k ? 'inset 0 0 0 1.5px var(--accent)' : 'none', transition: 'all .2s' } }));
+    const openS = [
+      { date: 'FRI OCT 23 · TONIGHT', venue: 'The Laurel Club', time: '7:30 PM – 1:00 AM · 5h 30m', n: 2, conflict: 'Overlaps your Grand Hotel shift (6–11 PM)', res: 'overlap' },
+      { date: 'SUN OCT 25', venue: 'Harbor Pavilion · Brunch', time: '10:00 AM – 3:00 PM · 5h', n: 3, res: 'claimed' },
+      { date: 'WED OCT 28', venue: 'The Grand Hotel', time: '5:00 – 10:00 PM · 5h', n: 1, res: 'filled' },
+      { date: 'SAT OCT 31', venue: 'Maison Blanc · Halloween', time: '7:00 PM – 1:00 AM · 6h', n: 4, res: 'claimed' }
+    ].map((o, i) => ({ ...o, spots: `${o.n} spot${o.n > 1 ? 's' : ''} left`, spotsStyle: { marginLeft: 'auto', height: 26, padding: '0 10px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', font: "600 13px var(--ff)", background: o.n === 1 ? 'var(--warn-soft)' : 'var(--surface-2)', color: o.n === 1 ? 'var(--warn)' : 'var(--fg-2)' },
+      style: { ...card, cursor: 'default', gap: 12, animationDelay: i * 60 + 'ms' }, cta: o.conflict ? 'Can\u2019t claim · overlap' : 'Claim shift',
+      btn: { height: 52, border: 0, borderRadius: 999, font: "600 16px var(--ff)", cursor: 'pointer', background: o.conflict ? 'var(--surface)' : 'var(--accent)', color: o.conflict ? 'var(--fg-3)' : 'var(--accent-ink)', transition: 'transform .16s' },
+      claim: () => set({ view: 'result', result: o.res }) }));
+    const R = {
+      claimed: { title: 'It\u2019s yours.', body: 'Harbor Pavilion · Brunch, Sun Oct 25, 10:00 AM – 3:00 PM is now in your shifts. Dispatch has been notified.', primaryLabel: 'View in my shifts', primary: () => set({ view: 'list', tab: 'upcoming' }), icon: 'check', tone: 'var(--ok)' },
+      filled: { title: 'Just filled.', body: 'Someone claimed the last spot at The Grand Hotel (Wed Oct 28) a moment before you. Other open shifts are still available.', primaryLabel: 'See remaining shifts', primary: () => set({ view: 'open' }), icon: 'group_off', tone: 'var(--fg)' },
+      overlap: { title: 'That overlaps a shift you hold.', body: 'The Laurel Club (7:30 PM – 1:00 AM) overlaps The Grand Hotel tonight (6:00 – 11:00 PM). You can only hold one at a time.', primaryLabel: 'View my Grand Hotel shift', primary: () => go('home'), icon: 'event_busy', tone: 'var(--warn)' },
+      dropped: { title: 'Shift dropped.', body: 'Harbor Pavilion (Sat Oct 24) has been reopened, and dispatch was alerted it\u2019s a late drop. Thanks for letting us know early.', primaryLabel: 'Back to my shifts', primary: () => set({ view: 'list' }), icon: 'undo', tone: 'var(--fg)' }
+    }[S.result];
+    const resIcon = E('div', { key: S.result, style: { width: 88, height: 88, borderRadius: 999, background: R.tone, color: 'var(--bg)', display: 'grid', placeItems: 'center', animation: 'vwPop .5s cubic-bezier(.2,.9,.3,1.3) both' } }, E('span', { style: { fontFamily: "'Material Symbols Rounded'", fontSize: 46, fontVariationSettings: "'wght' 700" } }, R.icon));
+    const pad = ph ? `${st + 82}px 20px 140px` : bp === 'tablet' ? '32px 32px 56px' : '40px 48px 64px';
+    return {
+      is: { list: view === 'list', detail: view === 'detail', drop: view === 'drop', open: view === 'open', result: view === 'result' },
+      L: { page: { width: '100%', maxWidth: 1120, margin: '0 auto', boxSizing: 'border-box', padding: pad, display: 'flex', flexDirection: 'column', gap: 24 },
+        cards: { display: 'grid', gridTemplateColumns: bp === 'desktop' ? 'repeat(2,minmax(0,1fr))' : 'minmax(0,1fr)', gap: 12 },
+        split: { display: 'grid', gridTemplateColumns: bp === 'desktop' ? 'minmax(0,1.2fr) minmax(0,1fr)' : 'minmax(0,1fr)', gap: 28, alignItems: 'start' },
+        narrow: { width: '100%', maxWidth: 520, margin: ph ? 0 : '24px auto 0', display: 'flex', flexDirection: 'column', gap: 22 } },
+      tabs, shifts: list, reasons, open: openS, res: R, resIcon, noLoc: !!P.noLocation,
+      noReason: !S.reason,
+      dropBtn: { flex: 1, height: 56, border: 0, borderRadius: 999, font: "600 17px var(--ff)", cursor: S.reason ? 'pointer' : 'not-allowed', background: S.reason ? 'var(--bad)' : 'var(--surface)', color: S.reason ? '#fff' : 'var(--fg-3)', transition: 'all .2s' },
+      toDrop: () => set({ view: 'drop' }), backDetail: () => set({ view: 'detail' }), confirmDrop: () => S.reason && set({ view: 'result', result: 'dropped' }),
+      toChat: () => go('inbox'), toOpen: () => set({ view: 'open' })
+    };
+  }
+}
+</script>
+</body>
+</html>
