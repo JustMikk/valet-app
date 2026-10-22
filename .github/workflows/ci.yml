@@ -1,29 +1,61 @@
 name: CI
 
+# Mirrors CONSTRAINTS.md. Every job blocks the merge.
 on:
   push:
     branches: [main]
   pull_request:
+
+env:
+  GITLEAKS_VERSION: 8.30.1
+  OSV_SCANNER_VERSION: 2.7.0
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
+      - name: Install gitleaks and osv-scanner
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz -C /usr/local/bin gitleaks
+          curl -sSfL -o /usr/local/bin/osv-scanner "https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
+          chmod +x /usr/local/bin/osv-scanner
       - run: pnpm typecheck
+      - run: pnpm lint
       - run: pnpm format:check
-      - run: pnpm test
+      - run: pnpm secrets:history
+      # Bar changes (new exceptions, loosened thresholds) block unless the owner labels the PR.
+      - run: pnpm guard --base origin/${{ github.base_ref }} ${{ contains(github.event.pull_request.labels.*.name, 'constraints-change-approved') && '--warn-bar-change' || '' }}
+        if: github.event_name == 'pull_request'
+      - run: pnpm test:coverage
+      - run: pnpm coverage:changed --base origin/${{ github.base_ref }}
+        if: github.event_name == 'pull_request'
+      - run: pnpm boundaries
       - run: pnpm build
+      - run: pnpm size
+      - run: pnpm deps:scan
       - run: pnpm audit --prod --audit-level=high
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-export
+          path: out
 
-  e2e:
+  semgrep:
+    runs-on: ubuntu-latest
+    container: semgrep/semgrep:1.140.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config p/default --config p/owasp-top-ten --severity ERROR --error --metrics=off src scripts
+
+  runtime:
     runs-on: ubuntu-latest
     needs: check
     steps:
@@ -35,6 +67,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      # Lighthouse first, on an idle runner: lab metrics inflate under load.
+      - run: pnpm perf
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -13,3 +13,10 @@ test-results
 /SCREENS.md
 /product-spec.md
 /Valet_Workforce_Frontend_Build_Handoff_for_Claude_Code.md
+
+# Not project code (see .constraintsignore)
+.agents
+skills
+.cc-history
+.mux
+skills-lock.json

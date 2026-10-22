@@ -1,0 +1,8 @@
+[
+  {
+    "name": "All client JS (static export)",
+    "path": "out/_next/static/chunks/**/*.js",
+    "gzip": true,
+    "limit": "175.5 kB"
+  }
+]

@@ -34,4 +34,4 @@ Environment: Windows 11, Node 24.15.0, pnpm 12.11.2, git 2.53.0.
 | Playwright (Chromium)             | 1.64.1         | ✅ `pnpm test:e2e` (3 passed: phone, tablet, desktop) |
 | husky + lint-staged               | 9.1.7 / 17.6.0 | ✅ pre-commit hook                                    |
 | GitHub Actions CI                 | —              | ⏳ runs on first push (no remote configured yet)      |
-| `/constraints` → `CONSTRAINTS.md` | —              | ⏳ needs the agent-skills plugin                      |
+| `/constraints` → `CONSTRAINTS.md` | —              | ✅ `pnpm check:full` green (ADR-005)                  |

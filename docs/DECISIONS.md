@@ -68,3 +68,26 @@ ESLint additions: `no-explicit-any`, `no-non-null-assertion`, `ban-ts-comment` (
 **Decision.** `.mcp.json` runs `node node_modules/shadcn/dist/index.js mcp`. The MCP version is now pinned with the project's `shadcn` devDependency, and upgrading it is a normal dependency bump.
 
 **Consequences.** Requires `pnpm install` before the MCP server can start.
+
+---
+
+## ADR-005 — Constraint tooling (CONSTRAINTS.md)
+
+**Date:** 2026-10-22 · **Status:** accepted (owner answers from `/constraints`: all dimensions, block on failure, handoff targets + ratchets, 90 s at task end with the rest in CI)
+
+**Decision.**
+
+| Tool                              | Why                                                                                                                                       | Where installed                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `@vitest/coverage-v8`             | Changed-line coverage (lcov) without a second test run                                                                                    | devDependency                                                           |
+| `@axe-core/playwright`            | axe-core WCAG 2.1 AA checks inside the existing Playwright viewports (instead of `@axe-core/cli`, which would need its own browser setup) | devDependency                                                           |
+| `lighthouse`                      | Core Web Vitals lab metrics; driven over CDP on Playwright's Chromium, so no `chrome-launcher` dependency                                 | devDependency                                                           |
+| `size-limit` + `@size-limit/file` | Gzipped client JS budget                                                                                                                  | devDependency                                                           |
+| `dependency-cruiser`              | Handoff §5.3 layer boundaries                                                                                                             | devDependency                                                           |
+| gitleaks 8.30.1                   | Secrets, always `--redact`                                                                                                                | Scoop (local), release binary (CI)                                      |
+| osv-scanner 2.7.0                 | Dependency vulnerabilities from the OSV database                                                                                          | Scoop (local), release binary (CI)                                      |
+| Semgrep 1.140.0                   | Code scanning (default + OWASP Top 10)                                                                                                    | CI container only: no native Windows build, Docker not required locally |
+
+Project-specific rules (device APIs, tokens only, component size) are ESLint rules, not new tools. The floor guard is `scripts/floor-guard.mjs`, adapted from the agent-skills reference; it blocks code-level floor violations everywhere and lets bar changes (new exceptions, loosened thresholds) through locally with a warning, blocking them in CI unless the owner labels the PR `constraints-change-approved`.
+
+**Consequences.** Lighthouse gates on the median of 3 runs and runs before Playwright, because a single lab run on a busy machine inflated LCP from ~1.7 s to 4.3 s. Bundle budget is a ratchet until route groups exist (Phase 2).

@@ -13,6 +13,10 @@ Mobile-first PWA (staff / admin / platform) on Next.js App Router + TypeScript +
 
 If the spec and the design conflict or are silent: stop, ask, log in OPEN_QUESTIONS. Never invent behavior or copy.
 
+## Quality bar
+
+Read [CONSTRAINTS.md](CONSTRAINTS.md) before writing code. Do not weaken it to make a change pass. Run `pnpm check:fast` after edits and `pnpm check:task` before handing work back; `pnpm check:full` before review.
+
 ## Hard rules
 
 - Static export must build (`output: 'export'`): no Server Actions, route handlers on Request, proxy/middleware, ISR, cookies, rewrites/redirects.

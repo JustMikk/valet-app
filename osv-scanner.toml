@@ -1,0 +1,7 @@
+# Each ignore is an Exceptions row in CONSTRAINTS.md with an owner and an expiry.
+# osv-scanner stops ignoring an entry after ignoreUntil, so an expired exception fails the scan.
+
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+ignoreUntil = 2027-01-20
+reason = "CONSTRAINTS.md W1: braces@3.0.3, dev-only (eslint-config-next, shadcn CLI), no fixed version published; not in the shipped bundle."

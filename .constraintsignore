@@ -1,0 +1,15 @@
+# Paths the floor guard does not inspect (see CONSTRAINTS.md). One path prefix per line.
+# Design and spec inputs: third-party reference material, not our code.
+docs/inputs/
+designs/
+README.md
+SCREENS.md
+product-spec.md
+Valet_Workforce_Frontend_Build_Handoff_for_Claude_Code.md
+# Vendored skills (installed by CLI, reviewed on install).
+.claude/skills/
+.agents/
+skills/
+# Local tool state, not project code.
+.cc-history/
+.mux/

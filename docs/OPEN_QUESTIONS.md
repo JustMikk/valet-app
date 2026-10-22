@@ -5,16 +5,16 @@ Owner for all items: product owner (Mikiyas) unless noted. Dates are when the it
 
 ## Build handoff §11 — owner decisions
 
-| #   | Question                                                 | Status | Logged     | Notes                                                             |
-| --- | -------------------------------------------------------- | ------ | ---------- | ----------------------------------------------------------------- |
-| H1  | Backend stack, API contract and auth provider            | open   | 2026-10-22 | Building against `lib/data` interfaces + mock layer until decided |
-| H2  | Realtime transport (SSE / WebSocket / managed)           | open   | 2026-10-22 | `RealtimeClient` interface + mock emitter until decided           |
-| H3  | Staff sign-in method without SMS                         | open   | 2026-10-22 | Same as Product spec §13.1; blocks slice 1                        |
-| H4  | Map and geocoding provider (+ licensing/storage terms)   | open   | 2026-10-22 | Blocks venue pin/fence UI (slice 2)                               |
-| H5  | Dynamic-route strategy under static export               | open   | 2026-10-22 | Proposal to come as an ADR in Phase 2                             |
-| H6  | Aceternity licensing — any Pro blocks licensed?          | open   | 2026-10-22 | Free components only until answered                               |
-| H7  | Install the Chrome DevTools MCP for browser verification | open   | 2026-10-22 | Playwright screenshots used meanwhile                             |
-| H8  | Performance budgets and `/constraints` thresholds        | open   | 2026-10-22 | Needs the agent-skills plugin installed first                     |
+| #   | Question                                                 | Status   | Logged     | Notes                                                                   |
+| --- | -------------------------------------------------------- | -------- | ---------- | ----------------------------------------------------------------------- |
+| H1  | Backend stack, API contract and auth provider            | open     | 2026-10-22 | Building against `lib/data` interfaces + mock layer until decided       |
+| H2  | Realtime transport (SSE / WebSocket / managed)           | open     | 2026-10-22 | `RealtimeClient` interface + mock emitter until decided                 |
+| H3  | Staff sign-in method without SMS                         | open     | 2026-10-22 | Same as Product spec §13.1; blocks slice 1                              |
+| H4  | Map and geocoding provider (+ licensing/storage terms)   | open     | 2026-10-22 | Blocks venue pin/fence UI (slice 2)                                     |
+| H5  | Dynamic-route strategy under static export               | open     | 2026-10-22 | Proposal to come as an ADR in Phase 2                                   |
+| H6  | Aceternity licensing — any Pro blocks licensed?          | open     | 2026-10-22 | Free components only until answered                                     |
+| H7  | Install the Chrome DevTools MCP for browser verification | open     | 2026-10-22 | Playwright screenshots used meanwhile                                   |
+| H8  | Performance budgets and `/constraints` thresholds        | answered | 2026-10-22 | CONSTRAINTS.md (ADR-005); per-route-group bundle budgets due in Phase 2 |
 
 ## Product spec §13 — open product decisions (do not resolve silently)
 
