@@ -1,0 +1,162 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+import { Icon, PageContainer, ToggleSwitch } from "@/components/shared"
+import { Button } from "@/components/ui/button"
+import { useThemeMode, type ThemePreference } from "@/lib/theme"
+import type { IconName } from "@/lib/icons/icon-names"
+import { NOTIFY_PREFS, STAFF_USER } from "@/mocks/staff"
+
+import { useStaffSession } from "../session/staff-session"
+
+type Permission = { icon: IconName; label: string; note: string; fix?: () => void }
+
+const THEME_LABEL: Record<ThemePreference, string> = {
+  system: "Match device",
+  light: "Light",
+  dark: "Dark",
+}
+const THEME_NEXT: Record<ThemePreference, ThemePreference> = {
+  system: "light",
+  light: "dark",
+  dark: "system",
+}
+
+const ROW = "flex items-center border-b border-line"
+
+/** Profile: permission health, notification preferences, language, theme and sign out. */
+export function Profile() {
+  const router = useRouter()
+  const { pushOn, setPushOn } = useStaffSession()
+  const { preference, setPreference } = useThemeMode()
+  const [prefs, setPrefs] = useState<Record<string, boolean>>({
+    open: true,
+    remind: true,
+    msg: true,
+    change: true,
+  })
+
+  const permissions: Permission[] = [
+    { icon: "location_on", label: "Location", note: "Read only when you clock in or out" },
+    { icon: "photo_camera", label: "Camera", note: "Used for the clock-in selfie" },
+    pushOn
+      ? { icon: "notifications", label: "Notifications", note: "Shift alerts and messages" }
+      : {
+          icon: "notifications_off",
+          label: "Notifications are off",
+          note: "You may miss shift changes. There is no text backup.",
+          fix: () => setPushOn(true),
+        },
+    {
+      icon: "install_mobile",
+      label: "Installed on Home Screen",
+      note: "Needed for alerts on iPhone",
+    },
+  ]
+
+  return (
+    <PageContainer className="max-w-280 tablet:pb-12 desktop:pb-12">
+      <div className="grid items-start gap-8 desktop:grid-cols-2">
+        <div className="flex flex-col gap-5.5">
+          <div className="flex items-center gap-4">
+            <div className="grid size-18 place-items-center rounded-pill bg-surface-2 font-display text-24 font-bold">
+              {STAFF_USER.initials}
+            </div>
+            <div className="flex flex-col gap-0.75">
+              <span className="font-display text-30 leading-x110 font-bold tracking-n030">
+                {STAFF_USER.name}
+              </span>
+              <span className="text-15 text-fg-2">
+                {STAFF_USER.email} · {STAFF_USER.company}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="font-display text-20 font-semibold tracking-n015">Permissions</span>
+            <div className="flex flex-col border-t border-line">
+              {permissions.map((p) => (
+                <div key={p.label} className={`${ROW} box-content min-h-17 gap-3`}>
+                  <Icon name={p.icon} filled size={24} className="text-fg-2" />
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <span className="text-17 font-medium">{p.label}</span>
+                    <span className="text-13 text-fg-2">{p.note}</span>
+                  </div>
+                  {p.fix ? (
+                    <Button
+                      variant="accent"
+                      size="xs"
+                      className="h-10 px-4 text-15"
+                      onClick={p.fix}
+                    >
+                      Turn on
+                    </Button>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-14 font-semibold text-ok">
+                      <Icon name="check_circle" filled size={18} />
+                      On
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-5.5">
+          <div className="flex flex-col gap-1.5">
+            <span className="font-display text-20 font-semibold tracking-n015">
+              Notify me about
+            </span>
+            <div className="flex flex-col border-t border-line">
+              {NOTIFY_PREFS.map((p) => {
+                const locked = "locked" in p && p.locked
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    role="switch"
+                    aria-checked={prefs[p.key]}
+                    disabled={locked}
+                    onClick={() => setPrefs((all) => ({ ...all, [p.key]: !all[p.key] }))}
+                    className={`${ROW} min-h-16 gap-3 border-0 border-b bg-transparent p-0 text-left text-fg`}
+                  >
+                    <span className="flex flex-1 flex-col gap-0.5">
+                      <span className="text-17 font-medium">{p.label}</span>
+                      <span className="text-13 text-fg-2">{p.note}</span>
+                    </span>
+                    <ToggleSwitch on={prefs[p.key]} locked={locked} />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col border-t border-line">
+            <div className={`${ROW} box-content min-h-15`}>
+              <span className="flex-1 text-17">Language</span>
+              <span className="text-15 font-medium text-fg-2">English</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPreference(THEME_NEXT[preference])}
+              className={`${ROW} box-content min-h-15 border-0 border-b bg-transparent p-0 text-left text-fg`}
+            >
+              <span className="flex-1 text-17">Theme</span>
+              <span className="text-15 font-medium text-fg-2">{THEME_LABEL[preference]}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className={`${ROW} min-h-15 border-0 border-b bg-transparent p-0 text-left text-17 font-semibold text-bad`}
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </PageContainer>
+  )
+}

@@ -94,8 +94,21 @@ export const DESIGN_SCALES = {
     "sheet",
     "pill",
   ],
-  shadow: ["float", "sheet", "card-line", "dialog", "cta"],
-  animate: ["rise", "screen", "sheet-up", "fade", "pop", "shine", "pulse-ring"],
+  shadow: ["float", "sheet", "card-line", "dialog", "cta", "knob", "clock", "onboarding"],
+  animate: [
+    "rise",
+    "screen",
+    "sheet-up",
+    "fade",
+    "pop",
+    "shine",
+    "pulse-ring",
+    "flash",
+    "ring-burst",
+    "spin-slow",
+    "spin-medium",
+    "sheet-up-slow",
+  ],
 } as const
 
 export const cn = createCn({

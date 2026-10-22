@@ -40,7 +40,7 @@ export type ShiftCard = {
 }
 
 const confirmed: StatusSpec = {
-  tone: "neutral",
+  tone: "subtle",
   icon: "event_available",
   filled: true,
   label: "Confirmed",
@@ -74,7 +74,7 @@ export const UPCOMING_SHIFTS: ShiftCard[] = [
   },
   {
     id: "maison",
-    status: { tone: "neutral", icon: "bolt", filled: true, label: "Claimed" },
+    status: { tone: "subtle", icon: "bolt", filled: true, label: "Claimed" },
     date: "Sat Oct 31",
     venue: "Maison Blanc · Halloween",
     time: "7:00 PM – 1:00 AM",
@@ -93,7 +93,7 @@ export const PAST_SHIFTS: ShiftCard[] = [
   },
   {
     id: "past-2",
-    status: { tone: "muted", icon: "hourglass_top", filled: true, label: "In review" },
+    status: { tone: "subtle", icon: "hourglass_top", filled: true, label: "In review" },
     date: "Tue Oct 20",
     venue: "Osteria Nove",
     time: "In 5:41 PM · Out 10:33 PM",

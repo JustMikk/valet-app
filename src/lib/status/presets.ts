@@ -9,6 +9,7 @@ export type StatusTone =
   | "strong"
   | "neutral"
   | "muted"
+  | "subtle"
   | "faint"
   | "outline"
 

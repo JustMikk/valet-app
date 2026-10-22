@@ -19,12 +19,14 @@ const badgeVariants = cva(
         strong: "bg-fg text-bg",
         neutral: "bg-surface text-fg",
         muted: "bg-surface text-fg-2",
+        /** Confirmed / claimed shifts (Staff Shifts): surface-2 ground. */
+        subtle: "bg-surface-2 text-fg-2",
         faint: "bg-surface text-fg-3",
         outline: "text-fg-2 shadow-[inset_0_0_0_1.5px_var(--fg-3-line)]",
       },
       size: {
         md: "h-7.5 gap-1.25 pr-2.75 pl-2 text-14",
-        sm: "h-7 gap-1 pr-2.5 pl-2 text-13",
+        sm: "h-7 gap-1 pr-2.5 pl-1.75 text-13",
       },
     },
     defaultVariants: {
