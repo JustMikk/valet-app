@@ -5,6 +5,7 @@ Each entry: context, decision, consequences, sources. Newest last.
 ---
 
 ## ADR-001 — Next.js App Router with static export
+
 **Date:** 2026-10-22 · **Status:** accepted
 
 **Context.** The build handoff mandates Next.js (App Router), TypeScript, Tailwind and shadcn, and requires the app to build with `output: 'export'` so it can later be wrapped with Capacitor. The design README suggested Vite + React Router; the build handoff takes precedence (see OPEN_QUESTIONS D6).
@@ -12,6 +13,7 @@ Each entry: context, decision, consequences, sources. Newest last.
 **Decision.** Next.js 16.4 (scaffolded with `create-next-app`), pnpm, Tailwind v4, `output: 'export'`, `images.unoptimized: true`.
 
 **Consequences.**
+
 - No Server Actions, Route Handlers relying on Request, middleware/proxy, rewrites, redirects, headers, ISR, cookies or draft mode.
 - `cacheComponents` and `partialPrefetching` (on by default in the 16.4 scaffold) are disabled: the build fails with `Invariant: PPR cannot be enabled in export mode`.
 - Dynamic detail routes need a client-resolved scheme (to be decided in Phase 2, OPEN_QUESTIONS H5).
@@ -21,6 +23,7 @@ Each entry: context, decision, consequences, sources. Newest last.
 ---
 
 ## ADR-002 — shadcn/ui `base-nova` style on Base UI
+
 **Date:** 2026-10-22 · **Status:** accepted
 
 **Context.** The handoff asks for shadcn/ui as the base component layer, with Aceternity available as a registry.
@@ -30,3 +33,26 @@ Each entry: context, decision, consequences, sources. Newest last.
 **Consequences.** Custom triggers use the Base UI `render` prop (not Radix `asChild`). The shadcn skill's `base-vs-radix` rules apply.
 
 **Sources.** `shadcn init --help` (shadcn 4.22.1); `shadcn info --json`.
+
+---
+
+## ADR-003 — Quality tooling
+
+**Date:** 2026-10-22 · **Status:** accepted
+
+**Context.** Handoff §7 requires lint, typecheck, tests and build in CI and in a pre-commit hook, with every dependency justified.
+
+**Decision.**
+
+| Dependency                                                                           | Why                                                                                                                                          |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prettier` + `prettier-plugin-tailwindcss`                                           | Formatting and Tailwind class sorting (handoff §7 tooling); also sorts inside `cn()`/`cva()`                                                 |
+| `vitest`, `@vitejs/plugin-react`, `jsdom`                                            | Unit and component tests (handoff §7 testing)                                                                                                |
+| `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event` | Behavior-level component tests                                                                                                               |
+| `@playwright/test`                                                                   | E2E with phone (390), tablet (820), desktop (1440) projects; served from the static `out/` via `serve@14` (run with `dlx`, not a dependency) |
+| `husky` + `lint-staged`                                                              | Pre-commit: ESLint + Prettier on staged files, then `tsc --noEmit`                                                                           |
+| `cn` (added by shadcn init)                                                          | shadcn's compiled replacement for `clsx` + `tailwind-merge` (repo `shadcn-ui/cn`)                                                            |
+
+ESLint additions: `no-explicit-any`, `no-non-null-assertion`, `ban-ts-comment` (`@ts-expect-error` only with a description), `no-console` (warn/error allowed). Lint runs with `--max-warnings=0`. CI (`.github/workflows/ci.yml`) runs lint, typecheck, format check, unit tests, build, `pnpm audit --prod`, then Playwright.
+
+**Consequences.** `pnpm check` runs the same gate locally. On Windows the first Vitest run after install can exceed the jsdom worker start-up timeout; reruns pass.

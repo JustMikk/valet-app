@@ -1,0 +1,15 @@
+.next
+out
+coverage
+pnpm-lock.yaml
+docs/inputs
+designs
+.claude/skills
+playwright-report
+test-results
+
+# Original input copies at the repo root (canonical copies live in docs/inputs)
+/README.md
+/SCREENS.md
+/product-spec.md
+/Valet_Workforce_Frontend_Build_Handoff_for_Claude_Code.md
