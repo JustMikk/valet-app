@@ -15,8 +15,8 @@ type ResponsiveSheetProps = {
   children?: ReactNode
 }
 
-const TITLE = "font-display text-28 leading-x110 font-bold tracking-n025 text-fg"
-const DESCRIPTION = "text-15 leading-x140 text-fg-2"
+export const SHEET_TITLE = "font-display text-28 leading-x110 font-bold tracking-n025 text-fg"
+export const SHEET_DESCRIPTION = "text-15 leading-x140 text-fg-2"
 
 /**
  * Bottom sheet on phone (glass, 30 px top corners, grabber, slide up) and centered 440 px dialog
@@ -43,9 +43,9 @@ export function ResponsiveSheet({
               aria-hidden="true"
               className="h-1.25 w-10 self-center rounded-r9 bg-line"
             />
-            <DrawerTitle className={TITLE}>{title}</DrawerTitle>
+            <DrawerTitle className={SHEET_TITLE}>{title}</DrawerTitle>
             {description && (
-              <DrawerDescription className={DESCRIPTION}>{description}</DrawerDescription>
+              <DrawerDescription className={SHEET_DESCRIPTION}>{description}</DrawerDescription>
             )}
             {children}
           </div>
@@ -57,9 +57,9 @@ export function ResponsiveSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex w-110 max-w-[calc(100%-2rem)] flex-col gap-4 rounded-dialog bg-sheet px-6 pt-5 pb-6 text-fg shadow-dialog ring-0 [backdrop-filter:var(--blur-lg)] duration-250 sm:max-w-110 data-open:zoom-in-100 data-closed:zoom-out-100">
-        <DialogTitle className={TITLE}>{title}</DialogTitle>
+        <DialogTitle className={SHEET_TITLE}>{title}</DialogTitle>
         {description && (
-          <DialogDescription className={DESCRIPTION}>{description}</DialogDescription>
+          <DialogDescription className={SHEET_DESCRIPTION}>{description}</DialogDescription>
         )}
         {children}
       </DialogContent>

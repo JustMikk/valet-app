@@ -4,8 +4,10 @@ import { useState } from "react"
 
 import { DEFAULT_ACCENT, TenantTheme } from "@/lib/tenant"
 
+import { SectionComponents } from "./section-components"
 import { SectionFoundations } from "./section-foundations"
 import { SectionIntro } from "./section-intro"
+import { SectionRules } from "./section-rules"
 import { SectionTokens } from "./section-tokens"
 
 /**
@@ -22,6 +24,8 @@ export function DesignSystemShowcase() {
         <SectionIntro accent={accent} onAccentChange={setAccent} />
         <SectionTokens accent={accent} />
         <SectionFoundations />
+        <SectionComponents />
+        <SectionRules />
       </main>
     </div>
   )

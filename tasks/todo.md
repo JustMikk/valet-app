@@ -109,7 +109,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/app/(dev)/design-system/page.tsx`, `src/features/design-system/tokens.meta.ts` (+ test), `src/features/design-system/sections-foundations.tsx`, `src/features/design-system/accent-switcher.tsx`, `src/features/design-system/index.ts`
   - Scope: M
 
-- [ ] **Task 16: Sections 05 (components, light + dark) and 06 (rules)**
+- [x] **Task 16: Sections 05 (components, light + dark) and 06 (rules)**
   - Acceptance: section 05 renders every component in two `data-theme` scopes side by side, same order and labels as the sheet; section 06 rules.
   - Verify: `pnpm build`; manual
   - Files: `src/features/design-system/section-components.tsx`, `src/features/design-system/component-specimens.tsx`, `src/features/design-system/section-rules.tsx`

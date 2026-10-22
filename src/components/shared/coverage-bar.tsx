@@ -11,11 +11,17 @@ export type CoverageCounts = {
 type Segment = keyof CoverageCounts
 
 // Order, words and fills per the Design System sheet ("coverage-bar").
-const SEGMENTS: { key: Segment; words: string; fill: string }[] = [
-  { key: "onSite", words: "on site", fill: "bg-ok" },
-  { key: "late", words: "late", fill: "bg-warn" },
-  { key: "expected", words: "expected", fill: "bg-fg-3" },
-  { key: "open", words: "open", fill: "hatch-open" },
+// The legend's open swatch is outlined only; the bar segment is hatched and outlined.
+const SEGMENTS: { key: Segment; words: string; fill: string; swatch: string }[] = [
+  { key: "onSite", words: "on site", fill: "bg-ok", swatch: "bg-ok" },
+  { key: "late", words: "late", fill: "bg-warn", swatch: "bg-warn" },
+  { key: "expected", words: "expected", fill: "bg-fg-3", swatch: "bg-fg-3" },
+  {
+    key: "open",
+    words: "open",
+    fill: "hatch-open",
+    swatch: "shadow-[inset_0_0_0_1.5px_var(--fg-3)]",
+  },
 ]
 
 const total = (counts: CoverageCounts) =>
@@ -54,7 +60,7 @@ export function CoverageBar({ counts, legend = false, className }: CoverageBarPr
         <div aria-hidden="true" className="flex flex-wrap gap-4 text-14 font-medium text-fg-2">
           {present.map((s) => (
             <span key={s.key} className="flex items-center gap-1.5">
-              <span className={cn("size-2.5 rounded-r3", s.fill)} />
+              <span className={cn("size-2.5 rounded-r3", s.swatch)} />
               <b className="text-fg">{counts[s.key]}</b> {s.words}
             </span>
           ))}
