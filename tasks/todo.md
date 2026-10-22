@@ -78,7 +78,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/ui/field.tsx`, `src/components/ui/input.tsx`, `src/components/shared/text-field.tsx`, `src/components/shared/system-banner.tsx`, `src/components/shared/field-banner.test.tsx`
   - Scope: M
 
-- [ ] **Task 12: AttentionCard, FeatureCard, PagerDots, GlassCard**
+- [x] **Task 12: AttentionCard, FeatureCard, PagerDots, GlassCard**
   - Acceptance: specs per sheet; FeatureCard dismiss button labelled; GlassCard uses glass tokens.
   - Verify: `pnpm test src/components/shared`
   - Files: `src/components/shared/attention-card.tsx`, `src/components/shared/feature-card.tsx`, `src/components/shared/glass-card.tsx`, `src/components/shared/cards.test.tsx`

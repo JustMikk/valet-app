@@ -53,6 +53,7 @@
   --color-hero-fg: var(--hero-fg);
   --color-hero-fg-2: var(--hero-fg-2);
   --color-hero-fg-3: var(--hero-fg-3);
+  --color-hero-overline: var(--hero-overline);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
