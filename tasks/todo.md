@@ -4,10 +4,10 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
 
 ## Foundation
 
-- [ ] **Task 1: Design tokens**
-  - Acceptance: `src/styles/tokens.css` defines every color token (light + dark), glass/elevation tokens (staff + admin flavours), radius, spacing and motion tokens + keyframes with `prefers-reduced-motion`, all scoped by `[data-theme]` / `[data-app]`. `src/lib/tokens/meta.ts` lists name, role and light/dark values for the swatch grid. A sync test fails if meta and CSS disagree.
-  - Verify: `pnpm test src/lib/tokens`
-  - Files: `src/styles/tokens.css`, `src/lib/tokens/meta.ts`, `src/lib/tokens/meta.test.ts`
+- [x] **Task 1: Design tokens**
+  - Acceptance: `src/styles/tokens.css` defines every color token (light + dark), glass/elevation tokens (staff + admin flavours) and motion tokens, all scoped by `[data-theme]` / `[data-app]`. The token metadata (`meta.ts`) and its CSS sync test move to Task 15 with their consumer: the no-orphans boundary rule rejects a module nothing imports.
+  - Verify: Task 2 build consumes it
+  - Files: `src/styles/tokens.css`
   - Scope: S
 
 - [ ] **Task 2: Tailwind theme + shadcn variable mapping (ADR-006)**
@@ -104,7 +104,8 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
 - [ ] **Task 15: `/design-system` route, sections 01–04, accent switcher**
   - Acceptance: thin route (`noindex`); sections Principles, Color tokens (from meta), Type scale, Space/Radius/Elevation match the sheet's layout at 1320 px; 4-swatch accent switcher recolors live.
   - Verify: `pnpm build`; manual at `/design-system`
-  - Files: `src/app/(dev)/design-system/page.tsx`, `src/features/design-system/sections-foundations.tsx`, `src/features/design-system/accent-switcher.tsx`, `src/features/design-system/index.ts`
+  - Acceptance (moved from Task 1): `src/features/design-system/tokens.meta.ts` + sync test against `tokens.css`.
+  - Files: `src/app/(dev)/design-system/page.tsx`, `src/features/design-system/tokens.meta.ts` (+ test), `src/features/design-system/sections-foundations.tsx`, `src/features/design-system/accent-switcher.tsx`, `src/features/design-system/index.ts`
   - Scope: M
 
 - [ ] **Task 16: Sections 05 (components, light + dark) and 06 (rules)**

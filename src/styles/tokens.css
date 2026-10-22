@@ -1,0 +1,147 @@
+/*
+ * Design tokens — the single source of every color, glass, radius and motion value.
+ * Values are copied from the design export (docs/inputs/designs: Staff PWA + Admin shells,
+ * DESIGN_README.md). Names match the export exactly. Keep src/lib/tokens/meta.ts in sync:
+ * the sync test fails if they drift.
+ *
+ * Scoping (can be set on any element, so the showcase can render both themes side by side):
+ *   [data-theme="light" | "dark"]   color scheme (default light)
+ *   [data-app="staff" | "admin"]    glass flavour (default staff); place at or below data-theme
+ *
+ * The tenant accent (--accent, --accent-rgb, --accent-ink, --accent-soft, --accent-text) is
+ * overridden at runtime by TenantThemeProvider (src/lib/tenant). Defaults here are Regency gold.
+ */
+
+/* ---------- Light (default) · staff glass ---------- */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --surface: #f4f4f2;
+  --surface-2: #e9e9e6;
+  --elev: #ffffff;
+  --fg: #0b0b0b;
+  --fg-2: #5e5e5b;
+  --fg-3: #8e8e8a;
+  --line: #e6e6e3;
+  --hero: #0e0f12;
+
+  --accent: #c9a24a;
+  --accent-rgb: 201 162 74;
+  --accent-ink: #1c1404;
+  --accent-soft: #f7efda;
+  --accent-text: #7f611a;
+
+  --ok: #2a7f36;
+  --ok-soft: #e5f3e1;
+  --warn: #b9480e;
+  --warn-soft: #fcede2;
+  --bad: #c02a20;
+  --bad-soft: #fbe7e5;
+  --info: #1e5bc6;
+  --info-soft: #e6edfa;
+
+  --chrome: rgba(255, 255, 255, 0.62);
+  --card: rgba(255, 255, 255, 0.58);
+  --sheet: rgba(255, 255, 255, 0.8);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+  --card-line: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 18px rgba(0, 0, 0, 0.05);
+  --ambient:
+    radial-gradient(70% 38% at 92% -4%, rgb(var(--accent-rgb) / 0.34), transparent 70%),
+    radial-gradient(55% 30% at -10% 22%, rgb(var(--accent-rgb) / 0.16), transparent 70%),
+    radial-gradient(60% 30% at 110% 70%, rgb(var(--accent-rgb) / 0.12), transparent 70%);
+  --hero-glow: radial-gradient(
+    120% 140% at 85% 110%,
+    rgb(var(--accent-rgb) / 0.38),
+    transparent 55%
+  );
+  --hero-fg: #f4f4f2;
+  --hero-fg-2: #c9c9c4;
+  --hero-fg-3: #8e8e8a;
+  --sheet-shadow: 0 -8px 40px rgba(0, 0, 0, 0.14);
+  --scrim: rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Dark · staff glass ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0a0a0b;
+  --surface: #18181a;
+  --surface-2: #252528;
+  --elev: #1e1e21;
+  --fg: #f4f4f2;
+  --fg-2: #a6a6a1;
+  --fg-3: #76766f;
+  --line: #2b2b2e;
+  --hero: #1e1e21;
+
+  --accent: #d9b661;
+  --accent-rgb: 217 182 97;
+  --accent-ink: #1c1404;
+  --accent-soft: #2b2415;
+  --accent-text: #e6c77e;
+
+  --ok: #62c46f;
+  --ok-soft: #14261a;
+  --warn: #ff8f57;
+  --warn-soft: #2e1b11;
+  --bad: #ff6e63;
+  --bad-soft: #311715;
+  --info: #82aeff;
+  --info-soft: #14203a;
+
+  --chrome: rgba(34, 34, 38, 0.55);
+  --card: rgba(40, 40, 44, 0.5);
+  --sheet: rgba(30, 30, 34, 0.8);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --card-line: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --ambient:
+    radial-gradient(70% 38% at 92% -4%, rgb(var(--accent-rgb) / 0.3), transparent 70%),
+    radial-gradient(55% 30% at -10% 22%, rgb(var(--accent-rgb) / 0.16), transparent 70%),
+    radial-gradient(60% 30% at 110% 70%, rgb(var(--accent-rgb) / 0.12), transparent 70%);
+  --hero-glow: radial-gradient(
+    120% 140% at 85% 110%,
+    rgb(var(--accent-rgb) / 0.38),
+    transparent 55%
+  );
+}
+
+/* ---------- Admin glass (Admin.dc.html differs from the staff shell) ---------- */
+[data-app="admin"],
+[data-theme="light"] [data-app="admin"],
+[data-app="admin"] [data-theme="light"] {
+  --sheet: rgba(255, 255, 255, 0.82);
+  --card-line: inset 0 0 0 1px rgba(0, 0, 0, 0.05), 0 4px 18px rgba(0, 0, 0, 0.05);
+  --ambient:
+    radial-gradient(70% 38% at 92% -4%, rgb(var(--accent-rgb) / 0.3), transparent 70%),
+    radial-gradient(55% 30% at -10% 30%, rgb(var(--accent-rgb) / 0.12), transparent 70%);
+}
+
+[data-theme="dark"][data-app="admin"],
+[data-theme="dark"] [data-app="admin"],
+[data-app="admin"] [data-theme="dark"] {
+  --sheet: rgba(30, 30, 34, 0.82);
+  --card-line: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --ambient:
+    radial-gradient(70% 38% at 92% -4%, rgb(var(--accent-rgb) / 0.26), transparent 70%),
+    radial-gradient(55% 30% at -10% 30%, rgb(var(--accent-rgb) / 0.12), transparent 70%);
+}
+
+/* ---------- Theme-independent ---------- */
+:root {
+  --blur: blur(22px) saturate(180%);
+  --blur-lg: blur(36px) saturate(180%);
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-sheet: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --ease-pop: cubic-bezier(0.2, 0.9, 0.3, 1.3);
+  --ease-toggle: cubic-bezier(0.3, 0.7, 0.4, 1.3);
+  --duration-press: 160ms;
+  --duration-toggle: 220ms;
+  --duration-sheet: 320ms;
+  --duration-screen: 380ms;
+  --duration-rise: 550ms;
+  --stagger: 55ms;
+}
