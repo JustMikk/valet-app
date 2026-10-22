@@ -98,7 +98,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
 
 ### Checkpoint B
 
-- [ ] `pnpm check:task` green; boundaries clean; every component exported from `src/components/shared/index.ts`
+- [x] `pnpm check:task` green; boundaries clean; every component exported from `src/components/shared/index.ts`
 
 ## Showcase and verification
 
