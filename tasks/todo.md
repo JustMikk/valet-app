@@ -53,7 +53,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/ui/badge.tsx`, `src/components/shared/status-badge.tsx`, `src/lib/status/presets.ts`, `src/lib/status/presets.test.ts`
   - Scope: M
 
-- [ ] **Task 8: ListRow, HeroStat, Avatar, PersonRow**
+- [x] **Task 8: ListRow, HeroStat, Avatar, PersonRow**
   - Acceptance: dimensions per sheet (64 / 72 px rows, 44 px avatar, open-slot dashed variant); tabular numerals on HeroStat.
   - Verify: `pnpm test src/components/shared`
   - Files: `src/components/shared/list-row.tsx`, `src/components/shared/hero-stat.tsx`, `src/components/shared/person-row.tsx`, `src/components/ui/avatar.tsx`, `src/components/shared/rows.test.tsx`
