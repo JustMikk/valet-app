@@ -1,10 +1,10 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
+import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 
 import { Icon } from "./icon"
-import type { IconName } from "./icon-names"
 
 const iconButtonVariants = cva(
   "relative inline-grid shrink-0 place-items-center rounded-pill border-0 text-fg transition-transform duration-160 select-none active:scale-94",

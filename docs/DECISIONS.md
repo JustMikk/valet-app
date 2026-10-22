@@ -121,7 +121,7 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 **Decision.**
 
 - Text fonts load through `next/font/google` (self-hosted at build time; Bricolage with its `opsz` axis as in the export).
-- Icons: `src/components/shared/icon-names.ts` lists every glyph the app may render. `pnpm icons:build` (`scripts/build-icon-font.mjs`) downloads a Google Fonts subset for exactly those names (`icon_names=`, same axes as the export: opsz 20..48, wght 400..700, FILL 0..1, GRAD 0) into `src/fonts/`, which is committed and loaded with `next/font/local`. 25 glyphs = 22.9 KiB.
+- Icons: `src/lib/icons/icon-names.ts` lists every glyph the app may render. `pnpm icons:build` (`scripts/build-icon-font.mjs`) downloads a Google Fonts subset for exactly those names (`icon_names=`, same axes as the export: opsz 20..48, wght 400..700, FILL 0..1, GRAD 0) into `src/fonts/`, which is committed and loaded with `next/font/local`. 25 glyphs = 22.9 KiB.
 - The `Icon` component accepts only `IconName`, so an unlisted name is a type error. A test fails if the committed font was built from a different list.
 - No `material-symbols` npm dependency; lucide (shadcn default) is not used for product icons.
 

@@ -1,6 +1,5 @@
+import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
-
-import type { IconName } from "./icon-names"
 
 // Sizes the design export uses for glyphs.
 export type IconSize = 16 | 18 | 20 | 22 | 24 | 25 | 26 | 28 | 32
@@ -29,7 +28,7 @@ export function Icon({
   return (
     <span
       className={cn(
-        "inline-block shrink-0 font-icon [font-feature-settings:'liga'] leading-x100 tracking-normal whitespace-nowrap normal-case select-none",
+        "inline-block shrink-0 font-icon font-features-['liga'] leading-x100 tracking-normal whitespace-nowrap normal-case select-none",
         className,
       )}
       // Size and variation axes are per-instance values, not theme tokens.

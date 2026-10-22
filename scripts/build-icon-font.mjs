@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // build-icon-font.mjs — downloads a Material Symbols Rounded font subset to exactly the names in
-// src/components/shared/icon-names.ts (ADR-007). The full font is 5.4 MB; the subset keeps
+// src/lib/icons/icon-names.ts (ADR-007). The full font is 5.4 MB; the subset keeps
 // ligatures, the FILL 0..1 / wght 400..700 / opsz 20..48 axes and GRAD 0, which is what the
 // design export requests from Google Fonts. Output is committed so builds stay offline.
 // Usage: pnpm icons:build
 import { readFileSync, writeFileSync } from "node:fs"
 
-const NAMES_FILE = "src/components/shared/icon-names.ts"
+const NAMES_FILE = "src/lib/icons/icon-names.ts"
 const FONT_OUT = "src/fonts/material-symbols-rounded.woff2"
 const MANIFEST_OUT = "src/fonts/material-symbols-rounded.json"
 // Google Fonts serves woff2 only to browsers it recognises.

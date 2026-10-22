@@ -20,7 +20,7 @@ const onest = Onest({ subsets: ["latin"], variable: "--font-onest" })
 // Numbers, codes, timers.
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
 
-// Material Symbols Rounded, subset to src/components/shared/icon-names.ts (ADR-007).
+// Material Symbols Rounded, subset to src/lib/icons/icon-names.ts (ADR-007).
 // `block` keeps ligature names from flashing as text before the glyphs load.
 const materialSymbols = localFont({
   src: "../fonts/material-symbols-rounded.woff2",

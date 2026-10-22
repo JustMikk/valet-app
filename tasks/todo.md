@@ -47,7 +47,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/ui/button.tsx` (variants), `src/components/shared/action-button.tsx` (icon slots, shine, reason), `src/components/shared/icon-button.tsx`, `src/components/shared/glass-pill.tsx`, `src/components/shared/button.test.tsx`; `glass*` and `shine-sweep` utilities in `globals.css`
   - Scope: M
 
-- [ ] **Task 7: StatusBadge + status presets**
+- [x] **Task 7: StatusBadge + status presets**
   - Acceptance: badge tones ok/warn/neutral/strong/info/outline/muted/bad/bad-solid; the 12 presets from the sheet live in `src/lib/status`; every preset renders icon + words.
   - Verify: `pnpm test src/lib/status src/components/shared/status-badge`
   - Files: `src/components/ui/badge.tsx`, `src/components/shared/status-badge.tsx`, `src/lib/status/presets.ts`, `src/lib/status/presets.test.ts`

@@ -1,9 +1,9 @@
 import { useId, type ComponentProps, type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
+import type { IconName } from "@/lib/icons/icon-names"
 
 import { Icon } from "./icon"
-import type { IconName } from "./icon-names"
 
 type ActionButtonProps = ComponentProps<typeof Button> & {
   /** Leading glyph (filled, as in the design). */

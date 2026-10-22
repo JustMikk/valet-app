@@ -4,8 +4,9 @@ import { join } from "node:path"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { ICON_NAMES } from "@/lib/icons/icon-names"
+
 import { Icon } from "./icon"
-import { ICON_NAMES } from "./icon-names"
 
 describe("Icon", () => {
   it("is hidden from assistive tech when decorative", () => {
