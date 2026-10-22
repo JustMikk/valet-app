@@ -91,6 +91,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Layout breakpoints (SCREENS.md): phone < 700, tablet 700–1099, desktop ≥ 1100. */
+  --breakpoint-tablet: 700px;
+  --breakpoint-desktop: 1100px;
+
   /* Families */
   --font-sans: var(--ff);
   --font-display: var(--fd);
@@ -229,6 +233,7 @@
   --shadow-sheet: var(--sheet-shadow);
   --shadow-card-line: var(--card-line);
   --shadow-dialog: var(--dialog-shadow);
+  --shadow-cta: var(--cta-shadow);
 
   /* Motion (DESIGN_README "Motion") */
   --ease-soft: var(--ease-out-soft);
@@ -351,6 +356,19 @@
   background-size: 250% 100%;
 }
 
+/* Page ground: the tenant-accent glow behind every screen (--ambient). */
+@utility bg-ambient {
+  background: var(--ambient);
+}
+
+/* Scrolling panes hide their scrollbar (the shells scroll inside fixed chrome). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Reduced motion: drop the loops (shine, pulse), keep fades (DESIGN_README "Motion"). */
 @media (prefers-reduced-motion: reduce) {
   .animate-shine,
@@ -377,4 +395,11 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+}
+
+/* Glass fill without the shadow ring: the shell sidebar (--card + blur). */
+@utility glass-plain {
+  background-color: var(--card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
 }

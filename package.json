@@ -26,8 +26,8 @@
     "size": "node scripts/route-js-size.mjs",
     "perf": "node scripts/lighthouse.mjs",
     "check:fast": "pnpm typecheck && pnpm lint && pnpm secrets && pnpm guard --warn-bar-change",
-    "check:task": "pnpm check:fast && pnpm test:coverage && pnpm coverage:changed && pnpm boundaries",
-    "check:full": "pnpm check:task && pnpm format:check && pnpm build && pnpm perf && pnpm size && pnpm deps:scan && pnpm secrets:history && pnpm test:e2e",
+    "check:task": "pnpm check:fast && pnpm boundaries && pnpm build",
+    "check:full": "pnpm check:task && pnpm test:coverage && pnpm coverage:changed && pnpm format:check && pnpm perf && pnpm size && pnpm deps:scan && pnpm secrets:history && pnpm test:e2e",
     "icons:build": "node scripts/build-icon-font.mjs"
   },
   "dependencies": {

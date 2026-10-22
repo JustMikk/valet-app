@@ -167,3 +167,15 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 **Decision.** `assertion-removed` fires when a test file that still exists ends with fewer assertion lines than it had (removed > added). Deleting a test file is still `test-deleted`; new skips, suppressions and stubs are unchanged. The floor line in CONSTRAINTS.md is reworded to match. `scripts/floor-guard.test.ts` pins the behaviour on a throwaway git repo: replace passes, add passes, delete or net loss fails, file deletion fails, suppression fails.
 
 **Consequences.** Swapping an assertion for a weaker one at equal count is no longer caught mechanically; code review (`/review`) remains the check for that. The guard exempts its own file from scanning, so changes to the guard are not self-flagged: they are reviewed as their own commit.
+
+---
+
+## ADR-011 — Build mode: pages first, testing after the full build
+
+**Date:** 2026-10-22 · **Status:** accepted (owner direction: "build all the pages with the right components and micro interactions, then do the testing after the whole build")
+
+**Context.** Phase 1 took longer than expected because every task carried the full gate set (tests, coverage, Lighthouse, axe, visual baselines). Most of that cost came from non-functional checks that are better run once the screens exist.
+
+**Decision.** `check:task` is now types + lint + secrets + floor + boundaries + static build. Tests, coverage, performance, accessibility runs, visual baselines, PWA/offline, platform providers and the real data layer are deferred to a testing phase that starts when every page in `tasks/build-all.md` exists (CONSTRAINTS.md "Build mode"). The floor, tokens-only, boundaries and secrets checks are unchanged.
+
+**Consequences.** New pages ship without tests until the testing phase; the testing phase must restore the deferred rows as per-task gates. Existing Phase 1 tests keep running in `check:full`. Pages use typed fixtures (`src/mocks`) instead of the data layer; swapping in repositories is a later task.

@@ -24,6 +24,8 @@ type ResponsiveSheetProps = {
   /** Required: every sheet and dialog is named by its title. */
   title: ReactNode
   description?: ReactNode
+  /** Names the sheet for assistive tech without showing a heading (e.g. the admin "More" menu). */
+  titleHidden?: boolean
   /**
    * Adds a "Close" control that stays visually hidden until keyboard focus reaches it, so
    * screen-reader and keyboard users are never left with only a gesture or the scrim to dismiss.
@@ -63,9 +65,11 @@ export function ResponsiveSheet({
   onOpenChange,
   title,
   description,
+  titleHidden = false,
   dismissible = true,
   children,
 }: ResponsiveSheetProps) {
+  const titleClass = titleHidden ? "sr-only" : SHEET_TITLE
   const variant = useSheetVariant(open)
 
   if (variant === "sheet") {
@@ -80,7 +84,7 @@ export function ResponsiveSheet({
               aria-hidden="true"
               className="h-1.25 w-10 self-center rounded-r9 bg-line"
             />
-            <DrawerTitle className={SHEET_TITLE}>{title}</DrawerTitle>
+            <DrawerTitle className={titleClass}>{title}</DrawerTitle>
             {description && (
               <DrawerDescription className={SHEET_DESCRIPTION}>{description}</DrawerDescription>
             )}
@@ -95,7 +99,7 @@ export function ResponsiveSheet({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex w-110 max-w-[calc(100%-2rem)] flex-col gap-4 rounded-dialog bg-sheet px-6 pt-5 pb-6 text-fg shadow-dialog ring-0 [backdrop-filter:var(--blur-lg)] duration-250 sm:max-w-110 data-open:zoom-in-100 data-closed:zoom-out-100">
-        <DialogTitle className={SHEET_TITLE}>{title}</DialogTitle>
+        <DialogTitle className={titleClass}>{title}</DialogTitle>
         {description && (
           <DialogDescription className={SHEET_DESCRIPTION}>{description}</DialogDescription>
         )}

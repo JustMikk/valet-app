@@ -94,7 +94,7 @@ export const DESIGN_SCALES = {
     "sheet",
     "pill",
   ],
-  shadow: ["float", "sheet", "card-line", "dialog"],
+  shadow: ["float", "sheet", "card-line", "dialog", "cta"],
   animate: ["rise", "screen", "sheet-up", "fade", "pop", "shine", "pulse-ring"],
 } as const
 

@@ -26,11 +26,13 @@ export function ActionButton({
   ...props
 }: ActionButtonProps) {
   const reasonId = useId()
+  // The full-width CTA carries a 24 px glyph (Staff Home); every other size 22 px.
+  const glyph = props.size === "cta" ? 24 : 22
   const button = (
     <Button aria-describedby={reason ? reasonId : undefined} {...props}>
-      {icon && <Icon name={icon} filled size={22} />}
+      {icon && <Icon name={icon} filled size={glyph} />}
       {children}
-      {iconEnd && <Icon name={iconEnd} size={22} />}
+      {iconEnd && <Icon name={iconEnd} size={glyph} />}
       {shine && (
         <span
           aria-hidden="true"
@@ -43,7 +45,7 @@ export function ActionButton({
   return (
     <>
       {button}
-      <p id={reasonId} className="text-13 leading-x140 text-fg-2">
+      <p id={reasonId} className="text-center text-14 text-fg-2">
         {reason}
       </p>
     </>

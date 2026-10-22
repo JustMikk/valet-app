@@ -56,12 +56,22 @@ gitleaks, osv-scanner, `pnpm audit`, Semgrep, axe-core and Lighthouse judge the 
 
 ## Where each check runs
 
-| Stage       | Command                          | Budget                              | What runs                                                                                                                                                     |
-| ----------- | -------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Edit loop   | `pnpm check:fast`                | ~seconds                            | types, lint (device APIs, tokens, size), uncommitted secrets, floor guard                                                                                     |
-| Pre-commit  | husky                            | ~seconds                            | lint-staged (ESLint + Prettier on staged files), types, uncommitted secrets, floor guard                                                                      |
-| Task end    | `pnpm check:task`                | ≤ 90 s (measured 23 s)              | `check:fast` + unit tests with coverage + changed-line coverage + boundaries                                                                                  |
-| Review / CI | `pnpm check:full` + CI-only jobs | minutes (measured 1 m 58 s locally) | `check:task` + format, static build, Lighthouse, bundle size, osv-scanner, secrets history, Playwright (smoke + axe); CI adds Semgrep and `pnpm audit --prod` |
+| Stage       | Command                          | Budget   | What runs                                                                                                                                                                                                      |
+| ----------- | -------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Edit loop   | `pnpm check:fast`                | ~seconds | types, lint (device APIs, tokens, size), uncommitted secrets, floor guard                                                                                                                                      |
+| Pre-commit  | husky                            | ~seconds | lint-staged (ESLint + Prettier on staged files), types, uncommitted secrets, floor guard                                                                                                                       |
+| Task end    | `pnpm check:task`                | ≤ 90 s   | **Build mode (see below):** `check:fast` + boundaries + static build. After the build: also unit tests with coverage + changed-line coverage                                                                   |
+| Review / CI | `pnpm check:full` + CI-only jobs | minutes  | `check:task` + unit tests with coverage, changed-line coverage, format, Lighthouse, bundle size, osv-scanner, secrets history, Playwright (smoke, axe, focus, visual); CI adds Semgrep and `pnpm audit --prod` |
+
+## Build mode (owner-directed, 2026-10-22)
+
+While every page is being built, only the checks that keep the code sound run per task: the floor, types, lint (device APIs, tokens only, component size), architecture boundaries, secrets and the static export build. The following are **deferred to the testing phase after the full build**, not dropped:
+
+- Unit, component and end-to-end tests for new pages and logic, and the changed-line coverage gate that depends on them (existing tests stay and are run in `check:full`).
+- Lighthouse, per-route bundle budgets, the axe and keyboard-focus run on new routes, and the visual baselines.
+- PWA/offline, platform providers, the real data layer and realtime (pages run on typed in-memory fixtures in `src/mocks`).
+
+Still expected while building: semantic markup, labels and keyboard-operable controls, icon plus words for status, and `prefers-reduced-motion` for every animation. The testing phase starts when every page in `tasks/build-all.md` exists; its first task is to restore the rows above to per-task gates. Do not read this section as a lower bar for the floor.
 
 ## Exceptions
 

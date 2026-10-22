@@ -73,6 +73,8 @@
   /* Hairline around the light/dark swatch pair (Design System section 02). */
   --swatch-pair-edge: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
   --dialog-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+  /* Primary full-width CTA (Staff Home). */
+  --cta-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 /* ---------- Dark · staff glass ---------- */
@@ -144,6 +146,10 @@
 
 /* ---------- Theme-independent ---------- */
 :root {
+  /* Notch / status-bar inset; floating chrome sits below it (phone). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
   --blur: blur(22px) saturate(180%);
   --blur-lg: blur(36px) saturate(180%);
 
