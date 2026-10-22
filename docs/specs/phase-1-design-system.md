@@ -1,6 +1,6 @@
 # Spec: Phase 1 — Design System
 
-Status: **draft, awaiting owner approval** · 2026-10-22 · Plan reference: Phase 1 of the approved build plan
+Status: **approved 2026-10-22** (D7 proposal, D8 and D9 defaults accepted) · 2026-10-22 · Plan reference: Phase 1 of the approved build plan
 
 ## Objective
 
