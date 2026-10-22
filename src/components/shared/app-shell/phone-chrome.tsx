@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -10,6 +9,7 @@ import { GlassPill } from "../glass-pill"
 import { Icon } from "../icon"
 import { ResponsiveSheet } from "../responsive-sheet"
 import { TabBar } from "../tab-bar"
+import { useShellMenu } from "./menu-context"
 import type { ShellApp, ShellNavItem, ShellUser } from "./types"
 
 const CIRCLE =
@@ -42,7 +42,7 @@ export function PhoneChrome({
   showTopBar,
   onBack,
 }: PhoneChromeProps) {
-  const [moreOpen, setMoreOpen] = useState(false)
+  const { open: moreOpen, setOpen: setMoreOpen } = useShellMenu()
   const moreOn = moreItems?.some((item) => item.key === currentKey) ?? false
 
   const brandPill = (

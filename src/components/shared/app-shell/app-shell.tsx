@@ -5,6 +5,7 @@ import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 import { Icon } from "../icon"
+import { ShellMenuProvider } from "./menu-context"
 import { PhoneChrome } from "./phone-chrome"
 import { Sidebar } from "./sidebar"
 import type { ShellApp, ShellNavItem, ShellUser } from "./types"
@@ -64,64 +65,66 @@ export function AppShell({
   const layered = mode !== "app"
 
   return (
-    <div
-      data-app={app}
-      className="relative flex h-dvh overflow-hidden bg-bg font-sans text-fg antialiased"
-    >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ambient" />
+    <ShellMenuProvider>
+      <div
+        data-app={app}
+        className="relative flex h-dvh overflow-hidden bg-bg font-sans text-fg antialiased"
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ambient" />
 
-      {mode !== "bare" && (
-        <Sidebar
-          app={app}
-          logo={logo}
-          brand={brand}
-          items={sidebarItems}
-          currentKey={currentKey}
-          user={user}
-        />
-      )}
-
-      <main className="relative h-full min-w-0 flex-1">
-        {layered ? (
-          <div className="absolute inset-0 z-50">{children}</div>
-        ) : (
-          <div className="no-scrollbar h-full overflow-y-auto">
-            {!isRoot && (
-              <div
-                className={cn(
-                  "mx-auto box-border hidden w-full px-8 pt-6 tablet:block desktop:px-12 desktop:pt-7",
-                  contentMax,
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={onBack}
-                  className="inline-flex h-11 items-center gap-1 rounded-pill border-0 glass pr-4 pl-2.5 text-15 font-semibold text-fg"
-                >
-                  <Icon name="arrow_back" size={22} />
-                  Back
-                </button>
-              </div>
-            )}
-            {children}
-          </div>
-        )}
-
-        {mode === "app" && (
-          <PhoneChrome
+        {mode !== "bare" && (
+          <Sidebar
             app={app}
             logo={logo}
-            title={phoneTitle}
-            user={user}
-            tabItems={tabItems}
-            moreItems={moreItems}
+            brand={brand}
+            items={sidebarItems}
             currentKey={currentKey}
-            isRoot={isRoot}
-            showTopBar={topBar}
-            onBack={onBack}
+            user={user}
           />
         )}
-      </main>
-    </div>
+
+        <main className="relative h-full min-w-0 flex-1">
+          {layered ? (
+            <div className="absolute inset-0 z-50">{children}</div>
+          ) : (
+            <div className="no-scrollbar h-full overflow-y-auto">
+              {!isRoot && (
+                <div
+                  className={cn(
+                    "mx-auto box-border hidden w-full px-8 pt-6 tablet:block desktop:px-12 desktop:pt-7",
+                    contentMax,
+                  )}
+                >
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="inline-flex h-11 items-center gap-1 rounded-pill border-0 glass pr-4 pl-2.5 text-15 font-semibold text-fg"
+                  >
+                    <Icon name="arrow_back" size={22} />
+                    Back
+                  </button>
+                </div>
+              )}
+              {children}
+            </div>
+          )}
+
+          {mode === "app" && (
+            <PhoneChrome
+              app={app}
+              logo={logo}
+              title={phoneTitle}
+              user={user}
+              tabItems={tabItems}
+              moreItems={moreItems}
+              currentKey={currentKey}
+              isRoot={isRoot}
+              showTopBar={topBar}
+              onBack={onBack}
+            />
+          )}
+        </main>
+      </div>
+    </ShellMenuProvider>
   )
 }

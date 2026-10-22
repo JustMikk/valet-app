@@ -256,7 +256,55 @@
   --animate-spin-slow: vw-spin 1.6s linear infinite;
   --animate-spin-medium: vw-spin 1.4s linear infinite;
   --animate-sheet-up-slow: vw-up 0.34s var(--ease-sheet) both;
+  --animate-blink: vw-blink 2s infinite;
+  --animate-grow: vw-grow 0.7s var(--ease-out-soft) both;
+  --animate-roll: vw-roll 0.5s var(--ease-pop) both;
+  --animate-out: vw-out 0.34s cubic-bezier(0.4, 0, 0.6, 1) forwards;
 
+  @keyframes vw-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @keyframes vw-grow {
+    0% {
+      transform: scaleX(0);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  @keyframes vw-roll {
+    0% {
+      transform: translateY(60%);
+      opacity: 0;
+      filter: blur(4px);
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+      filter: none;
+    }
+  }
+  @keyframes vw-out {
+    0% {
+      opacity: 1;
+      transform: none;
+      max-height: 300px;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(40px);
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin: 0;
+    }
+  }
   @keyframes vw-flash {
     0% {
       opacity: 0.9;
@@ -404,6 +452,9 @@
 /* Reduced motion: drop the loops (shine, pulse), keep fades (DESIGN_README "Motion"). */
 @media (prefers-reduced-motion: reduce) {
   .animate-shine,
+  .animate-blink,
+  .animate-grow,
+  .animate-roll,
   .animate-pulse-ring,
   .animate-spin-slow,
   .animate-spin-medium {
@@ -494,4 +545,20 @@
 /* Wide-screen onboarding ground: a soft accent wash from the top. */
 @utility onboarding-glow {
   background: radial-gradient(70% 60% at 50% 0%, var(--accent-soft), transparent 70%);
+}
+
+/* Placeholder map: a hairline grid on the surface tone; set the cell size with [--map-cell:40px]. */
+@utility map-grid {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(var(--map-cell) - 1px),
+      var(--line) calc(var(--map-cell) - 1px) var(--map-cell)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 calc(var(--map-cell) - 1px),
+      var(--line) calc(var(--map-cell) - 1px) var(--map-cell)
+    ),
+    var(--surface);
 }

@@ -9,3 +9,4 @@ export {
   type ThemeMode,
 } from "./accent"
 export { TenantTheme } from "./tenant-theme"
+export { TenantAccentProvider, useTenantAccent } from "./tenant-accent"
