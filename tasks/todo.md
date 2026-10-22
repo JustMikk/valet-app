@@ -84,7 +84,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/shared/attention-card.tsx`, `src/components/shared/feature-card.tsx`, `src/components/shared/glass-card.tsx`, `src/components/shared/cards.test.tsx`
   - Scope: M
 
-- [ ] **Task 13: TabBar**
+- [x] **Task 13: TabBar**
   - Acceptance: floating glass 76 px, 7 px padding, active = surface pill, count badge; `nav` + `aria-current`.
   - Verify: `pnpm test src/components/shared/tab-bar`
   - Files: `src/components/shared/tab-bar.tsx`, `src/components/shared/tab-bar.test.tsx`
