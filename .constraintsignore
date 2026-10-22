@@ -10,6 +10,3 @@ Valet_Workforce_Frontend_Build_Handoff_for_Claude_Code.md
 .claude/skills/
 .agents/
 skills/
-# Local tool state, not project code.
-.cc-history/
-.mux/
