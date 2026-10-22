@@ -41,10 +41,10 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
 
 ## Components
 
-- [ ] **Task 6: Button, IconButton, GlassPill**
+- [x] **Task 6: Button, IconButton, GlassPill**
   - Acceptance: shadcn `button` variants replaced with accent / strong / secondary / ghost / destructive / destructive-soft × lg 56 / md 48 / sm 40 / compact 44; `shine`; disabled + `reason` (linked by `aria-describedby`); press scale. IconButton/GlassPill 56 px glass with optional dot badge and required accessible label.
   - Verify: `pnpm test src/components`
-  - Files: `src/components/ui/button.tsx`, `src/components/shared/icon-button.tsx`, `src/components/shared/glass-pill.tsx`, `src/components/shared/button.test.tsx`
+  - Files: `src/components/ui/button.tsx` (variants), `src/components/shared/action-button.tsx` (icon slots, shine, reason), `src/components/shared/icon-button.tsx`, `src/components/shared/glass-pill.tsx`, `src/components/shared/button.test.tsx`; `glass*` and `shine-sweep` utilities in `globals.css`
   - Scope: M
 
 - [ ] **Task 7: StatusBadge + status presets**

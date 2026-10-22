@@ -311,6 +311,36 @@
   }
 }
 
+/* Glass surfaces (DESIGN_README "Glass + elevation"): floating chrome, cards, sheets only. */
+@utility glass {
+  background-color: var(--chrome);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--shadow);
+}
+@utility glass-card {
+  background-color: var(--card);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--card-line);
+}
+@utility glass-sheet {
+  background-color: var(--sheet);
+  -webkit-backdrop-filter: var(--blur-lg);
+  backdrop-filter: var(--blur-lg);
+}
+
+/* Diagonal white sweep across the primary CTA (DESIGN_README "CTA shine"); pair with animate-shine. */
+@utility shine-sweep {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 65%
+  );
+  background-size: 250% 100%;
+}
+
 /* Reduced motion: drop the loops (shine, pulse), keep fades (DESIGN_README "Motion"). */
 @media (prefers-reduced-motion: reduce) {
   .animate-shine,

@@ -62,6 +62,23 @@ const eslintConfig = defineConfig([
       "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
     },
   },
+  // shadcn's CLI writes `import { cn } from "cn"`; that copy lacks the design-token scales and
+  // mis-merges classes like text-17 + text-fg. Product icons are Material Symbols (ADR-007).
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/lib/utils.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "cn", message: "Import { cn } from '@/lib/utils' (knows the token scales)." },
+            { name: "lucide-react", message: "Use <Icon> from components/shared (ADR-007)." },
+          ],
+        },
+      ],
+    },
+  },
   // Node scripts report through the console.
   {
     files: ["scripts/**/*.mjs"],
