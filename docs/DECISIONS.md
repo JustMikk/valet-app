@@ -56,3 +56,15 @@ Each entry: context, decision, consequences, sources. Newest last.
 ESLint additions: `no-explicit-any`, `no-non-null-assertion`, `ban-ts-comment` (`@ts-expect-error` only with a description), `no-console` (warn/error allowed). Lint runs with `--max-warnings=0`. CI (`.github/workflows/ci.yml`) runs lint, typecheck, format check, unit tests, build, `pnpm audit --prod`, then Playwright.
 
 **Consequences.** `pnpm check` runs the same gate locally. On Windows the first Vitest run after install can exceed the jsdom worker start-up timeout; reruns pass.
+
+---
+
+## ADR-004 — Run the shadcn MCP server from the local install
+
+**Date:** 2026-10-22 · **Status:** accepted
+
+**Context.** The `.mcp.json` written by `shadcn mcp init` runs `npx shadcn@latest mcp`. On this network npx resolves and downloads `@latest` on each start, and Claude Code timed out the connection after 30 s. The locally installed `shadcn` (devDependency, 4.22.1) answers the MCP `initialize` handshake in under 5 s.
+
+**Decision.** `.mcp.json` runs `node node_modules/shadcn/dist/index.js mcp`. The MCP version is now pinned with the project's `shadcn` devDependency, and upgrading it is a normal dependency bump.
+
+**Consequences.** Requires `pnpm install` before the MCP server can start.
