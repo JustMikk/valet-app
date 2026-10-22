@@ -330,6 +330,12 @@
   backdrop-filter: var(--blur-lg);
 }
 
+/* Open-slot hatch (Design System "coverage-bar"): reads without color. */
+@utility hatch-open {
+  background: repeating-linear-gradient(135deg, transparent 0 4px, var(--fg-3) 4px 5.5px);
+  box-shadow: inset 0 0 0 1.5px var(--fg-3);
+}
+
 /* Diagonal white sweep across the primary CTA (DESIGN_README "CTA shine"); pair with animate-shine. */
 @utility shine-sweep {
   background: linear-gradient(

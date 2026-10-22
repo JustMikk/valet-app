@@ -59,7 +59,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/shared/list-row.tsx`, `src/components/shared/hero-stat.tsx`, `src/components/shared/person-row.tsx`, `src/components/ui/avatar.tsx`, `src/components/shared/rows.test.tsx`
   - Scope: M
 
-- [ ] **Task 9: CoverageBar**
+- [x] **Task 9: CoverageBar**
   - Acceptance: segments on-site / late / expected / open with flex weights; open is hatched and outlined; legend; accessible summary ("4 on site, 1 late, 1 open of 6").
   - Verify: `pnpm test src/components/shared/coverage-bar`
   - Files: `src/components/shared/coverage-bar.tsx`, `src/components/shared/coverage-bar.test.tsx`
