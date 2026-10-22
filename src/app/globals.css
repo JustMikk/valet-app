@@ -226,6 +226,7 @@
   --shadow-float: var(--shadow);
   --shadow-sheet: var(--sheet-shadow);
   --shadow-card-line: var(--card-line);
+  --shadow-dialog: var(--dialog-shadow);
 
   /* Motion (DESIGN_README "Motion") */
   --ease-soft: var(--ease-out-soft);

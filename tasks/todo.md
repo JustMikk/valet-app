@@ -90,7 +90,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/shared/tab-bar.tsx`, `src/components/shared/tab-bar.test.tsx`
   - Scope: S
 
-- [ ] **Task 14: ResponsiveSheet, ConfirmSheet**
+- [x] **Task 14: ResponsiveSheet, ConfirmSheet**
   - Acceptance: Drawer below 700 px (radius 30 top, grabber, sheet-up), Dialog at 700 px and up (440–480 px, radius 28, `rgba(0,0,0,.4)` scrim token); title required; Esc closes; focus returns. ConfirmSheet states the consequence and pairs Cancel + action.
   - Verify: `pnpm test src/components/shared/sheet`
   - Files: `src/components/ui/drawer.tsx`, `src/components/ui/dialog.tsx`, `src/components/shared/responsive-sheet.tsx`, `src/components/shared/sheet.test.tsx`, `src/hooks/use-breakpoint.ts`

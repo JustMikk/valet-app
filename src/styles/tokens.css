@@ -62,6 +62,7 @@
   --hero-overline: #b9b9b4;
   --sheet-shadow: 0 -8px 40px rgba(0, 0, 0, 0.14);
   --scrim: rgba(0, 0, 0, 0.4);
+  --dialog-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
 }
 
 /* ---------- Dark · staff glass ---------- */
