@@ -155,3 +155,15 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - **Contrast (D11, handoff §8.2 "implement the accessible version and flag")**: `--fg-3` text is darkened (light `#8E8E8A` → `#70706C`, dark `#76766F` → `#86867F`) to meet 4.5:1 on `--bg` and `--surface`; graphics keep the exported value as `--fg-3-line` (non-text needs 3:1, which it meets). `--ok` light `#2A7F36` → `#257A32` to meet 4.5:1 on `--ok-soft`.
 
 **Verification.** `pnpm check:full`: axe and focus clean on both routes × 3 viewports; Lighthouse `/` within budget; per-route JS within budget.
+
+---
+
+## ADR-010 — Floor guard counts assertions net per file
+
+**Date:** 2026-10-22 · **Status:** accepted (owner chose this option in the Phase 1 review)
+
+**Context.** `scripts/floor-guard.mjs` (from the agent-skills reference) flagged every removed `expect`/`assert`/`should` line in a test file. A reworded or strengthened assertion removes one line and adds one, so legitimate test improvements were blocked as if assertions had been deleted (5 false positives in the Phase 1 review fixes).
+
+**Decision.** `assertion-removed` fires when a test file that still exists ends with fewer assertion lines than it had (removed > added). Deleting a test file is still `test-deleted`; new skips, suppressions and stubs are unchanged. The floor line in CONSTRAINTS.md is reworded to match. `scripts/floor-guard.test.ts` pins the behaviour on a throwaway git repo: replace passes, add passes, delete or net loss fails, file deletion fails, suppression fails.
+
+**Consequences.** Swapping an assertion for a weaker one at equal count is no longer caught mechanically; code review (`/review`) remains the check for that. The guard exempts its own file from scanning, so changes to the guard are not self-flagged: they are reviewed as their own commit.

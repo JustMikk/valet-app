@@ -111,9 +111,23 @@ for (const { file, text } of added) {
 }
 
 for (const f of deleted) if (isTest(f)) flag("test-deleted", f, "file deleted")
-for (const { file, text } of removed) {
-  if (isTest(file) && !deleted.includes(file) && /\b(expect|assert|should)\b/.test(text)) {
-    flag("assertion-removed", file, text)
+// A test file must not end up with fewer assertion lines than it had. Rewording or strengthening
+// an assertion removes one line and adds one, which is fine; deleting one is not. Counting net
+// per file is deliberately shallow (a swap for a weaker assertion still passes): that is what
+// review is for. Deleted files are caught by test-deleted above.
+const ASSERTION = /\b(expect|assert|should)\b/
+const assertionLines = (lines, file) =>
+  lines.filter((l) => l.file === file && ASSERTION.test(l.text)).map((l) => l.text)
+for (const file of new Set(removed.filter((l) => isTest(l.file)).map((l) => l.file))) {
+  if (deleted.includes(file)) continue
+  const gone = assertionLines(removed, file)
+  const gained = assertionLines(added, file)
+  if (gone.length > gained.length) {
+    flag(
+      "assertion-removed",
+      file,
+      `${gone.length - gained.length} fewer assertion line(s), e.g. ${gone[0]}`,
+    )
   }
 }
 

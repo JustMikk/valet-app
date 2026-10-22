@@ -11,7 +11,7 @@ in its own commit, and `pnpm guard` flags it. Sources: build handoff §7 (code q
 
 - No new suppression comments: `@ts-ignore`, `@ts-nocheck`, `eslint-disable`, `istanbul/v8/c8 ignore`, `nosemgrep`, `gitleaks:allow` (handoff §7: "do not silence lint rules")
 - No unimplemented stubs: `throw new Error("Not implemented")`, empty `catch {}`, `TODO`/`FIXME` left in code
-- No skipped or deleted tests, and no assertions removed from tests that stay
+- No skipped or deleted tests, and no test file left with fewer assertion lines than before (rewording or strengthening one is fine; the guard counts net per file, so review still checks that a replacement is not weaker)
 - No secrets in source or history (reported redacted, never by value)
 - No new path in `.constraintsignore` without an Exceptions row
 - This file does not get weakened to make a change pass
