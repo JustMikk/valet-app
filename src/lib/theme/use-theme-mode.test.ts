@@ -22,6 +22,19 @@ afterEach(() => {
 })
 
 describe("useThemeMode", () => {
+  it("follows a preference changed in another tab, including <html>", () => {
+    const { result } = renderHook(() => useThemeMode())
+    expect(result.current.preference).toBe("system")
+    act(() => {
+      localStorage.setItem(THEME_STORAGE_KEY, "dark")
+      window.dispatchEvent(
+        new StorageEvent("storage", { key: THEME_STORAGE_KEY, newValue: "dark" }),
+      )
+    })
+    expect(result.current.preference).toBe("dark")
+    expect(document.documentElement.dataset.theme).toBe("dark")
+  })
+
   it("starts from the stored preference", () => {
     localStorage.setItem(THEME_STORAGE_KEY, "dark")
     const { result } = renderHook(() => useThemeMode())

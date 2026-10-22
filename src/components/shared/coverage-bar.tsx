@@ -24,11 +24,22 @@ const SEGMENTS: { key: Segment; words: string; fill: string; swatch: string }[] 
   },
 ]
 
+// Counts come from live data: treat anything that is not a positive number as zero.
+const wholeCount = (n: number) => (Number.isFinite(n) && n > 0 ? Math.floor(n) : 0)
+const normalise = (c: CoverageCounts): CoverageCounts => ({
+  onSite: wholeCount(c.onSite),
+  late: wholeCount(c.late),
+  expected: wholeCount(c.expected),
+  open: wholeCount(c.open),
+})
+
 const total = (counts: CoverageCounts) =>
   counts.onSite + counts.late + counts.expected + counts.open
 
 /** "4 on site, 1 late, 1 open of 6": the bar's meaning in words. */
-export function coverageSummary(counts: CoverageCounts): string {
+export function coverageSummary(input: CoverageCounts): string {
+  const counts = normalise(input)
+  if (total(counts) === 0) return "No slots"
   const parts = SEGMENTS.filter((s) => counts[s.key] > 0).map((s) => `${counts[s.key]} ${s.words}`)
   return `${parts.join(", ")} of ${total(counts)}`
 }
@@ -41,8 +52,10 @@ type CoverageBarProps = {
 }
 
 /** On site + late + expected + open = headcount. Open is hatched so it reads without color. */
-export function CoverageBar({ counts, legend = false, className }: CoverageBarProps) {
+export function CoverageBar({ counts: input, legend = false, className }: CoverageBarProps) {
+  const counts = normalise(input)
   const present = SEGMENTS.filter((s) => counts[s.key] > 0)
+  const empty = present.length === 0
   return (
     <div className={cn("flex flex-col gap-2.5", className)}>
       <div role="img" aria-label={coverageSummary(counts)} className="flex h-3.5 gap-1">
@@ -55,8 +68,9 @@ export function CoverageBar({ counts, legend = false, className }: CoverageBarPr
             style={{ flexGrow: counts[s.key], flexBasis: 0 }}
           />
         ))}
+        {empty && <div data-segment="none" className="flex-1 rounded-r4 bg-surface-2" />}
       </div>
-      {legend && (
+      {legend && !empty && (
         <div aria-hidden="true" className="flex flex-wrap gap-4 text-14 font-medium text-fg-2">
           {present.map((s) => (
             <span key={s.key} className="flex items-center gap-1.5">

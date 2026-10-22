@@ -2,7 +2,7 @@
 // lighthouse.mjs — CONSTRAINTS.md "Performance: page".
 // Serves the static export (out/) and runs Lighthouse with its default mobile profile
 // (mid-range Android emulation, simulated slow 4G + 4x CPU throttling) on every route
-// in ROUTES of e2e/routes.ts, gating on the median of 3 runs. Requires `pnpm build` first.
+// in ROUTES of e2e/routes.ts, gating on the median of 5 runs. Requires `pnpm build` first.
 // Exit codes: 0 within budget, 1 over budget, 2 could not run.
 import { existsSync, readFileSync } from "node:fs"
 import { createServer } from "node:http"
@@ -10,6 +10,8 @@ import { extname, join, normalize } from "node:path"
 
 import lighthouse from "lighthouse"
 import { chromium } from "@playwright/test"
+
+import { readRoutes } from "./lib/routes.mjs"
 
 const BUDGET = { lcpMs: 2500, cls: 0.1, tbtMs: 200 }
 const PORT = 3200
@@ -19,13 +21,14 @@ if (!existsSync(OUT)) {
   console.error("lighthouse: out/ missing; run `pnpm build` first")
   process.exit(2)
 }
-// User-facing routes only (the ROUTES list); dev reference routes are outside the budget.
-const routesList = /export const ROUTES = \[([^\]]*)\]/.exec(readFileSync("e2e/routes.ts", "utf8"))
-if (!routesList) {
-  console.error("lighthouse: ROUTES not found in e2e/routes.ts")
+// User-facing routes only (ROUTES); dev reference routes (DEV_ROUTES) are outside the budget.
+let routes
+try {
+  routes = readRoutes().ROUTES
+} catch (e) {
+  console.error("lighthouse: " + (e instanceof Error ? e.message : String(e)))
   process.exit(2)
 }
-const routes = [...routesList[1].matchAll(/"(\/[^"]*)"/g)].map((m) => m[1])
 
 const TYPES = {
   ".html": "text/html",
@@ -62,7 +65,7 @@ const DEBUG_PORT = 9223
 // Playwright's bundled Chromium, exposed over CDP for Lighthouse (no extra launcher dependency).
 const browser = await chromium.launch({ args: [`--remote-debugging-port=${DEBUG_PORT}`] })
 // Median of RUNS per route, as Lighthouse CI does: a single lab run swings with machine load.
-const RUNS = 3
+const RUNS = 5
 const median = (xs) => [...xs].sort((x, y) => x - y)[Math.floor(xs.length / 2)]
 let failed = false
 try {
@@ -82,6 +85,11 @@ try {
         cls: a["cumulative-layout-shift"].numericValue,
         tbt: a["total-blocking-time"].numericValue,
       })
+    }
+    if (process.env.LIGHTHOUSE_VERBOSE) {
+      console.log(
+        `lighthouse: ${route} LCP samples: ${samples.map((s) => Math.round(s.lcp)).join(", ")}`,
+      )
     }
     const lcp = median(samples.map((s) => s.lcp))
     const cls = median(samples.map((s) => s.cls))

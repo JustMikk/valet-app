@@ -22,16 +22,22 @@ const getServerSnapshot = (): ThemePreference => "system"
 function subscribe(onChange: () => void) {
   listeners.add(onChange)
   const media = window.matchMedia(DARK_QUERY)
+  const reapply = () => applyTheme(resolveTheme(getSnapshot(), media.matches))
   const onSystemChange = () => {
-    if (getSnapshot() === "system") applyTheme(resolveTheme("system", media.matches))
+    if (getSnapshot() === "system") reapply()
+    onChange()
+  }
+  // Another tab changed the preference: follow it, so <html> and the toggle never disagree.
+  const onStorage = () => {
+    reapply()
     onChange()
   }
   media.addEventListener("change", onSystemChange)
-  window.addEventListener("storage", onChange)
+  window.addEventListener("storage", onStorage)
   return () => {
     listeners.delete(onChange)
     media.removeEventListener("change", onSystemChange)
-    window.removeEventListener("storage", onChange)
+    window.removeEventListener("storage", onStorage)
   }
 }
 

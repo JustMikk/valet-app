@@ -21,25 +21,49 @@ for (const route of CHECKED) {
 }
 
 // CONSTRAINTS.md "Accessibility": keyboard operable with visible focus (handoff §7). Tabs through
-// the first controls of every route and checks each focused element draws an indicator.
+// every stop of each route and requires that focusing an element changes how it is drawn: its
+// outline or box-shadow must differ from the same element blurred (a resting shadow alone, as on
+// glass chrome, does not count).
+const MAX_STOPS = 300
+
 for (const route of CHECKED) {
   test(`keyboard focus is visible on ${route}`, async ({ page }) => {
     await page.goto(route)
-    for (let i = 0; i < 25; i++) {
-      await page.keyboard.press("Tab")
-      const focus = await page.evaluate(() => {
-        const el = document.activeElement
+    await page.addStyleTag({ content: "*,*::before,*::after{transition:none!important}" })
+
+    // Reads the focused element's look, blurs it, reads again, then restores focus.
+    const probe = () =>
+      page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null
         if (!el || el === document.body) return null
-        const style = getComputedStyle(el)
+        const look = () => {
+          const s = getComputedStyle(el)
+          return [s.outlineStyle, s.outlineWidth, s.outlineColor, s.boxShadow].join("|")
+        }
+        const focused = look()
+        el.blur()
+        const resting = look()
+        el.focus()
         return {
           name: `${el.tagName.toLowerCase()} ${(el.textContent ?? "").trim().slice(0, 30)}`,
-          visible:
-            (style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0) ||
-            style.boxShadow !== "none",
+          focused,
+          resting,
         }
       })
-      if (!focus) break
-      expect(focus.visible, `focus indicator on ${focus.name}`).toBe(true)
+
+    let stops = 0
+    for (; stops < MAX_STOPS; stops++) {
+      await page.keyboard.press("Tab")
+      const result = await probe()
+      if (!result) break // focus left the page content: the Tab cycle is complete
+      expect(result.focused, `focus indicator on ${result.name}`).not.toBe(result.resting)
     }
+    test.info().annotations.push({ type: "keyboard stops", description: String(stops) })
+    // The showcase renders every control, so it must be reachable; a product route with no
+    // controls yet (the placeholder root) legitimately has none.
+    if ((DEV_ROUTES as readonly string[]).includes(route)) {
+      expect(stops, "found keyboard stops").toBeGreaterThan(40)
+    }
+    expect(stops, "Tab cycle did not complete").toBeLessThan(MAX_STOPS)
   })
 }

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { ACCENT_SWATCHES, DEFAULT_ACCENT, deriveAccentVars, tenantThemeCss } from "./accent"
+import {
+  ACCENT_OPTIONS,
+  ACCENT_SWATCHES,
+  DEFAULT_ACCENT,
+  deriveAccentVars,
+  tenantThemeCss,
+} from "./accent"
 import { contrastRatio, deltaEOk, parseHex } from "./color"
 
 describe("deriveAccentVars", () => {
@@ -56,16 +62,36 @@ describe("deriveAccentVars", () => {
     }
   })
 
-  it.each(ACCENT_SWATCHES)("accent text on %s meets 4.5:1 on bg and on its soft fill", (hex) => {
-    for (const [mode, bg] of [
-      ["light", "#FFFFFF"],
-      ["dark", "#0A0A0B"],
-    ] as const) {
-      const vars = deriveAccentVars(hex, mode)
-      const text = parseHex(vars["--accent-text"])
-      expect(contrastRatio(text, parseHex(bg))).toBeGreaterThanOrEqual(4.5)
-      expect(contrastRatio(text, parseHex(vars["--accent-soft"]))).toBeGreaterThanOrEqual(4.5)
-    }
+  // Surfaces from tokens.css that body text can sit on (--bg, --elev, --surface).
+  const SURFACES = {
+    light: ["#FFFFFF", "#F4F4F2"],
+    dark: ["#0A0A0B", "#18181A", "#1E1E21"],
+  } as const
+
+  it.each(ACCENT_SWATCHES)(
+    "accent text on %s meets 4.5:1 on every surface and on its soft fill",
+    (hex) => {
+      for (const mode of ["light", "dark"] as const) {
+        const vars = deriveAccentVars(hex, mode)
+        const text = parseHex(vars["--accent-text"])
+        for (const surface of SURFACES[mode]) {
+          const ratio = contrastRatio(text, parseHex(surface))
+          expect(ratio, `${mode} text on ${surface}`).toBeGreaterThanOrEqual(4.5)
+        }
+        const onSoft = contrastRatio(text, parseHex(vars["--accent-soft"]))
+        expect(onSoft, `${mode} text on soft`).toBeGreaterThanOrEqual(4.5)
+      }
+    },
+  )
+
+  it("names every swatch for assistive tech", () => {
+    expect(ACCENT_OPTIONS.map((o) => o.name)).toEqual([
+      "Regency gold",
+      "Burgundy",
+      "Navy",
+      "Forest green",
+    ])
+    expect(ACCENT_OPTIONS.map((o) => o.hex)).toEqual([...ACCENT_SWATCHES])
   })
 
   it.each(ACCENT_SWATCHES)("ink on %s meets 4.5:1 on the accent fill", (hex) => {

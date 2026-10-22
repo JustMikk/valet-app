@@ -13,7 +13,14 @@ export const AccentHex = z
 export const DEFAULT_ACCENT = "#C9A24A"
 
 /** Accent choices offered in tenant Settings (Admin Pages.dc.html; OPEN_QUESTIONS D3). */
-export const ACCENT_SWATCHES = ["#C9A24A", "#8E1B2A", "#1F3A5F", "#2F5D46"] as const
+export const ACCENT_OPTIONS = [
+  { hex: "#C9A24A", name: "Regency gold" },
+  { hex: "#8E1B2A", name: "Burgundy" },
+  { hex: "#1F3A5F", name: "Navy" },
+  { hex: "#2F5D46", name: "Forest green" },
+] as const
+
+export const ACCENT_SWATCHES = ACCENT_OPTIONS.map((option) => option.hex)
 
 export type AccentVars = {
   "--accent": string
@@ -25,8 +32,19 @@ export type AccentVars = {
 
 // Exported values for the default gold, per mode. Also the reference the derivation is tuned on.
 const GOLD = {
-  light: { accent: "#C9A24A", soft: "#F7EFDA", text: "#7F611A", bg: "#FFFFFF" },
-  dark: { accent: "#D9B661", soft: "#2B2415", text: "#E6C77E", bg: "#0A0A0B" },
+  // `surfaces`: page and card grounds accent text can sit on (--bg/--elev, --surface).
+  light: {
+    accent: "#C9A24A",
+    soft: "#F7EFDA",
+    text: "#7F611A",
+    surfaces: ["#FFFFFF", "#F4F4F2"],
+  },
+  dark: {
+    accent: "#D9B661",
+    soft: "#2B2415",
+    text: "#E6C77E",
+    surfaces: ["#0A0A0B", "#18181A", "#1E1E21"],
+  },
 } as const
 
 const INK_DARK = "#1C1404"
@@ -82,7 +100,7 @@ export function deriveAccentVars(input: string, mode: ThemeMode): AccentVars {
   const soft = fromOklch(relativeTo(accent, goldAccent, toOklch(parseHex(gold.soft))))
   const text = ensureTextContrast(
     relativeTo(accent, goldAccent, toOklch(parseHex(gold.text))),
-    [parseHex(gold.bg), soft],
+    [...gold.surfaces.map(parseHex), soft],
     mode,
   )
   return {

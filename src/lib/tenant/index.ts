@@ -1,4 +1,5 @@
 export {
+  ACCENT_OPTIONS,
   ACCENT_SWATCHES,
   AccentHex,
   DEFAULT_ACCENT,

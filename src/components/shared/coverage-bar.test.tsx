@@ -17,7 +17,28 @@ describe("coverageSummary", () => {
   })
 })
 
+describe("coverageSummary with unusable counts", () => {
+  it("says there are no slots instead of printing 'of 0'", () => {
+    expect(coverageSummary({ onSite: 0, late: 0, expected: 0, open: 0 })).toBe("No slots")
+  })
+
+  it("treats negative, fractional and non-finite counts as valid whole numbers or zero", () => {
+    expect(coverageSummary({ onSite: -2, late: Number.NaN, expected: 2.9, open: 1 })).toBe(
+      "2 expected, 1 open of 3",
+    )
+  })
+})
+
 describe("CoverageBar", () => {
+  it("draws a neutral empty track with a text equivalent when there are no slots", () => {
+    const { container } = render(
+      <CoverageBar counts={{ onSite: 0, late: 0, expected: 0, open: 0 }} legend />,
+    )
+    expect(screen.getByRole("img", { name: "No slots" })).toBeInTheDocument()
+    expect(container.querySelector("[data-segment='none']")).not.toBeNull()
+    expect(screen.queryByText(/of 0/)).toBeNull()
+  })
+
   it("exposes the summary as the bar's accessible name", () => {
     render(<CoverageBar counts={counts} />)
     expect(screen.getByRole("img", { name: "4 on site, 1 late, 1 open of 6" })).toBeInTheDocument()

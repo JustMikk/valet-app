@@ -1,6 +1,6 @@
 "use client"
 
-import { ACCENT_SWATCHES } from "@/lib/tenant"
+import { ACCENT_OPTIONS } from "@/lib/tenant"
 import { cn } from "@/lib/utils"
 
 type AccentSwitcherProps = {
@@ -13,13 +13,13 @@ export function AccentSwitcher({ value, onChange }: AccentSwitcherProps) {
   return (
     <div role="group" aria-label="Tenant accent" className="flex items-center gap-3">
       <span className="text-14 font-semibold text-fg">Tenant accent</span>
-      {ACCENT_SWATCHES.map((hex) => {
+      {ACCENT_OPTIONS.map(({ hex, name }) => {
         const selected = hex === value.toUpperCase()
         return (
           <button
             key={hex}
             type="button"
-            aria-label={`Accent ${hex}`}
+            aria-label={`Accent ${name}`}
             aria-pressed={selected}
             onClick={() => onChange(hex)}
             className={cn(

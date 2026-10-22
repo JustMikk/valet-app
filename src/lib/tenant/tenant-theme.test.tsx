@@ -11,6 +11,14 @@ describe("TenantTheme", () => {
     expect(style?.textContent).toBe(tenantThemeCss("#8E1B2A"))
   })
 
+  it("emits the light scope before the dark one so dark wins on a dark page", () => {
+    // Both selectors have equal specificity (:root and [data-theme] each count one class-level
+    // selector), so source order decides which accent applies in a dark scope (ADR-006).
+    const css = tenantThemeCss("#8E1B2A")
+    expect(css.indexOf('[data-theme="light"]')).toBeGreaterThan(-1)
+    expect(css.indexOf('[data-theme="dark"]')).toBeGreaterThan(css.indexOf('[data-theme="light"]'))
+  })
+
   it("injects nothing for the default accent, which tokens.css already defines", () => {
     const { container } = render(<TenantTheme accent="#C9A24A" />)
     expect(container.querySelector("style")).toBeNull()

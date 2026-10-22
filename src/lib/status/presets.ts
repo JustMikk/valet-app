@@ -31,7 +31,8 @@ export const STATUS = {
     tone: "warn",
     icon: "running_with_errors",
     filled: true,
-    label: `Late ${Math.round(minutes)} min`,
+    // Round up so a person a few seconds late never reads "Late 0 min"; unknown stays "Late".
+    label: Number.isFinite(minutes) ? `Late ${Math.max(1, Math.ceil(minutes))} min` : "Late",
   }),
   waitingApproval: { tone: "info", icon: "front_hand", filled: true, label: "Waiting approval" },
   openSlot: { tone: "outline", icon: "person_add", filled: false, label: "Open slot" },

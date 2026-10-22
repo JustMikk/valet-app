@@ -35,6 +35,7 @@ export function ConfirmSheet({
       onOpenChange={onOpenChange}
       title={title}
       description={consequence}
+      dismissible={false}
     >
       <div className="flex gap-2.5">
         <Button variant="secondary" className="flex-1" onClick={() => onOpenChange(false)}>

@@ -1,9 +1,21 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
-import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerTitle,
+} from "@/components/ui/drawer"
 import { useBreakpoint } from "@/hooks/use-breakpoint"
 
 type ResponsiveSheetProps = {
@@ -12,11 +24,35 @@ type ResponsiveSheetProps = {
   /** Required: every sheet and dialog is named by its title. */
   title: ReactNode
   description?: ReactNode
+  /**
+   * Adds a "Close" control that stays visually hidden until keyboard focus reaches it, so
+   * screen-reader and keyboard users are never left with only a gesture or the scrim to dismiss.
+   * Turn off when the content already ends in an explicit Cancel (ConfirmSheet).
+   */
+  dismissible?: boolean
   children?: ReactNode
 }
 
 export const SHEET_TITLE = "font-display text-28 leading-x110 font-bold tracking-n025 text-fg"
 export const SHEET_DESCRIPTION = "text-15 leading-x140 text-fg-2"
+
+const DISMISS =
+  "sr-only h-10 rounded-pill border-0 bg-surface px-4 text-15 font-semibold text-fg focus-visible:not-sr-only focus-visible:self-center"
+
+type Variant = "sheet" | "dialog"
+
+/**
+ * Bottom sheet on phone, dialog from 700 px. The variant follows the breakpoint only while the
+ * sheet is closed: resizing or rotating with it open must not swap the primitive, which would
+ * remount the content and drop typed input and focus.
+ */
+function useSheetVariant(open: boolean): Variant {
+  const live: Variant = useBreakpoint() === "phone" ? "sheet" : "dialog"
+  const [locked, setLocked] = useState<Variant>(live)
+  // React's "adjust state while rendering" pattern: re-sync during render, not in an effect.
+  if (!open && locked !== live) setLocked(live)
+  return locked
+}
 
 /**
  * Bottom sheet on phone (glass, 30 px top corners, grabber, slide up) and centered 440 px dialog
@@ -27,11 +63,12 @@ export function ResponsiveSheet({
   onOpenChange,
   title,
   description,
+  dismissible = true,
   children,
 }: ResponsiveSheetProps) {
-  const phone = useBreakpoint() === "phone"
+  const variant = useSheetVariant(open)
 
-  if (phone) {
+  if (variant === "sheet") {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="rounded-t-sheet border-t-0 bg-sheet [backdrop-filter:var(--blur-lg)] duration-320 ease-(--ease-sheet) [--drawer-bleed-background:var(--sheet)]">
@@ -48,6 +85,7 @@ export function ResponsiveSheet({
               <DrawerDescription className={SHEET_DESCRIPTION}>{description}</DrawerDescription>
             )}
             {children}
+            {dismissible && <DrawerClose className={DISMISS}>Close</DrawerClose>}
           </div>
         </DrawerContent>
       </Drawer>
@@ -62,6 +100,7 @@ export function ResponsiveSheet({
           <DialogDescription className={SHEET_DESCRIPTION}>{description}</DialogDescription>
         )}
         {children}
+        {dismissible && <DialogClose className={DISMISS}>Close</DialogClose>}
       </DialogContent>
     </Dialog>
   )

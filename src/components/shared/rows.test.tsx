@@ -56,6 +56,8 @@ describe("PersonRow", () => {
       />,
     )
     expect(screen.getByText("AK")).toBeInTheDocument()
+    // The initials repeat the name beside them, so assistive tech should skip them.
+    expect(screen.getByText("AK").closest("[aria-hidden='true']")).not.toBeNull()
     expect(screen.getByText("Ana Kovač")).toBeInTheDocument()
     expect(screen.getByText("2h 12m")).toBeInTheDocument()
   })

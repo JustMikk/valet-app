@@ -32,7 +32,14 @@ describe("STATUS presets", () => {
     expect(spec.label.trim().length).toBeGreaterThan(0)
   })
 
-  it("formats lateness in whole minutes", () => {
+  it("formats lateness in whole minutes, rounding up so it is never 0", () => {
     expect(STATUS.late(3).label).toBe("Late 3 min")
+    expect(STATUS.late(0.4).label).toBe("Late 1 min")
+    expect(STATUS.late(12.2).label).toBe("Late 13 min")
+  })
+
+  it("does not print a number when the lateness is unknown", () => {
+    expect(STATUS.late(Number.NaN).label).toBe("Late")
+    expect(STATUS.late(-5).label).toBe("Late 1 min")
   })
 })

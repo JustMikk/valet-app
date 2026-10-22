@@ -34,7 +34,8 @@ export function PersonAvatar({ name, open, className }: PersonAvatarProps) {
     )
   }
   return (
-    <Avatar className={cn("size-11 after:hidden", className)}>
+    // Decorative: PersonRow always renders the name next to it, so skip the repeated initials.
+    <Avatar aria-hidden="true" className={cn("size-11 after:hidden", className)}>
       <AvatarFallback className="bg-surface-2 text-15 font-semibold text-fg">
         {initials(name)}
       </AvatarFallback>
