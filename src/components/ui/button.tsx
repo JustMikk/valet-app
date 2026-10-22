@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 // Vendor edit (ADR-006, DESIGN_INTAKE): shadcn's variants and sizes replaced with the design
 // export's button system. Pill radius everywhere; heights and label sizes as the app screens use.
 const buttonVariants = cva(
-  "group/button relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-pill border-0 font-sans font-semibold whitespace-nowrap transition-transform duration-160 outline-none select-none active:scale-97 disabled:cursor-not-allowed disabled:bg-surface disabled:text-fg-3 disabled:shadow-none disabled:active:scale-100",
+  "group/button relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-pill border-0 font-sans font-semibold whitespace-nowrap transition-transform duration-160 select-none active:scale-97 disabled:cursor-not-allowed disabled:bg-surface disabled:text-fg-3 disabled:shadow-none disabled:active:scale-100",
   {
     variants: {
       variant: {

@@ -65,10 +65,11 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/components/shared/coverage-bar.tsx`, `src/components/shared/coverage-bar.test.tsx`
   - Scope: S
 
-- [ ] **Task 10: UnderlineTabs, ChipGroup**
+- [x] **Task 10: UnderlineTabs, ChipGroup**
   - Acceptance: tabs underline variant (19 px, 3 px indicator); ChipGroup single-select via ToggleGroup, keyboard operable, selected = accent-soft + inset.
   - Verify: `pnpm test src/components/shared`
-  - Files: `src/components/ui/tabs.tsx`, `src/components/ui/toggle-group.tsx`, `src/components/shared/underline-tabs.tsx`, `src/components/shared/chip-group.tsx`, `src/components/shared/tabs-chips.test.tsx`
+  - Note: shadcn `tabs` was installed and evaluated, then removed: its line variant's 2 px pseudo indicator and dark-mode border overrides conflict with the 3 px underline, so UnderlineTabs composes the same Base UI primitive. `toggle` variants swapped to the design chip.
+  - Files: `src/components/ui/toggle.tsx`, `src/components/ui/toggle-group.tsx`, `src/components/shared/underline-tabs.tsx`, `src/components/shared/chip-group.tsx`, `src/components/shared/tabs-chips.test.tsx`
   - Scope: M
 
 - [ ] **Task 11: TextField, SystemBanner**
