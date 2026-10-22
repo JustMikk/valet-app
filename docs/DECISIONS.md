@@ -126,3 +126,13 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - No `material-symbols` npm dependency; lucide (shadcn default) is not used for product icons.
 
 **Consequences.** Adding an icon means adding its name and running `pnpm icons:build` (network needed once). Sources: `node_modules/next/dist/docs/01-app/03-api-reference/02-components/font.md`; verified fonts load (`document.fonts`) and glyphs render in a static-export screenshot.
+
+---
+
+## ADR-008 — Zod for boundary validation; tenant accent derivation
+
+**Date:** 2026-10-22 · **Status:** accepted
+
+**Decision.** `zod` 4 is the validation library at every boundary (handoff §7); first use is the tenant accent (`AccentHex`). Tenant accents derive `--accent-soft` and `--accent-text` in OKLCH from the exported gold variants (same lightness, chroma scaled to the accent, gold's hue offset), with text lightness nudged until it meets 4.5:1 on the page background and on the soft fill (D7). The default gold returns the exported values exactly; other accents use one hex in both modes (D8). `TenantTheme` injects the variables as a stylesheet built only from a validated hex.
+
+**Verification.** `src/lib/tenant/*.test.ts`: the formula reproduces exported gold within ΔE_ok < 2 in both modes; all four Settings swatches meet 4.5:1 for accent text (on bg and soft) and for ink on the accent fill.

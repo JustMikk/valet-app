@@ -22,7 +22,7 @@ Every task: `pnpm check:task` green, one commit, source of truth = spec + app sc
   - Files: `src/app/layout.tsx`, `src/components/shared/icon.tsx`, `src/components/shared/icon.test.tsx`, `package.json`, `docs/DECISIONS.md`
   - Scope: M
 
-- [ ] **Task 4: Tenant accent**
+- [x] **Task 4: Tenant accent**
   - Acceptance: `deriveAccentVars(hex, mode)` validates input with Zod. Gold returns the exported values exactly. Ink switches at luminance .55. Soft/text derivation reproduces gold within ΔE < 2. `TenantThemeProvider` injects the vars at the root with no component reading the tenant.
   - Verify: `pnpm test src/lib/tenant`
   - Files: `src/lib/tenant/accent.ts`, `src/lib/tenant/accent.test.ts`, `src/lib/tenant/tenant-theme-provider.tsx`, `src/lib/tenant/index.ts`
