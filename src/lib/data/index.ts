@@ -21,3 +21,4 @@ export const DATA_SOURCE = process.env.NEXT_PUBLIC_DATA_SOURCE === "api" ? "api"
 
 export const staffRepo: StaffRepo = DATA_SOURCE === "api" ? httpStaffRepo : mockStaffRepo
 export const adminRepo: AdminRepo = DATA_SOURCE === "api" ? httpAdminRepo : mockAdminRepo
+export { signInAdmin, signInDemo, signInStaff, signOut } from "./auth"

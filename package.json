@@ -34,6 +34,7 @@
     "icons:build": "node scripts/build-icon-font.mjs",
     "db:migrate": "node --env-file=.env.local scripts/db-migrate.mjs",
     "db:seed": "tsx --env-file=.env.local scripts/db-seed.ts",
+    "admin:create": "tsx --env-file=.env.local scripts/create-admin.ts",
     "db:setup": "pnpm db:migrate && pnpm db:seed"
   },
   "dependencies": {

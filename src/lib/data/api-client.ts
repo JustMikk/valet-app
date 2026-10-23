@@ -1,7 +1,6 @@
-// HTTP client for the demo API. Every response is validated against its shared schema; a missing
-// session is established silently with the demo sign-in (the real sign-in method is an owner
-// decision, OPEN_QUESTIONS P1/H3), and one expired-token retry is attempted. The staff and admin
-// apps keep separate sessions, so one browser can use both.
+// HTTP client for the demo API. Every response is validated against its shared schema. A request
+// with no session, or one the server rejects as expired, sends the person to the sign-in page. The
+// staff and admin apps keep separate sessions, so one browser can use both.
 import { z } from "zod/mini"
 
 import { SessionDto, type Session } from "./staff/schemas"
@@ -37,7 +36,6 @@ export function writeToken(session: Session | null, role: Role = "staff"): void 
 }
 
 const memoryTokens: Record<Role, string | null> = { staff: null, admin: null }
-const pendingSessions: Record<Role, Promise<string> | null> = { staff: null, admin: null }
 
 const ErrorBody = z.object({ error: z.object({ code: z.string(), message: z.string() }) })
 
@@ -67,26 +65,38 @@ export function clearSession(role: Role = "staff"): void {
   writeToken(null, role)
 }
 
-async function demoSession(role: Role): Promise<string> {
-  pendingSessions[role] ??= (async () => {
-    const res = await send("auth/demo", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ role }),
-    })
-    if (!res.ok) await fail(res)
-    const session = SessionDto.parse(await res.json())
-    setSession(session, role)
-    return session.token
-  })().finally(() => {
-    pendingSessions[role] = null
+/** One-tap demo session (only works when the server runs with DEMO_MODE=1): the /demo page. */
+export async function startDemoSession(role: Role): Promise<void> {
+  const res = await send("auth/demo", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ role }),
   })
-  return pendingSessions[role]
+  if (!res.ok) await fail(res)
+  setSession(SessionDto.parse(await res.json()), role)
 }
 
-async function currentToken(role: Role): Promise<string> {
+// Pages a person can be on without a session: they sign in from there.
+const OPEN_PATHS = ["/", "/login", "/demo"]
+
+function toSignIn(role: Role): void {
+  if (typeof window === "undefined") return
+  const path = window.location.pathname.replace(/\/$/, "") || "/"
+  if (OPEN_PATHS.includes(path) || path.startsWith("/staff/onboarding")) return
+  const next = encodeURIComponent(path + window.location.search)
+  window.location.replace(`/login?role=${role}&next=${next}`)
+}
+
+const signedOut = () => new ApiError(401, "unauthorized", "Sign in to continue.")
+
+function currentToken(role: Role): string {
   memoryTokens[role] ??= readToken(role)
-  return memoryTokens[role] ?? demoSession(role)
+  const token = memoryTokens[role]
+  if (!token) {
+    toSignIn(role)
+    throw signedOut()
+  }
+  return token
 }
 
 type Options = {
@@ -112,10 +122,12 @@ export async function api<S extends z.ZodMiniType>(
       body: body === undefined ? undefined : JSON.stringify(body),
     })
 
-  let res = await request(auth ? await currentToken(as) : null)
+  const res = await request(auth ? currentToken(as) : null)
   if (res.status === 401 && auth) {
+    // Expired or unknown token: forget it and ask for a fresh sign-in.
     clearSession(as)
-    res = await request(await demoSession(as))
+    toSignIn(as)
+    throw signedOut()
   }
   if (!res.ok) await fail(res)
   return schema.parse(await res.json())

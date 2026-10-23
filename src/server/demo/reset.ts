@@ -2,7 +2,8 @@
 // table from a single JSON document (jsonb_populate_recordset), so a reset is a handful of round
 // trips instead of hundreds of inserts. Columns come from the fixture rows, so anything a fixture
 // leaves out takes the table's default.
-import { sql } from "../db/client"
+import { rows, sql } from "../db/client"
+import { ADMIN_ID } from "./cast"
 import { env } from "../env"
 import { buildFixtures, type Fixtures, type Scenario } from "./fixtures"
 
@@ -64,6 +65,12 @@ function grandCenterFromEnv(): { lat: number; lng: number } | undefined {
 export async function resetDemo(scenario: Scenario, now: Date = new Date()): Promise<void> {
   const fixtures = buildFixtures(now, scenario, { grandCenter: grandCenterFromEnv() })
   const db = sql()
+  // Dispatchers created by hand (they have a password) survive a reset; the seeded one is rebuilt.
+  const kept = await rows<Record<string, unknown>>(
+    sql()`select id, tenant_id, name, email, role_label, password_hash from admins
+          where password_hash is not null and id <> ${ADMIN_ID}`,
+  )
+  fixtures.admins.push(...(kept as (typeof fixtures.admins)[number][]))
   await db.transaction((txn) => [
     txn.query(`truncate table ${WIPE}`),
     ...TABLES.filter((table) => fixtures[table].length > 0).map((table) => {

@@ -275,3 +275,19 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - Verified end to end in Edge: a staff message produced a displayed push notification on an admin device through the real push service.
 - iOS delivers push only to an installed home-screen app, which needs the manifest’s icon set (D37).
 - `web-push` is a new server dependency.
+
+---
+
+## ADR-016 — Real sign-in; the demo launcher moves to /demo
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction)
+
+**Decision.**
+
+- `/` is a short public landing page with two sign-in buttons; `/login` signs in (`?role=staff|admin`, `?next=` to return to where the person was headed, kept inside their own app); the old demo launcher is `/demo`.
+- **Staff** sign in with their email alone: an active staff row with that email is enough (invited people included, so they can finish onboarding). **Dispatchers** sign in with email and password (`admins.password_hash`, scrypt, constant-time compare, one message for either being wrong). Accounts are created by hand: `pnpm admin:create <email> <password> ["Name"]` (it also resets a password).
+- The client no longer creates a demo session silently. No session, or an expired one, sends the person to `/login`; `/`, `/login`, `/demo` and `/staff/onboarding` are reachable signed out. The demo shortcuts (`/api/auth/demo`, reset) still need `DEMO_MODE=1` and are used from `/demo`.
+- A demo reset keeps dispatchers that have a password; the seeded demo dispatcher has none.
+- Sign out: Profile (staff) and Settings (dispatch). The static build has no server, so signing in there just lets the person through.
+
+**Consequences.** Email-only staff sign-in is weak by design (D38). Turn `DEMO_MODE` off anywhere real.

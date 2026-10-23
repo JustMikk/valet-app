@@ -1,10 +1,11 @@
 "use client"
 
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 import { GlassCard, ToggleSwitch } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import type { Settings as SettingsData } from "@/lib/data"
+import { signOut, type Settings as SettingsData } from "@/lib/data"
 import { ACCENT_OPTIONS, useTenantAccent } from "@/lib/tenant"
 import { cn } from "@/lib/utils"
 
@@ -61,6 +62,7 @@ export function Settings() {
 
 function SettingsBody({ settings }: { settings: SettingsData }) {
   const { accent, setAccent } = useTenantAccent()
+  const router = useRouter()
   const update = useUpdateSettings()
 
   const pickAccent = (hex: string) => {
@@ -151,6 +153,16 @@ function SettingsBody({ settings }: { settings: SettingsData }) {
             ))}
           </ul>
         </section>
+        <Button
+          variant="ghost"
+          className="h-13 text-16 shadow-[inset_0_0_0_1.5px_var(--line)]"
+          onClick={() => {
+            signOut("admin")
+            router.push("/")
+          }}
+        >
+          Sign out
+        </Button>
       </div>
     </>
   )
