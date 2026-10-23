@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import { PillTabs, TextField } from "@/components/shared"
+import { PillTabs, TextField, ThemeToggle } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { signInAdmin, signInStaff } from "@/lib/data"
 import type { Role } from "@/lib/data/api-client"
@@ -49,15 +49,18 @@ export function LoginForm() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-110 flex-col justify-center gap-7 px-5 py-12 bg-ambient">
-      <Link href="/" aria-label="Valet Workforce home" className="self-start">
-        <Image
-          src="/brand/regency-logo.png"
-          alt="Regency"
-          width={72}
-          height={40}
-          className="h-10 w-auto"
-        />
-      </Link>
+      <div className="flex items-center justify-between gap-4">
+        <Link href="/" aria-label="Valet Workforce home">
+          <Image
+            src="/brand/regency-logo.png"
+            alt="Regency"
+            width={72}
+            height={40}
+            className="h-10 w-auto"
+          />
+        </Link>
+        <ThemeToggle />
+      </div>
       <div className="flex flex-col gap-2">
         <h1 className="m-0 font-display text-34 leading-x105 font-bold tracking-n030">Sign in</h1>
         <p className="m-0 text-16 text-fg-2">{COPY[role]}</p>
