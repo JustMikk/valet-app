@@ -1,11 +1,7 @@
 "use client"
 
-import { useState } from "react"
-
-import { Icon, PillTabs } from "@/components/shared"
-import { Button } from "@/components/ui/button"
+import { PillTabs } from "@/components/shared"
 import { RADII } from "@/lib/data"
-import { webLocation } from "@/lib/platform"
 
 import { FIELD_CONTROL, FormField } from "../common/form-field"
 import { PlaceSearch } from "./place-search"
@@ -13,11 +9,6 @@ import { pinOf, withPlace, type VenueDraft } from "./venue-draft"
 import { VenueMap } from "./venue-map"
 
 const RADIUS_ITEMS = RADII.map((r) => ({ value: String(r), label: `${r} m` }))
-const HERE_ACCURACY_M = 30
-const HERE_TIMEOUT_MS = 15_000
-
-type Here = { state: "idle" | "reading" | "done" | "failed"; accuracyM?: number }
-
 type LocationStepProps = {
   draft: VenueDraft
   onChange: (next: VenueDraft) => void
@@ -25,50 +16,16 @@ type LocationStepProps = {
 
 /** Step 1: find the venue, check it on the map, and set how close staff must be to clock in. */
 export function VenueLocationStep({ draft, onChange }: LocationStepProps) {
-  const [here, setHere] = useState<Here>({ state: "idle" })
   const pin = pinOf(draft)
-
-  const readThisDevice = async () => {
-    setHere({ state: "reading" })
-    const outcome = await webLocation.acquire({
-      targetAccuracyM: HERE_ACCURACY_M,
-      timeoutMs: HERE_TIMEOUT_MS,
-    })
-    if (!outcome.ok) return setHere({ state: "failed" })
-    onChange({
-      ...draft,
-      lat: outcome.fix.lat.toFixed(6),
-      lng: outcome.fix.lng.toFixed(6),
-    })
-    setHere({ state: "done", accuracyM: Math.round(outcome.fix.accuracyM) })
-  }
 
   return (
     <div className="flex flex-col gap-5">
       <PlaceSearch
         picked={draft.name ? `${draft.name} · search again to change` : undefined}
         onPick={(place) => {
-          setHere({ state: "idle" })
           onChange(withPlace(draft, place))
         }}
       />
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          size="xs"
-          disabled={here.state === "reading"}
-          onClick={() => void readThisDevice()}
-        >
-          <Icon name="my_location" size={20} />
-          {here.state === "reading" ? "Reading location…" : "Use my current location"}
-        </Button>
-        <span role="status" className="text-13 text-fg-2">
-          {here.state === "done" && `Set from this device, accurate to ±${here.accuracyM} m.`}
-          {here.state === "failed" && "Couldn’t read this device’s location."}
-        </span>
-      </div>
-
       {pin ? (
         <div className="flex flex-col gap-2">
           <VenueMap
