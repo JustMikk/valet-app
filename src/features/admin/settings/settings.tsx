@@ -1,26 +1,78 @@
 "use client"
 
-import { useState } from "react"
 import Image from "next/image"
 
 import { GlassCard, ToggleSwitch } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import type { Settings as SettingsData } from "@/lib/data"
 import { ACCENT_OPTIONS, useTenantAccent } from "@/lib/tenant"
 import { cn } from "@/lib/utils"
-import { ADMIN_USER, CLOCK_RULES, type ClockRuleKey } from "@/mocks/admin"
 
 import { AdminHead, AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
+import { ErrorNotice, QueryState } from "../data/query-state"
+import { useSettings, useUpdateSettings } from "../data/queries"
 
 const ROW = "box-content flex min-h-16.5 w-full items-center gap-3 border-0 border-b border-line"
 
+type ToggleKey = "selfie" | "earlyOut"
+
+/** The clock-in rules: three values the tenant has set, and two switches it can flip here. */
+function ruleRows(rules: SettingsData["rules"]) {
+  return [
+    {
+      label: "Clock-in window",
+      note: "How early staff can clock in",
+      value: `${rules.windowMin} min before`,
+    },
+    {
+      label: "Default geofence",
+      note: "New venues start with this radius",
+      value: `${rules.radiusM} m`,
+    },
+    {
+      label: "Location accuracy needed",
+      note: "Readings looser than this retry",
+      value: `±${rules.accuracyM} m`,
+    },
+    {
+      label: "Selfie at clock-in",
+      note: "Front camera photo with each clock-in",
+      toggle: "selfie" as const,
+    },
+    {
+      label: "Flag early clock-outs",
+      note: "More than 30 min before scheduled end",
+      toggle: "earlyOut" as const,
+    },
+  ]
+}
+
 /** Tenant settings: logo, accent color (recolors the app live) and clock-in rules. */
 export function Settings() {
-  const { accent, setAccent } = useTenantAccent()
-  const [rules, setRules] = useState<Record<ClockRuleKey, boolean>>({ selfie: true, early: true })
-
+  const settings = useSettings()
   return (
     <AdminPage>
-      <AdminHead title="Settings" sub={ADMIN_USER.company} />
+      <QueryState query={settings} rows={4}>
+        {(data) => <SettingsBody settings={data} />}
+      </QueryState>
+    </AdminPage>
+  )
+}
+
+function SettingsBody({ settings }: { settings: SettingsData }) {
+  const { accent, setAccent } = useTenantAccent()
+  const update = useUpdateSettings()
+
+  const pickAccent = (hex: string) => {
+    setAccent(hex)
+    update.mutate({ accent: hex })
+  }
+  const flip = (key: ToggleKey) => update.mutate({ rules: { [key]: !settings.rules[key] } })
+
+  return (
+    <>
+      <AdminHead title="Settings" sub={settings.company} />
+      {update.error && <ErrorNotice message={update.error.message} />}
       <div className={SPLIT}>
         <section className="flex flex-col gap-3">
           <SectionTitle>Branding</SectionTitle>
@@ -35,7 +87,7 @@ export function Settings() {
               />
             </div>
             <div className="flex flex-1 flex-col gap-0.5">
-              <span className="text-16 font-semibold">{ADMIN_USER.company}</span>
+              <span className="text-16 font-semibold">{settings.company}</span>
               <span className="text-13 text-fg-2">Logo shows in the staff app and on invoices</span>
             </div>
             <Button variant="secondary" size="xs" className="px-3.5">
@@ -46,7 +98,7 @@ export function Settings() {
             <span className="text-15 font-medium">Accent color</span>
             <div className="flex gap-2.5">
               {ACCENT_OPTIONS.map((option) => {
-                const on = option.hex === accent
+                const on = option.hex.toLowerCase() === accent.toLowerCase()
                 return (
                   <button
                     key={option.hex}
@@ -54,7 +106,7 @@ export function Settings() {
                     role="radio"
                     aria-checked={on}
                     aria-label={option.name}
-                    onClick={() => setAccent(option.hex)}
+                    onClick={() => pickAccent(option.hex)}
                     // The swatch shows the tenant's candidate color itself.
                     style={{ backgroundColor: option.hex }}
                     className={cn(
@@ -76,24 +128,18 @@ export function Settings() {
         <section className="flex flex-col gap-1.5">
           <SectionTitle>Clock-in rules</SectionTitle>
           <ul className="m-0 flex list-none flex-col border-t border-line p-0">
-            {CLOCK_RULES.map((rule) => (
+            {ruleRows(settings.rules).map((rule) => (
               <li key={rule.label}>
                 {rule.toggle ? (
                   <button
                     type="button"
                     role="switch"
-                    aria-checked={rules[rule.toggle]}
-                    onClick={() =>
-                      rule.toggle &&
-                      setRules((r) => ({
-                        ...r,
-                        [rule.toggle as ClockRuleKey]: !r[rule.toggle as ClockRuleKey],
-                      }))
-                    }
+                    aria-checked={settings.rules[rule.toggle]}
+                    onClick={() => rule.toggle && flip(rule.toggle)}
                     className={cn(ROW, "bg-transparent p-0 text-left text-fg")}
                   >
                     <RuleText label={rule.label} note={rule.note} />
-                    <ToggleSwitch on={rules[rule.toggle]} />
+                    <ToggleSwitch on={settings.rules[rule.toggle]} />
                   </button>
                 ) : (
                   <div className={ROW}>
@@ -106,7 +152,7 @@ export function Settings() {
           </ul>
         </section>
       </div>
-    </AdminPage>
+    </>
   )
 }
 

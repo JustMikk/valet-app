@@ -232,3 +232,26 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - Push is still not built (`PushProvider`, service worker and manifest are a separate task).
 - Selfie retention is still the owner's decision (product spec §13, OPEN_QUESTIONS P9); photos accumulate in the demo database until reset.
 - Verified in Edge with a fake camera device and a controlled position against the live API: inside (38 m, judged by the server), outside (420 m), location denied, camera refused, camera released after capture, photo stored.
+
+---
+
+## ADR-014 — Admin API and one admin data layer
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: do the admin side API and integration and make it real)
+
+**Context.** The admin app (Live Board, Events, Staff, Venues, Hours, Invoices, Inbox, Settings) ran on fixtures. The staff side already runs on `StaffRepo` with HTTP and mock implementations (ADR-012).
+
+**Decision.**
+
+- `AdminRepo` is the admin app's data boundary, with an HTTP implementation (32 endpoints under `/api/admin/**`, thin `route.api.ts` handlers, logic in `src/server/admin/*`) and a mock implementation for the static export. Screens use TanStack Query hooks in `features/admin/data`.
+- Tokens carry a role (`staff` or `admin`). `adminRoute` answers 403 to a staff token, `staffRoute` the reverse. Legacy tokens read as staff. The demo sign-in (`POST /api/auth/demo`, only with `DEMO_MODE=1`) takes `{role}`.
+- The Live Board model (slot status, summaries, board derivation) is pure and lives in `lib/live/model.ts`, shared by the server, the mock repo and the screens. Wording is built from structured `facts`, never stored as prose.
+- Rules stay on the server: approving or declining an out-of-fence request, nudging, removing from a slot, assigning (one person per spot, never double-booked), hours adjustment with a reason, invoice send. Money is integer cents; bill rates exist only in venue and invoice types.
+- The seed is a living operation relative to "now": events today in every state, past hours with flags, invoices, threads. `POST /api/demo/reset` rebuilds it, and ids are stable so tokens survive.
+- The tenant accent follows the saved setting (staff read it from their profile), so changing it in Settings recolours both apps.
+
+**Consequences.**
+
+- Cross-app effects are real: a staff member's decline, reply or clock-in shows on the admin screens, and an approval, removal or hours adjustment shows on the staff app.
+- Push delivery is still not built; notifications are rows the staff inbox reads.
+- Screens that have no design (Add venue, New invoice, invoice PDF, editing instructions) are logged in OPEN_QUESTIONS D29–D33.

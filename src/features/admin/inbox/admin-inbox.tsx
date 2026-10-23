@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { Icon } from "@/components/shared"
 import { useBreakpoint } from "@/hooks/use-breakpoint"
+import type { Thread } from "@/lib/data"
 import { cn } from "@/lib/utils"
-import { THREADS, type Thread } from "@/mocks/admin"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
+import { QueryState } from "../data/query-state"
+import { useInbox } from "../data/queries"
 import { Conversation } from "./conversation"
 
 function ThreadRow({
@@ -53,22 +54,28 @@ function ThreadRow({
   )
 }
 
-/** Admin inbox: thread list and conversation side by side from tablet; one at a time on phone. */
+/**
+ * Admin inbox: thread list and conversation side by side from tablet; one at a time on phone.
+ * The open thread lives in `?thread=` so a person's "Message" button can land on it.
+ */
 export function AdminInbox() {
   const router = useRouter()
   const phone = useBreakpoint() === "phone"
-  const [selected, setSelected] = useState(0)
-  const [open, setOpen] = useState(false)
+  const inbox = useInbox()
+  const requested = useSearchParams().get("thread") ?? undefined
 
+  const open = requested !== undefined
   const showList = !phone || !open
   const showThread = !phone || open
+  const selected = requested ?? (phone ? undefined : inbox.data?.threads[0]?.id)
+  const data = inbox.data
 
   return (
     <AdminPage>
       {!(phone && open) && (
         <AdminHead
           title="Inbox"
-          sub="2 unread"
+          sub={data ? (data.unread ? `${data.unread} unread` : "All caught up") : "…"}
           cta={{
             label: "Announce",
             icon: "campaign",
@@ -79,20 +86,27 @@ export function AdminInbox() {
       <div className="grid items-start gap-7 tablet:grid-cols-[minmax(17.5rem,22.5rem)_minmax(0,1fr)]">
         {showList && (
           <div className="flex flex-col border-t border-line">
-            {THREADS.map((thread, i) => (
-              <ThreadRow
-                key={thread.name}
-                thread={thread}
-                selected={!phone && i === selected}
-                onOpen={() => {
-                  setSelected(i)
-                  setOpen(true)
-                }}
-              />
-            ))}
+            <QueryState query={inbox} rows={4}>
+              {({ threads }) =>
+                threads.map((thread) => (
+                  <ThreadRow
+                    key={thread.id}
+                    thread={thread}
+                    selected={!phone && thread.id === selected}
+                    onOpen={() => router.replace(`/admin/inbox?thread=${thread.id}`)}
+                  />
+                ))
+              }
+            </QueryState>
           </div>
         )}
-        {showThread && <Conversation onBack={phone ? () => setOpen(false) : undefined} />}
+        {showThread && selected && (
+          <Conversation
+            key={selected}
+            id={selected}
+            onBack={phone ? () => router.replace("/admin/inbox") : undefined}
+          />
+        )}
       </div>
     </AdminPage>
   )
