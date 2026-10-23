@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useRef, type ReactNode } from "react"
+import { useEffect, useRef, ViewTransition, type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
 /**
- * The app's scrolling content pane. Each route enters with the design's screen transition
- * (a plain .22 s fade: scaling a page full of blurred glass janks, see OPEN_QUESTIONS D19), and a new route starts at the top
- * instead of inheriting the previous page's scroll position.
+ * The app's scrolling content pane. Route changes fade through from the old to the new page with React
+ * <ViewTransition> (OPEN_QUESTIONS D19: the exported fade + scale janks on blur-heavy pages), and
+ * a new route starts at the top instead of inheriting the previous page's scroll position.
  */
 export function RouteScreen({ back, children }: { back: ReactNode; children: ReactNode }) {
   const pathname = usePathname()
@@ -19,10 +19,10 @@ export function RouteScreen({ back, children }: { back: ReactNode; children: Rea
   return (
     <div ref={pane} className="no-scrollbar flex h-full flex-col overflow-y-auto">
       {back}
-      {/* Keyed so each route remounts and replays the transition; the Back row stays put. */}
-      <div key={pathname} className="min-h-0 flex-1 animate-route">
-        {children}
-      </div>
+      {/* Keyed so each route is a new transition root; the Back row stays put. */}
+      <ViewTransition key={pathname} enter="route-in" exit="route-out" default="none">
+        <div className="min-h-0 flex-1">{children}</div>
+      </ViewTransition>
     </div>
   )
 }

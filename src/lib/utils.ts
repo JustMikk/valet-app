@@ -109,7 +109,6 @@ export const DESIGN_SCALES = {
     "spin-medium",
     "sheet-up-slow",
     "blink",
-    "route",
     "grow",
     "roll",
     "out",
