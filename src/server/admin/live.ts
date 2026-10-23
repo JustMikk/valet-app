@@ -19,6 +19,8 @@ import {
 
 import { rows, sql } from "../db/client"
 import { conflict, notFound } from "../http/handler"
+import { notifyAdmins } from "../notify"
+import { sweepExpiredSelfies } from "../retention"
 import { adminCtx, firstName, messageStaff, notifyStaff, type AdminCtx } from "./common"
 import { classifySlot, loadSlots, type SlotRow } from "./slots"
 
@@ -97,7 +99,27 @@ export function buildLive(slots: SlotRow[], now: Date): Live {
 
 export async function getLive(adminId: string, now: Date): Promise<Live> {
   const ctx = await adminCtx(adminId)
-  return buildLive(await loadSlots(ctx.tenantId), now)
+  await sweepExpiredSelfies(now)
+  const live = buildLive(await loadSlots(ctx.tenantId), now)
+  await announceLate(ctx.tenantId, live)
+  return live
+}
+
+/** Someone not clocked in after the start is a dispatcher alert, raised once per shift. */
+async function announceLate(tenantId: string, live: Live): Promise<void> {
+  for (const event of live.events) {
+    for (const slot of event.slots) {
+      if (slot.state !== "late") continue
+      await notifyAdmins(tenantId, {
+        dedupeKey: `late:${slot.id}`,
+        icon: "timer",
+        tone: "warn",
+        title: `${slot.name} is late`,
+        body: `${event.venue} · not clocked in ${slot.facts.lateMin ?? 0} min after start`,
+        href: "/admin",
+      })
+    }
+  }
 }
 
 /** How many things need the dispatcher right now: the navigation badge. */

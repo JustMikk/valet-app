@@ -4,6 +4,7 @@ import type {
   AssignResult,
   AvailableStaff,
   EventCard,
+  EventPatch,
   EventDetail,
   EventList,
   EventState,
@@ -490,4 +491,41 @@ export async function createEvent(
     }
   }
   return { id: created.id }
+}
+
+/** Edits what the crew is told (dress, where to park, who to ask for) and tells the crew it changed. */
+export async function updateEvent(
+  adminId: string,
+  eventId: string,
+  patch: EventPatch,
+  now: Date,
+): Promise<EventDetail> {
+  const ctx = await adminCtx(adminId)
+  const [current] = await rows<{ instructions: string; title: string }>(
+    sql()`select instructions, title from events
+          where id = ${eventId} and tenant_id = ${ctx.tenantId}
+            and status <> 'cancelled' and ends_at > ${now.toISOString()}`,
+  )
+  if (!current) throw notFound("Event not found, cancelled or already over.")
+  if (current.instructions === patch.instructions) return getEvent(adminId, eventId, now)
+  await sql()`update events set instructions = ${patch.instructions} where id = ${eventId}`
+  const tellCrew = async () => {
+    const crew = await rows<{ staff_id: string; assignment_id: string }>(
+      sql()`select staff_id, id as assignment_id from assignments
+            where event_id = ${eventId} and staff_id is not null`,
+    )
+    await notifyStaff(
+      crew.map((row) => ({
+        staffId: row.staff_id,
+        icon: "edit_calendar",
+        tone: "warn" as const,
+        title: "Instructions updated",
+        body: `${current.title}: ${patch.instructions.length > 70 ? `${patch.instructions.slice(0, 69)}…` : patch.instructions || "cleared"}`,
+        href: `/staff/shifts/detail?id=${row.assignment_id}`,
+      })),
+    )
+  }
+  // The crew is told while the screen's answer is being built: neither waits on the other.
+  const [detail] = await Promise.all([getEvent(adminId, eventId, now), tellCrew()])
+  return detail
 }

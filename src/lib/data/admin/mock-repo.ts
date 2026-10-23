@@ -5,6 +5,7 @@ import { deriveBoard, first } from "@/lib/live/model"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import {
   ADJUSTED,
+  ADMIN_NOTIFICATIONS,
   ADMIN_USER,
   AUDIENCES,
   AVAILABLE_STAFF,
@@ -23,6 +24,7 @@ import {
 } from "@/mocks/admin"
 import { LIVE_EVENTS, TIMELINE } from "@/mocks/admin-live"
 
+import type { Notifications } from "../staff/schemas"
 import type { AdminRepo } from "./repo"
 import type { Live, LiveEvent, ThreadMessage } from "./ops-schemas"
 import type {
@@ -44,7 +46,28 @@ const settings: Settings = {
   rules: { windowMin: 15, radiusM: 150, accuracyM: 75, selfie: true, earlyOut: true },
 }
 
-const radii = new Map(VENUES.map((venue) => [venue.id, venue.radius as number]))
+/** Every venue, seeded from the design and growing as venues are added or edited. */
+const venueStore = new Map<string, VenueDetail>(
+  VENUES.map((venue) => [
+    venue.id,
+    {
+      id: venue.id,
+      name: venue.name,
+      address: venue.id === "grand" ? VENUE_DETAIL.address : `${venue.address} · PT`,
+      street: venue.address,
+      lat: 37.7936,
+      lng: -122.3965,
+      radiusM: venue.radius,
+      contact: VENUE_DETAIL.rows[0].v,
+      contactName: "Priya",
+      contactTel: "(415) 555-0100",
+      dress: VENUE_DETAIL.rows[1].v,
+      billingEmail: "billing@example.com",
+      billRateCents: 3800,
+    },
+  ]),
+)
+let instructions: string = EVENT_DETAIL.instructions
 let liveEvents: LiveEvent[] = structuredClone(LIVE_EVENTS)
 const approvedHours = new Set<string>()
 let cleanApproved = false
@@ -59,6 +82,7 @@ const staffRows: StaffRow[] = STAFF_ROWS.map((row) => ({
   hours: row.hours,
 }))
 let sentInvoice = false
+let unreadNotices = 2
 let threadMessages: ThreadMessage[] = THREAD_MESSAGES.map((m, i) => ({ id: `m${i}`, ...m }))
 
 const eventCards: EventCard[] = EVENT_DAYS.flatMap((day) => day.items)
@@ -83,7 +107,7 @@ function eventDetail(): EventDetail {
     venueId: "grand",
     badge: { label: `Live now · ${EVENT_DETAIL.when}`, live: true },
     summary: EVENT_DETAIL.summary,
-    instructions: EVENT_DETAIL.instructions,
+    instructions,
     stats: EVENT_DETAIL.stats.map((s) => ({ ...s })),
     roster: EVENT_DETAIL.roster.map((r) => ({
       id: r.name,
@@ -100,16 +124,8 @@ function eventDetail(): EventDetail {
 }
 
 function venueDetail(id: string | undefined): VenueDetail {
-  const venue = VENUES.find((v) => v.id === id) ?? VENUES[0]
-  return {
-    id: venue.id,
-    name: venue.name,
-    address: venue.id === "grand" ? VENUE_DETAIL.address : `${venue.address} · PT`,
-    radiusM: radii.get(venue.id) ?? venue.radius,
-    contact: VENUE_DETAIL.rows[0].v,
-    dress: VENUE_DETAIL.rows[1].v,
-    billRateCents: 3800,
-  }
+  const venue = (id ? venueStore.get(id) : undefined) ?? [...venueStore.values()][0]
+  return structuredClone(venue)
 }
 
 function mapSlots(eventId: string, change: (slots: LiveEvent["slots"]) => LiveEvent["slots"]) {
@@ -140,17 +156,33 @@ export const mockAdminRepo: AdminRepo = {
 
   venues: () =>
     wait(
-      VENUES.map((v) => ({
+      [...venueStore.values()].map((v) => ({
         id: v.id,
         name: v.name,
-        address: v.address,
-        radiusM: radii.get(v.id) ?? v.radius,
-        upcoming: v.upcoming,
+        address: v.street.split(",")[0] ?? v.street,
+        radiusM: v.radiusM,
+        upcoming: VENUES.find((seed) => seed.id === v.id)?.upcoming ?? "No upcoming",
       })),
     ),
   venue: async (id) => venueDetail(id),
+  createVenue: async (request) => {
+    const id = `venue-${venueStore.size + 1}`
+    venueStore.set(id, {
+      ...request,
+      id,
+      address: `${request.street} · PT`,
+      contact: request.contactName,
+    })
+    return venueDetail(id)
+  },
   updateVenue: async (id, patch) => {
-    if (patch.radiusM) radii.set(id, patch.radiusM)
+    const current = venueDetail(id)
+    const next = { ...current, ...patch }
+    venueStore.set(current.id, {
+      ...next,
+      address: `${next.street} · PT`,
+      contact: next.contactName,
+    })
     return venueDetail(id)
   },
 
@@ -193,6 +225,10 @@ export const mockAdminRepo: AdminRepo = {
   events: (tab) => wait(eventList(tab)),
   event: async () => eventDetail(),
   createEvent: async () => ({ id: "new-event" }),
+  updateEvent: async (_id, patch) => {
+    instructions = patch.instructions
+    return eventDetail()
+  },
   cancelEvent: async () => {},
   availableStaff: () =>
     wait(
@@ -367,6 +403,7 @@ export const mockAdminRepo: AdminRepo = {
         },
       ],
     }),
+  createInvoice: async () => ({ id: "inv-0" }),
   sendInvoice: async () => {
     sentInvoice = true
     return { billedTo: INVOICE_DETAIL.sentTo }
@@ -402,6 +439,18 @@ export const mockAdminRepo: AdminRepo = {
     const message = { id: `m${threadMessages.length}`, text, meta: "Just now · Jamie", mine: true }
     threadMessages = [...threadMessages, message]
     return structuredClone(message)
+  },
+  notifications: async (): Promise<Notifications> => ({
+    groups: [
+      {
+        label: "TODAY",
+        items: ADMIN_NOTIFICATIONS.map((item, i) => ({ ...item, unread: i < unreadNotices })),
+      },
+    ],
+    unread: unreadNotices,
+  }),
+  markNotificationsRead: async () => {
+    unreadNotices = 0
   },
   audiences: () => wait(AUDIENCES.map((a) => ({ key: a.key, label: a.label, reach: a.reach }))),
   announce: async () => ({ delivered: 6 }),

@@ -1,13 +1,13 @@
 // Invoices (product spec §10.3-10.5): one per venue per period, built from approved hours. Lines
 // are a snapshot; the notice about hours still in review is live, so it clears as hours are approved.
-import type { InvoiceDetail, InvoiceRow } from "@/lib/data/admin/ops-schemas"
-import { formatHoursDecimal } from "@/lib/money/format"
+import type { InvoiceDetail, InvoiceRow, NewInvoiceRequest } from "@/lib/data/admin/ops-schemas"
+import { amountCents, formatHoursDecimal } from "@/lib/money/format"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import type { StatusSpec } from "@/lib/status/presets"
 import { formatDate } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
-import { conflict, notFound } from "../http/handler"
+import { badRequest, conflict, notFound } from "../http/handler"
 import { adminCtx } from "./common"
 
 const DAY = 24 * 60 * 60_000
@@ -146,4 +146,95 @@ export async function sendInvoice(
     throw conflict("already_sent", "That invoice was already sent.")
   }
   return { billedTo: sent.billed_to }
+}
+
+type ApprovedLine = {
+  id: string
+  label: string
+  starts_at: Date
+  staff_count: number
+  minutes: number
+}
+
+/**
+ * Builds a draft invoice for one venue and period from the hours approved so far (a snapshot, like
+ * the seeded ones). Hours still in review are not included; the invoice’s notice says so.
+ */
+export async function createInvoice(
+  adminId: string,
+  input: NewInvoiceRequest,
+  now: Date,
+): Promise<{ id: string }> {
+  const ctx = await adminCtx(adminId)
+  if (input.periodEnd < input.periodStart) {
+    throw badRequest("The period ends before it starts.", "invalid_request")
+  }
+  const [venue] = await rows<{
+    id: string
+    name: string
+    timezone: string
+    bill_rate_cents: number
+    billing_email: string
+  }>(
+    sql()`select id, name, timezone, bill_rate_cents, billing_email from venues
+          where id = ${input.venueId} and tenant_id = ${ctx.tenantId}`,
+  )
+  if (!venue) throw badRequest("Choose a venue.", "invalid_request")
+
+  const [existing] = await rows<{ id: string }>(
+    sql()`select id from invoices
+          where venue_id = ${venue.id} and period_start = ${input.periodStart}::date
+            and period_end = ${input.periodEnd}::date limit 1`,
+  )
+  if (existing) {
+    throw conflict("invoice_exists", `${venue.name} already has an invoice for that period.`)
+  }
+
+  const events = await rows<ApprovedLine>(
+    sql()`select e.id, coalesce(nullif(e.kind, ''), e.title) as label, e.starts_at,
+                 count(*)::int as staff_count,
+                 round(sum(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60))::int as minutes
+          from assignments a join events e on e.id = a.event_id
+          where e.venue_id = ${venue.id} and a.hours_status = 'approved'
+            and a.clocked_in_at is not null and a.clocked_out_at is not null
+            and (e.starts_at at time zone ${venue.timezone})::date
+                between ${input.periodStart}::date and ${input.periodEnd}::date
+          group by e.id, e.kind, e.title, e.starts_at
+          order by e.starts_at`,
+  )
+  if (events.length === 0) {
+    throw conflict(
+      "nothing_to_invoice",
+      `There are no approved hours at ${venue.name} in that period yet. Approve hours first.`,
+    )
+  }
+
+  const lines = events.map((event) => ({
+    what: `${event.label} · ${formatDate(event.starts_at, venue.timezone)}`,
+    staff_count: event.staff_count,
+    minutes: event.minutes,
+    rate_cents: venue.bill_rate_cents,
+    amount_cents: amountCents(event.minutes, venue.bill_rate_cents),
+  }))
+  const total = lines.reduce((sum, line) => sum + line.amount_cents, 0)
+  const minutes = lines.reduce((sum, line) => sum + line.minutes, 0)
+  const year = now.getUTCFullYear()
+  const [{ next }] = await rows<{ next: number }>(
+    sql()`select coalesce(max(substring(number from '([0-9]+)$')::int), 0) + 1 as next
+          from invoices where tenant_id = ${ctx.tenantId}`,
+  )
+  const number = `INV-${year}-${String(next).padStart(4, "0")}`
+
+  const [created] = await rows<{ id: string }>(
+    sql()`insert into invoices (tenant_id, venue_id, number, period_start, period_end, status,
+                                billed_to, total_cents, minutes)
+          values (${ctx.tenantId}, ${venue.id}, ${number}, ${input.periodStart}::date,
+                  ${input.periodEnd}::date, 'draft', ${venue.billing_email}, ${total}, ${minutes})
+          returning id`,
+  )
+  await sql()`insert into invoice_lines (invoice_id, position, what, staff_count, minutes, rate_cents, amount_cents)
+              select ${created.id}, x.position, x.what, x.staff_count, x.minutes, x.rate_cents, x.amount_cents
+              from jsonb_to_recordset(${JSON.stringify(lines.map((line, i) => ({ ...line, position: i + 1 })))}::jsonb)
+                as x(position int, what text, staff_count int, minutes int, rate_cents int, amount_cents int)`
+  return { id: created.id }
 }

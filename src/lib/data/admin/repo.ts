@@ -1,6 +1,7 @@
 // The admin app's data boundary (handoff §6), like StaffRepo: screens depend on this interface;
 // the HTTP implementation calls the demo API, the mock one serves the design's fixtures in the
 // static export.
+import type { Notifications } from "../staff/schemas"
 import type {
   AdjustResult,
   AnnounceResult,
@@ -13,6 +14,7 @@ import type {
   InvoiceDetail,
   InvoiceRow,
   Live,
+  NewInvoiceRequest,
   NudgeResult,
   RemoveResult,
   ThreadDetail,
@@ -25,9 +27,11 @@ import type {
   AvailableStaff,
   EventDetail,
   EventList,
+  EventPatch,
   EventTab,
   InviteResult,
   NewEventRequest,
+  NewVenueRequest,
   Person,
   Settings,
   SettingsPatch,
@@ -39,6 +43,8 @@ import type {
 
 export interface AdminRepo {
   session(): Promise<AdminSession>
+  notifications(): Promise<Notifications>
+  markNotificationsRead(): Promise<void>
 
   settings(): Promise<Settings>
   updateSettings(patch: SettingsPatch): Promise<Settings>
@@ -46,6 +52,7 @@ export interface AdminRepo {
   venues(): Promise<VenueRow[]>
   /** `id` undefined opens the first venue. */
   venue(id: string | undefined): Promise<VenueDetail>
+  createVenue(request: NewVenueRequest): Promise<VenueDetail>
   updateVenue(id: string, patch: VenuePatch): Promise<VenueDetail>
 
   staff(): Promise<StaffList>
@@ -56,6 +63,8 @@ export interface AdminRepo {
   events(tab: EventTab): Promise<EventList>
   event(id: string | undefined): Promise<EventDetail>
   createEvent(request: NewEventRequest): Promise<{ id: string }>
+  /** Edits what the crew is told; the crew is notified when it changes. */
+  updateEvent(id: string, patch: EventPatch): Promise<EventDetail>
   cancelEvent(id: string): Promise<void>
   availableStaff(eventId: string): Promise<AvailableStaff>
   /** Without `staffIds`, the server picks the best-suited free person. */
@@ -76,6 +85,8 @@ export interface AdminRepo {
   invoices(): Promise<InvoiceRow[]>
   /** `id` undefined opens the first draft. */
   invoice(id: string | undefined): Promise<InvoiceDetail>
+  /** A draft for one venue and period, from the hours approved so far. */
+  createInvoice(request: NewInvoiceRequest): Promise<{ id: string }>
   sendInvoice(id: string): Promise<{ billedTo: string }>
 
   inbox(): Promise<Inbox>

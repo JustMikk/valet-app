@@ -4,6 +4,7 @@ import type { ChatItem } from "@/lib/data/staff/schemas"
 import { formatCompactRange, formatDate, formatTime, calendarDaysBetween } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
+import { snippet, tellDispatch } from "../notify/dispatch"
 import { tenantTimezone } from "./tenant"
 
 type MessageRow = {
@@ -105,6 +106,13 @@ export async function sendMessage(staffId: string, text: string): Promise<ChatIt
           returning id, created_at`,
   )
   const tz = await tenantTimezone(staffId)
+  await tellDispatch(staffId, (who) => ({
+    icon: "chat_bubble",
+    tone: "info",
+    title: `Message from ${who}`,
+    body: snippet(text),
+    href: `/admin/inbox?thread=${staffId}`,
+  }))
   return {
     kind: "message",
     id: created.id,

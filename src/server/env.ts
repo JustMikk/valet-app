@@ -12,6 +12,12 @@ const Env = z.object({
   /** Optional: move the demo's Grand Hotel to these coordinates, so real GPS can clock in there. */
   DEMO_VENUE_LAT: z.optional(z.string()),
   DEMO_VENUE_LNG: z.optional(z.string()),
+  /** Web Push (VAPID). Without the key pair push is off and the apps say so. */
+  VAPID_PUBLIC_KEY: z.optional(z.string()),
+  VAPID_PRIVATE_KEY: z.optional(z.string()),
+  VAPID_SUBJECT: z.optional(z.string()),
+  /** Shared secret for the scheduled retention job (GET /api/cron/retention). */
+  CRON_SECRET: z.optional(z.string()),
 })
 export type Env = z.infer<typeof Env>
 

@@ -229,7 +229,7 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 **Consequences.**
 
 - Geolocation and camera need a secure context: `localhost` works; a phone reaching the dev server over plain `http://<lan-ip>` will not get either permission, so on-device testing needs HTTPS (a tunnel or a deployed preview).
-- Push is still not built (`PushProvider`, service worker and manifest are a separate task).
+- Push was built next (ADR-015).
 - Selfie retention is still the owner's decision (product spec §13, OPEN_QUESTIONS P9); photos accumulate in the demo database until reset.
 - Verified in Edge with a fake camera device and a controlled position against the live API: inside (38 m, judged by the server), outside (420 m), location denied, camera refused, camera released after capture, photo stored.
 
@@ -255,3 +255,23 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - Cross-app effects are real: a staff member's decline, reply or clock-in shows on the admin screens, and an approval, removal or hours adjustment shows on the staff app.
 - Push delivery is still not built; notifications are rows the staff inbox reads.
 - Screens that have no design (Add venue, New invoice, invoice PDF, editing instructions) are logged in OPEN_QUESTIONS D29–D33.
+
+---
+
+## ADR-015 — Notification drawer, Web Push, photo retention, and the admin screens the design lacks
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: build the missing admin screens, real push notifications, keep punch photos 30 days, a notification icon on every page that opens as a side drawer)
+
+**Decision.**
+
+- **Bell and drawer.** `AppShell` takes `notifications` and draws the bell (phone top bar, tablet rail, desktop sidebar, and the Live Board’s own phone bar) plus a right-hand drawer over the current page; choosing a row navigates and closes it. Closing the drawer marks everything read. Staff and admin have the same shape (`Notifications` DTO), served by `/api/staff/notifications` and `/api/admin/notifications`, polled every 15 s. The full-screen clock-in and onboarding flows have no chrome and so no bell.
+- **Admin notifications** (`admin_notifications`, one row per dispatcher): a clock-in request needing approval, a dropped shift, a staff message, and "late" (derived on the Live Board, once per shift via a dedupe key).
+- **Web Push.** `PushProvider` in `lib/platform` (web: service worker `/sw.js` + `PushManager`; fixture build: unsupported). The server (`src/server/notify`) writes the center row and pushes to every device the person allowed, using VAPID keys from the environment (`VAPID_*`; without them push is off and the UI hides it). Delivery is best effort and capped at 3 s; endpoints the push service reports gone are deleted. Staff respect their push setting. Turning alerts on is in the drawer, the onboarding step and the profile. One browser endpoint belongs to one person at a time, so staff and admin in the same browser take it over from each other.
+- **Retention (P9).** A punch photo is deleted 30 days after the punch; the punch and the `selfie` fact stay. It runs hourly as a side effect of a punch or a Live Board load, and from `GET /api/cron/retention` with `CRON_SECRET` for a real scheduler.
+- **Admin screens added** (D29, D30): Add venue, Edit venue, New invoice, invoice PDF (a small dependency-free writer in `lib/pdf`), Edit event instructions.
+
+**Consequences.**
+
+- Verified end to end in Edge: a staff message produced a displayed push notification on an admin device through the real push service.
+- iOS delivers push only to an installed home-screen app, which needs the manifest’s icon set (D37).
+- `web-push` is a new server dependency.

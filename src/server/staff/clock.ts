@@ -15,6 +15,8 @@ import { rows, sql } from "../db/client"
 import { isUniqueViolation } from "../db/errors"
 import { env } from "../env"
 import { badRequest, conflict, notFound } from "../http/handler"
+import { tellDispatch } from "../notify/dispatch"
+import { sweepExpiredSelfies } from "../retention"
 import { loadShifts, type ShiftRow } from "./shift-data"
 
 const OFFLINE_MAX_AGE_MS = 24 * 3_600_000
@@ -157,6 +159,7 @@ export async function punchIn(
   req: ClockPunchRequest,
   now: Date,
 ): Promise<ClockPunch> {
+  await sweepExpiredSelfies(now)
   const replayed = await replay(staffId, req)
   if (replayed) return replayed
 
@@ -206,7 +209,18 @@ export async function punchIn(
   }
 
   try {
-    return toPunch(await insertPunch(staffId, req, row, "in", at, fix, decision, now), row)
+    const punch = toPunch(await insertPunch(staffId, req, row, "in", at, fix, decision, now), row)
+    if (decision.status === "pending_approval") {
+      const away = fix.distanceM === null ? "" : ` · ${fix.distanceM} m away`
+      await tellDispatch(staffId, (who) => ({
+        icon: "wrong_location",
+        tone: "warn",
+        title: `${who} needs approval`,
+        body: `Clock-in request at ${row.venue_name}${away}`,
+        href: "/admin",
+      }))
+    }
+    return punch
   } catch (error) {
     // Two copies of the same request raced: the second returns the first's result.
     if (isUniqueViolation(error)) {

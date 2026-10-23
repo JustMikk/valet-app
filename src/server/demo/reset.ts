@@ -19,6 +19,7 @@ const TABLES = [
   "broadcasts",
   "messages",
   "notifications",
+  "admin_notifications",
   "invoices",
   "invoice_lines",
 ] as const satisfies readonly (keyof Fixtures)[]
@@ -28,6 +29,7 @@ const WIPE = [
   "invoice_lines",
   "invoices",
   "notifications",
+  "admin_notifications",
   "messages",
   "broadcasts",
   "drops",

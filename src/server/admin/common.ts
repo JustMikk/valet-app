@@ -2,6 +2,9 @@
 // (a notification, or a message in their inbox thread).
 import { rows, sql } from "../db/client"
 import { unauthorized } from "../http/handler"
+import { notifyStaff } from "../notify"
+
+export { notifyStaff }
 
 export type AdminCtx = { adminId: string; tenantId: string; name: string; tz: string }
 
@@ -31,34 +34,6 @@ export const initialsOf = (name: string) =>
     .slice(0, 2)
     .map((word) => word[0]?.toUpperCase() ?? "")
     .join("")
-
-type Notice = {
-  staffId: string
-  icon: string
-  tone: "accent" | "info" | "ok" | "warn"
-  title: string
-  body: string
-  href: string
-}
-
-/** One insert for any number of notifications. */
-export async function notifyStaff(notices: Notice[]): Promise<void> {
-  if (notices.length === 0) return
-  const payload = JSON.stringify(
-    notices.map((n) => ({
-      staff_id: n.staffId,
-      icon: n.icon,
-      tone: n.tone,
-      title: n.title,
-      body: n.body,
-      href: n.href,
-    })),
-  )
-  await sql()`insert into notifications (staff_id, icon, tone, title, body, href)
-              select staff_id, icon, tone, title, body, href
-              from jsonb_to_recordset(${payload}::jsonb)
-                as x(staff_id uuid, icon text, tone text, title text, body text, href text)`
-}
 
 /** A message from dispatch into one staff member's thread, plus the "new message" notification. */
 export async function messageStaff(

@@ -18,21 +18,21 @@ Owner for all items: product owner (Mikiyas) unless noted. Dates are when the it
 
 ## Product spec §13 — open product decisions (do not resolve silently)
 
-| #   | Question                                                                              | Status | Logged     |
-| --- | ------------------------------------------------------------------------------------- | ------ | ---------- |
-| P1  | Staff sign-in method (magic link / code vs password vs both)                          | open   | 2026-10-22 |
-| P2  | Staff see own pay rate? Co-workers visible to each other?                             | open   | 2026-10-22 |
-| P3  | Billing rules: minimum hours per worker vs per event; early-arrival minutes; rounding | open   | 2026-10-22 |
-| P4  | GPS accuracy threshold; default geofence radius validation with real venues           | open   | 2026-10-22 |
-| P5  | Mark no-show and slot reopening when the event is already live                        | open   | 2026-10-22 |
-| P6  | Worker-entered corrections: note-only vs request-a-correction flow                    | open   | 2026-10-22 |
-| P7  | Invoice void/reissue and partial payments                                             | open   | 2026-10-22 |
-| P8  | Email as a safety net for critical notifications                                      | open   | 2026-10-22 |
-| P9  | Retention policy for selfies and location samples                                     | open   | 2026-10-22 |
-| P10 | W-2 vs 1099 for the first client                                                      | open   | 2026-10-22 |
-| P11 | Bulk staff import at launch                                                           | open   | 2026-10-22 |
-| P12 | Languages staff need                                                                  | open   | 2026-10-22 |
-| P13 | Request-approval path (§8.5) in MVP?                                                  | open   | 2026-10-22 |
+| #   | Question                                                                              | Status   | Logged     |
+| --- | ------------------------------------------------------------------------------------- | -------- | ---------- |
+| P1  | Staff sign-in method (magic link / code vs password vs both)                          | open     | 2026-10-22 |
+| P2  | Staff see own pay rate? Co-workers visible to each other?                             | open     | 2026-10-22 |
+| P3  | Billing rules: minimum hours per worker vs per event; early-arrival minutes; rounding | open     | 2026-10-22 |
+| P4  | GPS accuracy threshold; default geofence radius validation with real venues           | open     | 2026-10-22 |
+| P5  | Mark no-show and slot reopening when the event is already live                        | open     | 2026-10-22 |
+| P6  | Worker-entered corrections: note-only vs request-a-correction flow                    | open     | 2026-10-22 |
+| P7  | Invoice void/reissue and partial payments                                             | open     | 2026-10-22 |
+| P8  | Email as a safety net for critical notifications                                      | open     | 2026-10-22 |
+| P9  | Retention policy for selfies and location samples                                     | answered | 2026-10-23 | Owner: keep punch photos 30 days, then delete automatically (ADR-015). Location samples: still open |
+| P10 | W-2 vs 1099 for the first client                                                      | open     | 2026-10-22 |
+| P11 | Bulk staff import at launch                                                           | open     | 2026-10-22 |
+| P12 | Languages staff need                                                                  | open     | 2026-10-22 |
+| P13 | Request-approval path (§8.5) in MVP?                                                  | open     | 2026-10-22 |
 
 ## Design intake conflicts
 
@@ -66,9 +66,13 @@ Owner for all items: product owner (Mikiyas) unless noted. Dates are when the it
 | D26 | Seeded addresses, coordinates, venue contacts (Elena, Camille, Dani, Ines) and instructions beyond the design's examples are illustrative                             | resolved-default | 2026-10-23 | `src/server/demo/fixtures.ts`; replace with real tenant data once the admin side can create it                                                                                                                                                 |
 | D27 | No design for a refused camera permission, or for "no location fix after 20 s"                                                                                        | resolved-default | 2026-10-23 | Camera: the location fix-it screen reused with camera copy ("Turn on the camera to clock in", spec §8.4) and steps in Settings → Privacy → Camera. No fix: a notice with "Try again" on the locating screen. Wording is mine. Owner to confirm |
 | D28 | Selfie photos are stored in the database as JPEG data URLs with no expiry                                                                                             | resolved-default | 2026-10-23 | Needed so the admin side can show them; retention is P9. Demo reset clears them                                                                                                                                                                |
-| D29 | The design has "Add venue" and "New invoice" buttons but no screens for them                                                                                          | resolved-default | 2026-10-23 | "Add venue" opens the first venue and "New invoice" opens the first draft invoice. Owner to supply the flows or drop the buttons                                                                                                               |
-| D30 | The invoice "PDF" button and the event "Edit instructions" button have no designed result                                                                             | resolved-default | 2026-10-23 | PDF is disabled; the instructions card is read-only. Owner to specify                                                                                                                                                                          |
+| D29 | The design has "Add venue" and "New invoice" buttons but no screens for them                                                                                          | resolved-default | 2026-10-23 | Built: Add venue (name, address, coordinates typed or read from this device, radius, contact, dress, billing) and New invoice (venue + period, drafted from approved hours). Layouts follow the New event form. Owner to confirm               |
+| D30 | The invoice "PDF" button and the event "Edit instructions" button have no designed result                                                                             | resolved-default | 2026-10-23 | Built: PDF downloads a plain text invoice (no logo); Edit opens a sheet and notifies the crew on change. Owner to confirm or supply a PDF design                                                                                               |
 | D31 | The roster action "Review" on a pending clock-in request has no destination in the design                                                                             | resolved-default | 2026-10-23 | Opens the Live Board, where the request is approved or declined in place                                                                                                                                                                       |
 | D32 | Wording for messages the server sends on an admin action (nudge, approval, decline, removal, hours adjusted, assignment) is not in the design                         | resolved-default | 2026-10-23 | Wording is mine, in `src/server/admin/*`. Owner to confirm or supply copy                                                                                                                                                                      |
 | D33 | "Message crew" and a person’s "Message" have no composer in the design                                                                                                | resolved-default | 2026-10-23 | Message crew opens the announcement composer on that event; Message opens that person’s inbox thread; Call uses a `tel:` link                                                                                                                  |
 | D34 | Admin sign-in is demo-only: the admin session is created automatically with no code screen                                                                            | resolved-default | 2026-10-23 | Real admin auth stays open (P1/H3); replacing `src/server/auth/sign-in.ts` is the only change                                                                                                                                                  |
+
+| D35 | The notification bell on every page (side drawer) is not in the design | resolved-default | 2026-10-23 | Owner asked for it. Right-hand drawer over the current page; bell in the phone top bar and the tablet/desktop sidebar; not on the full-screen clock-in and onboarding flows. Owner to confirm |
+| D36 | Wording of dispatch alerts (late, needs approval, dropped a shift, message) and of push permission copy is not in the design | resolved-default | 2026-10-23 | Wording is mine, in `src/server/notify`, `src/server/staff/*` and `components/shared/push-prompt.tsx`. Owner to confirm |
+| D37 | PWA icons: the manifest has no square icon (only the wide Regency logo exists) | open | 2026-10-23 | Needed for home-screen install and iOS push; owner to supply a square icon set |

@@ -440,6 +440,73 @@ export function buildFixtures(now: Date, scenario: Scenario, options: Options = 
         ]
       : []
 
+  const adminNote = (
+    icon: string,
+    tone: "accent" | "info" | "ok" | "warn",
+    title: string,
+    body: string,
+    href: string,
+    at: Date,
+    read: boolean,
+  ) => ({
+    id: randomUUID(),
+    admin_id: ADMIN_ID,
+    icon,
+    tone,
+    title,
+    body,
+    href,
+    created_at: iso(at),
+    read_at: read ? iso(at) : null,
+  })
+  const adminNotifications = [
+    adminNote(
+      "wrong_location",
+      "warn",
+      "Luis T. needs approval",
+      "Clock-in request at The Grand Hotel · 420 m away",
+      "/admin",
+      ago(8),
+      false,
+    ),
+    adminNote(
+      "timer",
+      "warn",
+      "Ari B. is late",
+      "The Grand Hotel · not clocked in 4 min after start",
+      "/admin",
+      ago(14),
+      false,
+    ),
+    adminNote(
+      "chat_bubble",
+      "info",
+      "Message from Jordan E.",
+      "Garage is full, sending crew to the east lot.",
+      "/admin/inbox",
+      ago(55),
+      true,
+    ),
+    adminNote(
+      "event_busy",
+      "warn",
+      "Sam R. dropped a shift",
+      "Maison Blanc · under 24 h notice",
+      "/admin/events",
+      ago(3 * 60),
+      true,
+    ),
+    adminNote(
+      "schedule",
+      "info",
+      "Hours are ready to review",
+      "Pay period entries are waiting for approval.",
+      "/admin/hours",
+      ago(27 * 60),
+      true,
+    ),
+  ]
+
   const { invoices, invoiceLines } = buildInvoices(now, today, venueIds)
 
   return {
@@ -470,6 +537,7 @@ export function buildFixtures(now: Date, scenario: Scenario, options: Options = 
     broadcasts,
     messages,
     notifications,
+    admin_notifications: adminNotifications,
     invoices,
     invoice_lines: invoiceLines,
   }

@@ -1,6 +1,7 @@
 import { z } from "zod/mini"
 
 import { ApiError, api } from "../api-client"
+import { NotificationsDto } from "../staff/schemas"
 import type { AdminRepo } from "./repo"
 import {
   AddSlotResultDto,
@@ -52,6 +53,7 @@ export const httpAdminRepo: AdminRepo = {
 
   venues: () => api("admin/venues", z.array(VenueRowDto), call),
   venue: (id) => api(`admin/venues/${id ?? "first"}`, VenueDetailDto, call),
+  createVenue: (request) => api("admin/venues", VenueDetailDto, post(request)),
   updateVenue: (id, patch) =>
     api(`admin/venues/${id}`, VenueDetailDto, { ...call, method: "PATCH", body: patch }),
 
@@ -65,6 +67,8 @@ export const httpAdminRepo: AdminRepo = {
   events: (tab) => api(`admin/events?tab=${tab}`, EventListDto, call),
   event: (id) => needsId(id, (v) => api(`admin/events/${v}`, EventDetailDto, call)),
   createEvent: (request) => api("admin/events", IdDto, post(request)),
+  updateEvent: (id, patch) =>
+    api(`admin/events/${id}`, EventDetailDto, { ...call, method: "PATCH", body: patch }),
   cancelEvent: async (id) => {
     await api(`admin/events/${id}/cancel`, Ack, post())
   },
@@ -80,6 +84,11 @@ export const httpAdminRepo: AdminRepo = {
   nudge: (slotId) => api(`admin/live/slots/${slotId}/nudge`, NudgeResultDto, post()),
   removeFromSlot: (slotId) => api(`admin/live/slots/${slotId}/remove`, RemoveResultDto, post()),
 
+  notifications: () => api("admin/notifications", NotificationsDto, call),
+  markNotificationsRead: async () => {
+    await api("admin/notifications/read", Ack, post())
+  },
+
   hours: () => api("admin/hours", HoursDto, call),
   approveHours: async (id) => {
     await api(`admin/hours/${id}/approve`, Ack, post())
@@ -90,6 +99,7 @@ export const httpAdminRepo: AdminRepo = {
 
   invoices: () => api("admin/invoices", z.array(InvoiceRowDto), call),
   invoice: (id) => api(`admin/invoices/${id ?? "first"}`, InvoiceDetailDto, call),
+  createInvoice: (request) => api("admin/invoices", IdDto, post(request)),
   sendInvoice: (id) => api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post()),
 
   inbox: () => api("admin/inbox", InboxDto, call),

@@ -155,6 +155,14 @@ export const InvoiceDetailDto = z.object({
 })
 export type InvoiceDetail = z.infer<typeof InvoiceDetailDto>
 
+export const NewInvoiceRequest = z.object({
+  venueId: str,
+  /** Venue-local calendar dates, "2026-10-16" to "2026-10-31", both included. */
+  periodStart: z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}$/)),
+  periodEnd: z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}$/)),
+})
+export type NewInvoiceRequest = z.infer<typeof NewInvoiceRequest>
+
 export const SendInvoiceResultDto = z.object({ billedTo: str })
 
 // ---- Inbox -----------------------------------------------------------------------------------

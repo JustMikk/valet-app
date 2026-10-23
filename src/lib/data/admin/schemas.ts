@@ -55,15 +55,44 @@ export type VenueRow = z.infer<typeof VenueRowDto>
 export const VenueDetailDto = z.object({
   id: str,
   name: str,
+  /** Display line: street address and the venue's zone ("400 Market St, San Francisco · PT"). */
   address: str,
+  /** The stored street address, for editing. */
+  street: str,
+  lat: z.number(),
+  lng: z.number(),
   radiusM: int,
   contact: str,
+  contactName: str,
+  contactTel: str,
   dress: str,
+  billingEmail: str,
   billRateCents: int,
 })
 export type VenueDetail = z.infer<typeof VenueDetailDto>
 
-export const VenuePatch = z.object({ radiusM: z.optional(z.int().check(z.gte(25), z.lte(2000))) })
+const radius = z.int().check(z.gte(25), z.lte(2000))
+const latitude = z.number().check(z.gte(-90), z.lte(90))
+const longitude = z.number().check(z.gte(-180), z.lte(180))
+const text = (max: number) => z.string().check(z.trim(), z.maxLength(max))
+const venueFields = {
+  name: z.string().check(z.trim(), z.minLength(1), z.maxLength(80)),
+  street: z.string().check(z.trim(), z.minLength(1), z.maxLength(160)),
+  lat: latitude,
+  lng: longitude,
+  radiusM: radius,
+  contactName: text(80),
+  contactTel: text(40),
+  dress: text(120),
+  billingEmail: z.union([z.email(), z.literal("")]),
+  /** Dollars per hour billed to the venue, in cents. */
+  billRateCents: z.int().check(z.gte(0), z.lte(100_000)),
+}
+
+export const NewVenueRequest = z.object(venueFields)
+export type NewVenueRequest = z.infer<typeof NewVenueRequest>
+
+export const VenuePatch = z.partial(z.object(venueFields))
 export type VenuePatch = z.infer<typeof VenuePatch>
 
 // ---- Staff -----------------------------------------------------------------------------------
@@ -163,6 +192,9 @@ export const EventDetailDto = z.object({
   cancelled: bool,
 })
 export type EventDetail = z.infer<typeof EventDetailDto>
+
+export const EventPatch = z.object({ instructions: z.string().check(z.trim(), z.maxLength(1000)) })
+export type EventPatch = z.infer<typeof EventPatch>
 
 export const FillMode = z.enum(["open", "assign"])
 export type FillMode = z.infer<typeof FillMode>

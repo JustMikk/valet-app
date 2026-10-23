@@ -10,6 +10,7 @@ import { formatDate, formatRange } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
 import { conflict, notFound } from "../http/handler"
+import { tellDispatch } from "../notify/dispatch"
 import { loadShifts } from "./shift-data"
 import { hoursUntilStart, isPast, toPastCard, toShiftDetail, toUpcomingCard } from "./shift-view"
 
@@ -69,6 +70,13 @@ export async function dropShift(
   if (dropped.length === 0) throw conflict("not_droppable", "This shift can't be dropped anymore.")
 
   const tz = row.timezone
+  await tellDispatch(staffId, (who) => ({
+    icon: "event_busy",
+    tone: "warn",
+    title: `${who} dropped a shift`,
+    body: `${row.venue_name} · ${formatDate(row.starts_at, tz)}${late ? " · under 24 h notice" : ""}`,
+    href: `/admin/events/detail?id=${row.event_id}`,
+  }))
   return {
     venue: row.venue_name,
     dateLabel: formatDate(row.starts_at, tz),
