@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import type { IconName } from "@/lib/icons/icon-names"
 
 export type ShellApp = "staff" | "admin"
@@ -20,4 +22,13 @@ export type ShellUser = {
   role: string
   /** Makes the avatar a link (staff: Profile). */
   href?: string
+}
+
+export type ShellNotifications = {
+  /** Unread count: drives the bell's dot and the sidebar badge. */
+  unread: number
+  /** Called each time the drawer closes, however it was dismissed (the app marks things read). */
+  onClose?: () => void
+  /** The drawer's content: the app's list and its push prompt. */
+  children: ReactNode
 }

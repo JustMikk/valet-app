@@ -10,6 +10,7 @@ import { Icon } from "../icon"
 import { ResponsiveSheet } from "../responsive-sheet"
 import { TabBar } from "../tab-bar"
 import { useShellMenu } from "./menu-context"
+import { NotificationBell } from "./notification-bell"
 import type { ShellApp, ShellNavItem, ShellUser } from "./types"
 
 const CIRCLE =
@@ -26,6 +27,8 @@ type PhoneChromeProps = {
   currentKey: string | null
   isRoot: boolean
   showTopBar: boolean
+  /** Unread notifications; undefined draws no bell. */
+  unread?: number
   onBack: () => void
 }
 
@@ -40,6 +43,7 @@ export function PhoneChrome({
   currentKey,
   isRoot,
   showTopBar,
+  unread,
   onBack,
 }: PhoneChromeProps) {
   const { open: moreOpen, setOpen: setMoreOpen } = useShellMenu()
@@ -83,19 +87,22 @@ export function PhoneChrome({
               <Icon name="arrow_back" size={24} />
             </button>
           )}
-          {user.href ? (
-            <Link
-              href={user.href}
-              aria-label={user.name}
-              className={cn(CIRCLE, "text-16 font-semibold")}
-            >
-              {user.initials}
-            </Link>
-          ) : (
-            <span className={cn(CIRCLE, "text-16 font-semibold")} aria-hidden="true">
-              {user.initials}
-            </span>
-          )}
+          <div className="flex items-center gap-2.5">
+            {unread !== undefined && <NotificationBell unread={unread} variant="glass" />}
+            {user.href ? (
+              <Link
+                href={user.href}
+                aria-label={user.name}
+                className={cn(CIRCLE, "text-16 font-semibold")}
+              >
+                {user.initials}
+              </Link>
+            ) : (
+              <span className={cn(CIRCLE, "text-16 font-semibold")} aria-hidden="true">
+                {user.initials}
+              </span>
+            )}
+          </div>
         </div>
       )}
 

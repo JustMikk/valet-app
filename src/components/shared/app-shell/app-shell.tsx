@@ -1,15 +1,16 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useEffect, useRef, type ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
 import { Icon } from "../icon"
-import { ShellMenuProvider } from "./menu-context"
+import { ShellMenuProvider, useShellMenu } from "./menu-context"
+import { NotificationDrawer } from "./notification-drawer"
 import { PhoneChrome } from "./phone-chrome"
 import { RouteScreen } from "./route-screen"
 import { Sidebar } from "./sidebar"
-import type { ShellApp, ShellNavItem, ShellUser } from "./types"
+import type { ShellApp, ShellNavItem, ShellNotifications, ShellUser } from "./types"
 
 type AppShellProps = {
   app: ShellApp
@@ -37,8 +38,28 @@ type AppShellProps = {
   topBar?: boolean
   /** Width class of the wide-screen Back row, matching the page's content width. */
   contentMax?: string
+  /** The bell and its drawer. Left out, the shell draws neither. */
+  notifications?: ShellNotifications
   onBack: () => void
   children: ReactNode
+}
+
+/** The drawer, wired to the shell's open state; tells the app each time it closes. */
+function NotificationsLayer({ notifications }: { notifications: ShellNotifications }) {
+  const { notificationsOpen, setNotificationsOpen } = useShellMenu()
+  const wasOpen = useRef(false)
+  const { onClose } = notifications
+
+  useEffect(() => {
+    if (wasOpen.current && !notificationsOpen) onClose?.()
+    wasOpen.current = notificationsOpen
+  }, [notificationsOpen, onClose])
+
+  return (
+    <NotificationDrawer open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+      {notifications.children}
+    </NotificationDrawer>
+  )
 }
 
 /**
@@ -60,6 +81,7 @@ export function AppShell({
   mode = "app",
   topBar = true,
   contentMax = "max-w-280",
+  notifications,
   onBack,
   children,
 }: AppShellProps) {
@@ -81,6 +103,7 @@ export function AppShell({
             items={sidebarItems}
             currentKey={currentKey}
             user={user}
+            unread={notifications?.unread}
           />
         )}
 
@@ -124,10 +147,12 @@ export function AppShell({
               currentKey={currentKey}
               isRoot={isRoot}
               showTopBar={topBar}
+              unread={notifications?.unread}
               onBack={onBack}
             />
           )}
         </main>
+        {notifications && mode === "app" && <NotificationsLayer notifications={notifications} />}
       </div>
     </ShellMenuProvider>
   )
