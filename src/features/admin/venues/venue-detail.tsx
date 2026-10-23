@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import { PillTabs } from "@/components/shared"
+import { Icon, PillTabs } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { useBreakpoint } from "@/hooks/use-breakpoint"
 import { RADII, type VenueDetail as VenueData } from "@/lib/data"
@@ -103,6 +104,15 @@ function VenueBody({ venue }: { venue: VenueData }) {
             </dd>
           </div>
         </dl>
+        <Button
+          variant="secondary"
+          className="gap-2 text-16"
+          nativeButton={false}
+          render={<Link href={`/admin/venues/edit?id=${venue.id}`} />}
+        >
+          <Icon name="edit" size={22} />
+          Edit details
+        </Button>
         {update.error && <ErrorNotice message={update.error.message} />}
         <Button
           variant="strong"

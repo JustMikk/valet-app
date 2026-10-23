@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { useBreakpoint } from "@/hooks/use-breakpoint"
+import { usePush } from "@/hooks/use-push"
 import type { StaffProfile } from "@/lib/data"
 import { ONBOARDING_ORDER, type InstallOs, type OnboardingStep } from "@/mocks/onboarding"
 import { STAFF_USER } from "@/mocks/staff"
@@ -18,7 +19,8 @@ import { InstallStep, LocationStep, PushStep } from "./permission-steps"
 const ALL_STEPS: readonly OnboardingStep[] = [...ONBOARDING_ORDER, "desktop"]
 
 /**
- * Invite-to-ready setup. Every permission is simulated; `?step=` jumps to a screen. On desktop the
+ * Invite-to-ready setup. Location and install are simulated; notifications are real where the
+ * browser and server support push. `?step=` jumps to a screen. On desktop the
  * invite hands off to a "continue on your phone" screen first.
  */
 export function OnboardingFlow() {
@@ -36,6 +38,16 @@ export function OnboardingFlow() {
   const choose = (permissions: Partial<StaffProfile["permissions"]>, next: OnboardingStep) => {
     update.mutate({ permissions })
     setStep(next)
+  }
+
+  const push = usePush("staff")
+  /** Real permission and subscription where push works; the simulated step where it can't. */
+  const allowPush = async () => {
+    if (push.status === "unavailable" || push.status === "unconfigured") {
+      return choose({ push: true }, "done")
+    }
+    const result = await push.enable.mutateAsync().catch(() => "off" as const)
+    choose({ push: result === "on" }, "done")
   }
 
   const go = (next: OnboardingStep) => setStep(next)
@@ -75,10 +87,7 @@ export function OnboardingFlow() {
         />
       )}
       {step === "push" && (
-        <PushStep
-          onAllow={() => choose({ push: true }, "done")}
-          onSkip={() => choose({ push: false }, "done")}
-        />
+        <PushStep onAllow={allowPush} onSkip={() => choose({ push: false }, "done")} />
       )}
       {step === "done" && <DoneStep pushOn={profile?.permissions.push ?? true} onFinish={finish} />}
     </OnboardingFrame>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { Icon, TextField } from "@/components/shared"
@@ -10,6 +10,7 @@ import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage, FORM } from "../common/admin-page"
+import { FIELD_CONTROL, FormField } from "../common/form-field"
 import { ErrorNotice } from "../data/query-state"
 import { useCreateEvent, useVenues } from "../data/queries"
 
@@ -27,22 +28,6 @@ const MIN_STAFF = 1
 const MAX_STAFF = 40
 const STEP =
   "grid size-11 place-items-center rounded-pill border-0 bg-surface text-fg transition-transform duration-160 active:scale-90 disabled:text-fg-3"
-const CONTROL = "min-w-0 flex-1 border-0 bg-transparent p-0 text-17 text-fg outline-none"
-
-function Field({ label, icon, htmlFor, children }: FieldProps) {
-  return (
-    <div className="flex flex-1 flex-col gap-2">
-      <label htmlFor={htmlFor} className="text-15 font-medium">
-        {label}
-      </label>
-      <div className="flex h-14 items-center gap-2.5 rounded-field bg-surface px-4 text-17">
-        <Icon name={icon} size={22} className="text-fg-2" />
-        {children}
-      </div>
-    </div>
-  )
-}
-type FieldProps = { label: string; icon: IconName; htmlFor: string; children: ReactNode }
 
 /** New event form: venue, date, time, name, headcount, instructions and how to fill. */
 export function NewEvent() {
@@ -96,12 +81,12 @@ export function NewEvent() {
           if (ready) submit(true)
         }}
       >
-        <Field label="Venue" icon="location_on" htmlFor="f-venue">
+        <FormField label="Venue" icon="location_on" htmlFor="f-venue">
           <select
             id="f-venue"
             value={venue}
             onChange={(e) => setVenueId(e.target.value)}
-            className={CONTROL}
+            className={FIELD_CONTROL}
           >
             {(venues.data ?? []).map((v) => (
               <option key={v.id} value={v.id}>
@@ -110,40 +95,40 @@ export function NewEvent() {
             ))}
           </select>
           <Icon name="expand_more" size={22} className="text-fg-2" />
-        </Field>
-        <Field label="Date" icon="calendar_month" htmlFor="f-date">
+        </FormField>
+        <FormField label="Date" icon="calendar_month" htmlFor="f-date">
           <input
             id="f-date"
             type="date"
             required
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className={CONTROL}
+            className={FIELD_CONTROL}
           />
-        </Field>
+        </FormField>
         <div className="flex gap-2.5">
-          <Field label="Starts" icon="schedule" htmlFor="f-start">
+          <FormField label="Starts" icon="schedule" htmlFor="f-start">
             <input
               id="f-start"
               type="time"
               required
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className={CONTROL}
+              className={FIELD_CONTROL}
             />
-          </Field>
-          <Field label="Ends" icon="schedule" htmlFor="f-end">
+          </FormField>
+          <FormField label="Ends" icon="schedule" htmlFor="f-end">
             <input
               id="f-end"
               type="time"
               required
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              className={CONTROL}
+              className={FIELD_CONTROL}
             />
-          </Field>
+          </FormField>
         </div>
-        <Field label="Event name" icon="edit" htmlFor="f-name">
+        <FormField label="Event name" icon="edit" htmlFor="f-name">
           <input
             id="f-name"
             required
@@ -151,9 +136,9 @@ export function NewEvent() {
             value={name}
             placeholder="Sunday brunch"
             onChange={(e) => setName(e.target.value)}
-            className={cn(CONTROL, "placeholder:text-fg-3")}
+            className={cn(FIELD_CONTROL, "placeholder:text-fg-3")}
           />
-        </Field>
+        </FormField>
 
         <div className="box-content flex min-h-16 items-center justify-between border-y border-line">
           <div className="flex flex-col gap-0.5">

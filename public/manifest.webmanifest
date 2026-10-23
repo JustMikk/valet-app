@@ -1,0 +1,9 @@
+{
+  "name": "Regency Valet Workforce",
+  "short_name": "Regency",
+  "start_url": "/staff",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}

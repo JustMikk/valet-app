@@ -60,7 +60,11 @@ export const useMessages = () =>
   })
 
 export const useNotifications = () =>
-  useQuery({ queryKey: keys.notifications, queryFn: () => staffRepo.notifications() })
+  useQuery({
+    queryKey: keys.notifications,
+    queryFn: () => staffRepo.notifications(),
+    refetchInterval: 15_000,
+  })
 
 export function useUpdateProfile() {
   const qc = useQueryClient()

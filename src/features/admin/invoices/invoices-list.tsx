@@ -22,7 +22,7 @@ export function InvoicesList() {
         cta={{
           label: "New invoice",
           icon: "request_quote",
-          onClick: () => router.push("/admin/invoices/detail"),
+          onClick: () => router.push("/admin/invoices/new"),
         }}
       />
       <QueryState query={invoices} rows={4}>

@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils"
 
 import { AdminPage, FORM } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
-import { useInvoice, useSendInvoice } from "../data/queries"
+import { useInvoice, useSendInvoice, useSession } from "../data/queries"
+import { invoiceNumber, invoicePdf } from "./invoice-pdf"
 
 /** One invoice: lines from approved hours, total and send. `?id=` picks it (default: first draft). */
 export function InvoiceDetail() {
@@ -26,8 +27,20 @@ export function InvoiceDetail() {
   )
 }
 
+/** Saves the invoice as a PDF file named after its number. */
+function downloadPdf(invoice: InvoiceData, company: string) {
+  const blob = new Blob([invoicePdf(invoice, company)], { type: "application/pdf" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `${invoiceNumber(invoice.number)}.pdf`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
   const send = useSendInvoice()
+  const company = useSession().data?.admin.company ?? "Invoice"
 
   return (
     <div className={FORM}>
@@ -82,7 +95,11 @@ function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
       </GlassCard>
       {send.error && <ErrorNotice message={send.error.message} />}
       <div className="flex gap-2.5">
-        <Button variant="secondary" className="flex-1 gap-1.5 text-16" disabled>
+        <Button
+          variant="secondary"
+          className="flex-1 gap-1.5 text-16"
+          onClick={() => downloadPdf(invoice, company)}
+        >
           <Icon name="download" size={22} />
           PDF
         </Button>

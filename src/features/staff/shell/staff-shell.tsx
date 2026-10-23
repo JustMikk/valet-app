@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation"
 
 import { AppShell, type ShellNavItem } from "@/components/shared"
 
-import { useHome, useProfile } from "../data/queries"
+import { useHome, useMarkNotificationsRead, useNotifications, useProfile } from "../data/queries"
+import { NotificationPanel } from "./notification-panel"
 
 /** Home, Shifts, Open (with a count of claimable shifts) and Inbox. */
 const navItems = (openCount: number): ShellNavItem[] => [
@@ -38,6 +39,8 @@ export function StaffShell({ children }: { children: ReactNode }) {
   const router = useRouter()
   const profile = useProfile().data
   const nav = navItems(useHome().data?.open.count ?? 0)
+  const unread = useNotifications().data?.unread ?? 0
+  const markRead = useMarkNotificationsRead()
 
   const mode =
     pathname === "/staff/onboarding" ? "bare" : pathname === "/staff/clock" ? "overlay" : "app"
@@ -65,6 +68,14 @@ export function StaffShell({ children }: { children: ReactNode }) {
       isRoot={ROOTS.includes(pathname)}
       mode={mode}
       contentMax="max-w-280"
+      notifications={{
+        unread,
+        // Closing the drawer is what reads them, so the dots stay while you look.
+        onClose: () => {
+          if (unread > 0) markRead.mutate()
+        },
+        children: <NotificationPanel />,
+      }}
       onBack={goBack}
     >
       {children}

@@ -5,6 +5,7 @@ import { useState } from "react"
 import {
   AttentionCard,
   Icon,
+  NotificationBell,
   StatusBadge,
   ToastPill,
   UnderlineTabPanel,
@@ -13,6 +14,7 @@ import {
 } from "@/components/shared"
 import { cn } from "@/lib/utils"
 
+import { useNotifications } from "../data/queries"
 import { EventSheet } from "./event-sheet"
 import { attentionActions, LiveDot, SlotBar } from "./live-parts"
 import { People, Timeline } from "./live-phone-tabs"
@@ -59,6 +61,7 @@ function EventRow({ event, onOpen }: { event: EventSummary; onOpen: () => void }
 /** Live Board for phone and tablet: the "need you" count, attention cards and three views. */
 export function LivePhone({ board }: { board: LiveBoard }) {
   const menu = useShellMenu()
+  const unread = useNotifications().data?.unread ?? 0
   const [tab, setTab] = useState<Tab>("events")
   const [openId, setOpenId] = useState<string | null>(null)
   const { pulse } = board
@@ -76,14 +79,17 @@ export function LivePhone({ board }: { board: LiveBoard }) {
             <Icon name="menu" filled weight={600} size={26} />
             <span className="text-19 leading-x100 font-semibold tracking-n010">Live Board</span>
           </button>
-          <button
-            type="button"
-            aria-label="Find a person"
-            onClick={() => setTab("people")}
-            className="grid size-14 place-items-center rounded-pill border-0 glass text-fg"
-          >
-            <Icon name="search" filled size={26} />
-          </button>
+          <div className="flex items-center gap-2.5">
+            <NotificationBell unread={unread} variant="glass" />
+            <button
+              type="button"
+              aria-label="Find a person"
+              onClick={() => setTab("people")}
+              className="grid size-14 place-items-center rounded-pill border-0 glass text-fg"
+            >
+              <Icon name="search" filled size={26} />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">

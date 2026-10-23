@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
-import { Icon, PageContainer } from "@/components/shared"
+import { Icon, PageContainer, useShellMenu } from "@/components/shared"
 import { cn } from "@/lib/utils"
 
 import { QueryState } from "../data/query-state"
@@ -14,6 +14,7 @@ import { ChatBubble } from "./chat-bubble"
 /** Single dispatch thread: bubbles, a broadcast with a claimable event, and a composer. */
 export function StaffInbox() {
   const router = useRouter()
+  const { setNotificationsOpen } = useShellMenu()
   const [draft, setDraft] = useState("")
   const messages = useMessages()
   const unread = useNotifications().data?.unread ?? 0
@@ -59,7 +60,7 @@ export function StaffInbox() {
           <button
             type="button"
             aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
-            onClick={() => router.push("/staff/notifications")}
+            onClick={() => setNotificationsOpen(true)}
             className="relative grid size-12 place-items-center rounded-pill border-0 bg-surface text-fg"
           >
             <Icon name="notifications" filled size={24} />

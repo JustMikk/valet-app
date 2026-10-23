@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 
 import { Icon, PageContainer, ToggleSwitch } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import { usePush } from "@/hooks/use-push"
 import { clearSession, type StaffProfile } from "@/lib/data"
 import type { IconName } from "@/lib/icons/icon-names"
 import { useThemeMode, type ThemePreference } from "@/lib/theme"
@@ -50,8 +51,16 @@ function ProfileBody({ profile }: { profile: StaffProfile }) {
   const update = useUpdateProfile()
   const { preference, setPreference } = useThemeMode()
 
+  const push = usePush("staff")
+
   const turnOn = (key: keyof StaffProfile["permissions"]) => () =>
     update.mutate({ permissions: { [key]: true } })
+  /** The real browser permission and subscription where push works; the profile flag follows. */
+  const turnOnPush = async () => {
+    if (push.status === "unavailable" || push.status === "unconfigured") return turnOn("push")()
+    const result = await push.enable.mutateAsync().catch(() => "off" as const)
+    update.mutate({ permissions: { push: result === "on" } })
+  }
   const p = profile.permissions
   const permissions: Permission[] = [
     {
@@ -74,14 +83,14 @@ function ProfileBody({ profile }: { profile: StaffProfile }) {
           label: "Notifications",
           note: "Shift alerts and messages",
           on: true,
-          turnOn: turnOn("push"),
+          turnOn: turnOnPush,
         }
       : {
           icon: "notifications_off",
           label: "Notifications are off",
           note: "You may miss shift changes. There is no text backup.",
           on: false,
-          turnOn: turnOn("push"),
+          turnOn: turnOnPush,
         },
     {
       icon: "install_mobile",

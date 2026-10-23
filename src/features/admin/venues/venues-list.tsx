@@ -24,7 +24,7 @@ export function VenuesList() {
         cta={{
           label: "Add venue",
           icon: "add_location_alt",
-          onClick: () => router.push("/admin/venues/detail"),
+          onClick: () => router.push("/admin/venues/new"),
         }}
       />
       <QueryState query={venues} rows={3}>

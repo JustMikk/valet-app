@@ -8,8 +8,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   adminRepo,
   type AudienceKey,
+  type EventPatch,
   type EventTab,
   type NewEventRequest,
+  type NewInvoiceRequest,
+  type NewVenueRequest,
   type SettingsPatch,
   type VenuePatch,
 } from "@/lib/data"
@@ -17,6 +20,7 @@ import {
 export const keys = {
   all: ["admin"],
   session: ["admin", "session"],
+  notifications: ["admin", "notifications"],
   settings: ["admin", "settings"],
   venues: ["admin", "venues"],
   venue: (id: string | undefined) => ["admin", "venue", id ?? "first"],
@@ -43,6 +47,21 @@ export function useRefresh() {
 export const useSession = () =>
   useQuery({ queryKey: keys.session, queryFn: () => adminRepo.session(), refetchInterval: 30_000 })
 
+export const useNotifications = () =>
+  useQuery({
+    queryKey: keys.notifications,
+    queryFn: () => adminRepo.notifications(),
+    refetchInterval: 15_000,
+  })
+
+export function useMarkNotificationsRead() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => adminRepo.markNotificationsRead(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.notifications }),
+  })
+}
+
 export const useSettings = () =>
   useQuery({ queryKey: keys.settings, queryFn: () => adminRepo.settings() })
 
@@ -59,6 +78,14 @@ export const useVenues = () =>
 
 export const useVenue = (id: string | undefined) =>
   useQuery({ queryKey: keys.venue(id), queryFn: () => adminRepo.venue(id) })
+
+export function useCreateVenue() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: (request: NewVenueRequest) => adminRepo.createVenue(request),
+    onSuccess: refresh,
+  })
+}
 
 export function useUpdateVenue() {
   const refresh = useRefresh()
@@ -97,6 +124,15 @@ export function useCreateEvent() {
   const refresh = useRefresh()
   return useMutation({
     mutationFn: (request: NewEventRequest) => adminRepo.createEvent(request),
+    onSuccess: refresh,
+  })
+}
+
+export function useUpdateEvent() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: (input: { id: string; patch: EventPatch }) =>
+      adminRepo.updateEvent(input.id, input.patch),
     onSuccess: refresh,
   })
 }
@@ -148,6 +184,14 @@ export const useInvoices = () =>
 
 export const useInvoice = (id: string | undefined) =>
   useQuery({ queryKey: keys.invoice(id), queryFn: () => adminRepo.invoice(id) })
+
+export function useCreateInvoice() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: (request: NewInvoiceRequest) => adminRepo.createInvoice(request),
+    onSuccess: refresh,
+  })
+}
 
 export function useSendInvoice() {
   const refresh = useRefresh()

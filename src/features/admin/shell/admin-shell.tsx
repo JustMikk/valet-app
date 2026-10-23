@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation"
 
 import { AppShell, type ShellNavItem } from "@/components/shared"
 
-import { useSession } from "../data/queries"
+import { useMarkNotificationsRead, useNotifications, useSession } from "../data/queries"
+import { NotificationPanel } from "./notification-panel"
 
 type Badges = { live: number; hours: number; inbox: number }
 
@@ -78,6 +79,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname().replace(/\/$/, "") || "/"
   const router = useRouter()
   const session = useSession().data
+  const unread = useNotifications().data?.unread ?? 0
+  const markRead = useMarkNotificationsRead()
   const nav = navItems(session?.badges ?? { live: 0, hours: 0, inbox: 0 })
   const roots = nav.sidebar.map((item) => item.href)
 
@@ -108,6 +111,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
       // The Live Board draws its own menu and search pills on phone.
       topBar={pathname !== "/admin"}
       contentMax="max-w-290"
+      notifications={{
+        unread,
+        // Closing the drawer is what reads them, so the dots stay while you look.
+        onClose: () => {
+          if (unread > 0) markRead.mutate()
+        },
+        children: <NotificationPanel />,
+      }}
       onBack={goBack}
     >
       {children}

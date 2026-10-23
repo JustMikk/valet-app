@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useCancelEvent, useEvent } from "../data/queries"
+import { EditInstructionsSheet } from "./edit-instructions-sheet"
 import { FillSheet } from "./fill-sheet"
 
 const STAT_TONE = { ok: "text-ok", warn: "text-warn", fg: "text-fg" } as const
@@ -50,6 +51,7 @@ function EventBody({ event, fillOnOpen }: { event: EventData; fillOnOpen: boolea
   const router = useRouter()
   const [fillOpen, setFillOpen] = useState(fillOnOpen && event.openSlots.length > 0)
   const [cancelOpen, setCancelOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const cancel = useCancelEvent()
   const openSpots = event.openSlots.length
 
@@ -134,6 +136,16 @@ function EventBody({ event, fillOnOpen }: { event: EventData; fillOnOpen: boolea
             <p className="m-0 text-15 leading-x155 text-fg-2">
               {event.instructions || "No instructions yet."}
             </p>
+            {!event.cancelled && (
+              <Button
+                variant="secondary"
+                size="xs"
+                className="self-start"
+                onClick={() => setEditOpen(true)}
+              >
+                Edit
+              </Button>
+            )}
           </GlassCard>
           <Button
             variant="secondary"
@@ -171,6 +183,12 @@ function EventBody({ event, fillOnOpen }: { event: EventData; fillOnOpen: boolea
         open={fillOpen}
         onOpenChange={setFillOpen}
         openSpots={openSpots}
+      />
+      <EditInstructionsSheet
+        eventId={event.id}
+        instructions={event.instructions}
+        open={editOpen}
+        onOpenChange={setEditOpen}
       />
       <ConfirmSheet
         open={cancelOpen}
