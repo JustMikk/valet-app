@@ -17,6 +17,7 @@ import { useAfterPunch, useHome, useProfile } from "../data/queries"
 import { useStaffSession } from "../session/staff-session"
 import { useDemoParam } from "../session/use-demo-param"
 import { ClockOutSheet } from "./clock-out-sheet"
+import { EmptyHome } from "./empty-home"
 import { BANNER_KEYS, HomeBanner } from "./home-banner"
 import { buildHomeView } from "./home-view"
 import { ShiftInfoRows } from "./shift-info-rows"
@@ -37,6 +38,8 @@ export function StaffHome() {
         {(data) =>
           data.shift ? (
             <HomeContent shift={data.shift} upNext={data.upNext} open={data.open} />
+          ) : data.upNext.length === 0 ? (
+            <EmptyHome open={data.open} />
           ) : (
             <UpNext upNext={data.upNext} open={data.open} />
           )
