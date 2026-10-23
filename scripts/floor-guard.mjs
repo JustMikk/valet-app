@@ -14,7 +14,12 @@ import { existsSync, readFileSync } from "node:fs"
 
 const git = (args, { diffExit = false } = {}) => {
   try {
-    return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] })
+    return execFileSync("git", args, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      // Large diffs (added design exports, lockfiles) overflow the 1 MB default.
+      maxBuffer: 256 * 1024 * 1024,
+    })
   } catch (e) {
     return diffExit && e.status === 1 && typeof e.stdout === "string" ? e.stdout : null
   }
