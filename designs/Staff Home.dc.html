@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="{{ L.page }}">
+  <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ bannerGo }}" style="{{ bannerStyle }}"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">{{ banner.icon }}</span><span style="flex:1;text-align:left">{{ banner.text }}</span><span style="font-family:'Material Symbols Rounded';font-size:20px">chevron_right</span></button>
+  </sc-if>
+  <div style="{{ L.grid }}">
+    <div style="{{ L.heroCard }}">
+      <div style="display:flex;flex-direction:column;gap:14px;animation:var(--anim-rise)">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="{{ state.badgeStyle }}"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">{{ state.icon }}</span>{{ state.badge }}</span>
+          <span style="font:500 14px var(--ff);color:var(--fg-2)">{{ state.sub }}</span>
+        </div>
+        <span style="font:700 60px/1 var(--fd);letter-spacing:-.045em;font-variant-numeric:tabular-nums">{{ state.big }}</span>
+        <sc-if value="{{ isOn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:6px;font:400 16px var(--ff);color:var(--fg-2)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--ok)">north_east</span>In 5:51 PM · scheduled until 11:00 PM</div>
+            <div style="height:6px;border-radius:9px;background:var(--surface-2);overflow:hidden"><div style="height:100%;width:{{ progress }};background:var(--fg);border-radius:9px;transition:width 1s linear"></div></div>
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font:600 26px/1.15 var(--fd);letter-spacing:-.02em">The Grand Hotel</span>
+          <span style="font:400 16px/1.4 var(--ff);color:var(--fg-2)">{{ state.when }}</span>
+        </div>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button onClick="{{ cta.fn }}" disabled="{{ cta.disabled }}" style="{{ cta.style }}" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1">{{ cta.icon }}</span>{{ cta.label }}<span style="position:absolute;inset:0;border-radius:inherit;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:250% 100%;animation:{{ cta.shine }};pointer-events:none"></span></button>
+          <sc-if value="{{ cta.note }}" hint-placeholder-val="{{ false }}"><span style="font:400 14px var(--ff);color:var(--fg-2);text-align:center">{{ cta.note }}</span></sc-if>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+        <a href="https://maps.google.com/?q=400+Market+St+San+Francisco" target="_blank" style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);color:var(--fg);text-decoration:none;animation:var(--anim-rise);animation-delay:80ms"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">location_on</span><span style="flex:1;font:400 17px var(--ff)">400 Market St, San Francisco</span><span style="font:600 15px var(--ff);color:var(--fg-2)">Directions</span><span style="font-family:'Material Symbols Rounded';font-size:22px">open_in_new</span></a>
+        <div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);animation:var(--anim-rise);animation-delay:140ms"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">person</span><span style="flex:1;font:400 17px var(--ff)">Ask for Priya, front desk</span><a href="tel:+14155550142" style="width:44px;height:44px;border-radius:999px;background:var(--surface);display:grid;place-items:center;color:var(--fg);text-decoration:none;font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">call</a></div>
+        <div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);animation:var(--anim-rise);animation-delay:200ms"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">checkroom</span><span style="flex:1;font:400 17px var(--ff)">Black suit, no sneakers · east lot, B1</span></div>
+        <button onClick="{{ openShift }}" style="min-height:64px;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);padding:0;cursor:pointer;text-align:left;animation:var(--anim-rise);animation-delay:260ms"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">description</span><span style="flex:1;font:400 17px var(--ff)">Shift details &amp; instructions</span><span style="font-family:'Material Symbols Rounded';font-size:24px">chevron_right</span></button>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:28px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:600 22px var(--fd);letter-spacing:-.02em">Up next</span><button onClick="{{ goShifts }}" style="border:0;background:transparent;color:var(--fg-2);font:600 15px var(--ff);cursor:pointer;padding:8px 0">All shifts</button></div>
+        <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+          <sc-for list="{{ upNext }}" as="u" hint-placeholder-count="2">
+            <button onClick="{{ openShift }}" style="min-height:72px;display:flex;align-items:center;gap:14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);padding:0;cursor:pointer;text-align:left">
+              <div style="width:52px;height:52px;border-radius:16px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none"><span style="font:600 11px var(--ff);color:var(--fg-2);letter-spacing:.04em">{{ u.dow }}</span><span style="font:700 20px/1 var(--fd)">{{ u.day }}</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:600 17px var(--ff)">{{ u.venue }}</span><span style="font:400 15px var(--ff);color:var(--fg-2)">{{ u.time }}</span></div>
+              <span style="font-family:'Material Symbols Rounded';font-size:24px">chevron_right</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <button onClick="{{ goOpen }}" style="position:relative;border:0;text-align:left;cursor:pointer;border-radius:24px;padding:22px;background:radial-gradient(120% 140% at 85% 110%,rgba(201,162,74,.42),transparent 55%),#0E0F12;color:#F4F4F2;display:flex;flex-direction:column;gap:8px;overflow:hidden">
+        <span style="font:600 12px 'Geist Mono',monospace;letter-spacing:.06em;color:#B9B9B4">OPEN SHIFTS</span>
+        <span style="font:600 22px/1.2 var(--fd);letter-spacing:-.015em">4 shifts you can claim this week</span>
+        <span style="font:400 15px/1.4 var(--ff);color:#C9C9C4">Harbor Pavilion brunch, Maison Blanc Halloween gala and more. First to claim gets it.</span>
+        <span style="display:flex;align-items:center;font:600 17px var(--ff);margin-top:6px">See open shifts<span style="font-family:'Material Symbols Rounded';font-size:22px">chevron_right</span></span>
+      </button>
+    </div>
+  </div>
+
+  <sc-if value="{{ dock }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:20px;right:20px;bottom:112px;z-index:15;display:flex;flex-direction:column;gap:6px">
+      <button onClick="{{ cta.fn }}" disabled="{{ cta.disabled }}" style="{{ cta.style }}" style-active="transform:scale(.98)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1">{{ cta.icon }}</span>{{ cta.label }}<span style="position:absolute;inset:0;border-radius:inherit;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:250% 100%;animation:{{ cta.shine }};pointer-events:none"></span></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ outOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeOut }}" style="position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:40;animation:vwFade .2s"></div>
+    <div style="{{ L.sheet }}">
+      <span style="align-self:center;width:40px;height:5px;border-radius:9px;background:var(--line)"></span>
+      <span style="font:500 15px var(--ff);color:var(--fg-2)">Clock out now? You've worked</span>
+      <span style="font:700 52px/1 var(--fd);letter-spacing:-.04em;font-variant-numeric:tabular-nums">{{ elapsedShort }}</span>
+      <span style="font:400 15px/1.45 var(--ff);color:var(--fg-2)">Scheduled end is 11:00 PM. Your location is checked once more as you leave. Leaving early or outside the venue is fine; it's noted for your manager.</span>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ closeOut }}" style="flex:1;height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Keep working</button>
+        <button onClick="{{ doOut }}" style="flex:1;height:56px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 17px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Clock out</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { secs: this.props.elapsed ?? 8047, outOpen: false };
+  componentDidMount() { this.t = setInterval(() => { if (this.props.mode === 'onshift') this.setState(s => ({ secs: s.secs + 1 })); }, 1000); }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const P = this.props, bp = P.bp || 'phone', ph = bp === 'phone', st = P.safeTop ?? 0, mode = P.mode || 'due';
+    const go = (r, p) => P.go && P.go(r, p);
+    const secs = this.state.secs;
+    const hh = Math.floor(secs / 3600), mm = Math.floor(secs % 3600 / 60), ss = secs % 60;
+    const tone = { strong: ['var(--fg)', 'var(--bg)'], ok: ['var(--ok-soft)', 'var(--ok)'], neutral: ['var(--surface)', 'var(--fg-2)'], warn: ['var(--warn-soft)', 'var(--warn)'] };
+    const badge = k => ({ alignSelf: 'flex-start', height: 30, padding: '0 11px 0 8px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 5, font: "600 14px var(--ff)", background: tone[k][0], color: tone[k][1] });
+    const S = {
+      due: { badge: 'Clock-in open', icon: 'timer', b: 'strong', sub: 'Starts in 12 min', big: '6:00 PM', when: 'Today, Fri Oct 23 · 6:00 – 11:00 PM · venue time (PT)' },
+      before: { badge: 'Today', icon: 'event', b: 'neutral', sub: 'Clock-in opens 5:45 PM', big: '6:00 PM', when: 'Fri Oct 23 · 6:00 – 11:00 PM · venue time (PT)' },
+      onshift: { badge: 'On the clock', icon: 'verified', b: 'ok', sub: 'Verified · 38 m from venue', big: `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`, when: '400 Market St · Fri Oct 23' }
+    }[mode];
+    const primary = { position: 'relative', overflow: 'hidden', width: '100%', height: 60, border: 0, borderRadius: 999, font: "600 19px var(--ff)", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', transition: 'transform .16s', boxShadow: '0 12px 30px rgba(0,0,0,.12)' };
+    const cta = mode === 'due' ? { label: 'Clock in', icon: 'login', fn: () => go('clock', { step: 'locating' }), style: { ...primary, background: 'var(--accent)', color: 'var(--accent-ink)' }, shine: 'var(--anim-shine)' }
+      : mode === 'onshift' ? { label: 'Clock out', icon: 'logout', fn: () => this.setState({ outOpen: true }), style: { ...primary, background: 'var(--accent)', color: 'var(--accent-ink)' }, shine: 'var(--anim-shine)' }
+      : { label: 'Clock in opens 5:45 PM', icon: 'lock_clock', disabled: true, fn: () => {}, style: { ...primary, background: 'var(--surface)', color: 'var(--fg-3)', cursor: 'not-allowed', boxShadow: 'none' }, shine: 'none', note: 'Available 15 min before your shift starts' };
+    const banner = P.banner === 'push' ? { icon: 'notifications_off', text: 'Notifications are off. You may miss shift changes; there is no text backup.', tone: 'warn', to: 'profile' }
+      : P.banner === 'sync' ? { icon: 'cloud_sync', text: 'Clock-in saved at 5:51 PM · will sync when you have signal', tone: 'neutral', to: null }
+      : P.banner === 'install' ? { icon: 'install_mobile', text: 'Add Regency to your Home Screen to get shift alerts', tone: 'neutral', to: 'onboarding' } : null;
+    const bt = banner ? tone[banner.tone] : tone.neutral;
+    const wide = !ph;
+    const L = {
+      page: { width: '100%', maxWidth: bp === 'desktop' ? 1120 : 760, margin: '0 auto', boxSizing: 'border-box', padding: ph ? `${st + 82}px 20px 200px` : (bp === 'tablet' ? '32px 32px 56px' : '40px 48px 64px'), display: 'flex', flexDirection: 'column', gap: 24 },
+      grid: { display: 'grid', gridTemplateColumns: bp === 'desktop' ? 'minmax(0,1.25fr) minmax(0,1fr)' : 'minmax(0,1fr)', gap: ph ? 32 : 32, alignItems: 'start' },
+      heroCard: wide ? { display: 'flex', flexDirection: 'column', gap: 24, padding: 28, borderRadius: 28, background: 'var(--card)', backdropFilter: 'var(--blur)', boxShadow: 'var(--card-line)' } : { display: 'flex', flexDirection: 'column', gap: 24 },
+      sheet: ph ? { position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 41, background: 'var(--sheet)', backdropFilter: 'var(--blur-lg)', borderRadius: '30px 30px 0 0', padding: '12px 20px 32px', display: 'flex', flexDirection: 'column', gap: 16, animation: 'vwUp .32s cubic-bezier(.2,.9,.3,1)' }
+        : { position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 440, zIndex: 41, background: 'var(--sheet)', backdropFilter: 'var(--blur-lg)', borderRadius: 28, padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 30px 80px rgba(0,0,0,.25)', animation: 'vwFade .25s' }
+    };
+    return {
+      L, wide, dock: ph, isOn: mode === 'onshift', cta, banner,
+      bannerStyle: { minHeight: 52, border: 0, borderRadius: 18, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 10, font: "600 15px/1.35 var(--ff)", background: bt[0], color: bt[1], cursor: banner && banner.to ? 'pointer' : 'default' },
+      bannerGo: () => banner && banner.to && go(banner.to),
+      state: { ...S, badgeStyle: badge(S.b) },
+      progress: Math.min(100, secs / 18540 * 100) + '%',
+      elapsedShort: `${hh}h ${String(mm).padStart(2, '0')}m`,
+      outOpen: this.state.outOpen, closeOut: () => this.setState({ outOpen: false }),
+      doOut: () => { this.setState({ outOpen: false }); go('clock', { step: 'outdone', secs }); },
+      upNext: [{ dow: 'SAT', day: '24', venue: 'Harbor Pavilion · Wedding', time: '4:00 – 11:30 PM' }, { dow: 'TUE', day: '27', venue: 'Osteria Nove', time: '5:30 – 10:30 PM' }],
+      openShift: () => go('shift'), goShifts: () => go('shifts'), goOpen: () => go('open')
+    };
+  }
+}
+</script>
+</body>
+</html>

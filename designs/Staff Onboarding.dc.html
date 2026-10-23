@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="{{ L.outer }}">
+  <div style="{{ L.card }}">
+    <sc-if value="{{ showProgress }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onClick="{{ back }}" aria-label="Back" style="width:48px;height:48px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);display:grid;place-items:center;cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px;flex:none">arrow_back</button>
+        <div style="flex:1;display:flex;gap:4px"><sc-for list="{{ bars }}" as="b" hint-placeholder-count="6"><span style="{{ b }}"></span></sc-for></div>
+        <span style="font:500 13px var(--ff);color:var(--fg-2);width:48px;text-align:right">{{ stepNo }}</span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.invite }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;animation:var(--anim-screen)">
+        <div style="width:120px;height:120px;border-radius:32px;background:#fff;display:grid;place-items:center;box-shadow:0 20px 50px rgba(201,162,74,.28),inset 0 0 0 1px rgba(0,0,0,.06)"><img src="assets/regency-logo.png" alt="Regency Parking Service" style="width:100px;height:auto"></div>
+        <div style="display:flex;flex-direction:column;gap:12px"><span style="font:700 44px/1.02 var(--fd);letter-spacing:-.04em">Regency Valet Parking invited you to join their crew.</span><span style="font:400 17px/1.5 var(--ff);color:var(--fg-2)">See your shifts, claim open ones, clock in at the venue, and chat with dispatch, all in one app.</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px"><button onClick="{{ next }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Get started</button><span style="text-align:center;font:400 13px var(--ff);color:var(--fg-3)">Invited as jordan.ellis@gmail.com by Jamie Cole</span></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.signin }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:24px;animation:var(--anim-screen)">
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Sign in with your email</span><span style="font:400 17px/1.45 var(--ff);color:var(--fg-2)">We'll email you a 6-digit code. No password to remember, and it works on a new phone too.</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Email</span><input value="jordan.ellis@gmail.com" readonly="{{ true }}" style="height:56px;border:0;outline:0;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--fg);padding:0 16px;font:400 17px var(--ff);color:var(--fg)"></div>
+        <button onClick="{{ next }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Email me a code</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.code }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:24px;animation:var(--anim-screen)">
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Enter the code</span><span style="font:400 17px/1.45 var(--ff);color:var(--fg-2)">Sent to jordan.ellis@gmail.com. It expires in 10 minutes.</span></div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+          <sc-for list="{{ digits }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}">{{ d.v }}</span></sc-for>
+        </div>
+        <button onClick="{{ typeCode }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">{{ codeCta }}</button>
+        <button style="height:44px;border:0;background:transparent;color:var(--fg-2);font:600 15px var(--ff);cursor:pointer">Resend code</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.profile }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:22px;animation:var(--anim-screen)">
+        <span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Confirm your profile</span>
+        <div style="display:flex;align-items:center;gap:16px"><div style="position:relative;width:88px;height:88px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 2px var(--line);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:34px;color:var(--fg-2)">add_a_photo</div><span style="font:400 15px/1.45 var(--ff);color:var(--fg-2);flex:1">Optional photo. It helps dispatch recognise you on the board.</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Full name</span><input value="Jordan Ellis" readonly="{{ true }}" style="height:56px;border:0;outline:0;border-radius:16px;background:var(--surface);padding:0 16px;font:400 17px var(--ff);color:var(--fg)"></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 15px var(--ff)">Phone (for dispatch to call)</span><input value="(415) 555-0123" readonly="{{ true }}" style="height:56px;border:0;outline:0;border-radius:16px;background:var(--surface);padding:0 16px;font:400 17px var(--ff);color:var(--fg)"></div>
+        <button onClick="{{ next }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Continue</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.location }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:22px;animation:var(--anim-screen)">
+        <div style="width:72px;height:72px;border-radius:22px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:36px;font-variation-settings:'FILL' 1">location_on</div>
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Location, only at clock-in</span><span style="font:400 17px/1.5 var(--ff);color:var(--fg-2)">When you tap Clock in or Clock out, the app checks once that you're at the venue. It does not track you during shifts or any other time.</span></div>
+        <div style="display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)">
+          <div style="min-height:56px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);font:400 16px var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--ok)">check</span>One reading per clock-in and clock-out</div>
+          <div style="min-height:56px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);font:400 16px var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--ok)">check</span>Seen only by Regency dispatch</div>
+          <div style="min-height:56px;display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);font:400 16px var(--ff)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--ok)">check</span>You can still browse shifts without it</div>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px"><button onClick="{{ next }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Allow location</button><button onClick="{{ next }}" style="height:48px;border:0;background:transparent;color:var(--fg-2);font:600 15px var(--ff);cursor:pointer">Not now (you won't be able to clock in)</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.install }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:22px;animation:var(--anim-screen)">
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Add Regency to your Home Screen</span><span style="font:400 17px/1.5 var(--ff);color:var(--fg-2)">On iPhone, shift alerts only work once the app is installed. It takes 10 seconds.</span></div>
+        <div style="display:flex;gap:6px;padding:4px;border-radius:999px;background:var(--surface);align-self:flex-start"><sc-for list="{{ osTabs }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ installSteps }}" as="s" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;border-radius:20px;background:var(--card);backdrop-filter:var(--blur);box-shadow:var(--card-line);animation:var(--anim-rise)">
+              <div style="width:48px;height:48px;border-radius:14px;background:var(--elev);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:26px;color:var(--info);flex:none">{{ s.icon }}</div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 13px var(--ff);color:var(--fg-3)">STEP {{ s.n }}</span><span style="font:500 16px/1.35 var(--ff)">{{ s.t }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px"><button onClick="{{ next }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">I've added it</button><button onClick="{{ next }}" style="height:48px;border:0;background:transparent;color:var(--fg-2);font:600 15px var(--ff);cursor:pointer">Remind me later</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.push }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:22px;animation:var(--anim-screen)">
+        <div style="padding:16px;border-radius:22px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);display:flex;gap:12px;align-items:flex-start;animation:vwUp .5s .2s both">
+          <div style="width:40px;height:40px;border-radius:10px;background:#fff;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);flex:none"><img src="assets/regency-logo.png" alt="" style="width:34px;height:auto"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 15px var(--ff)">New shift · 3 spots</span><span style="font:400 14px/1.35 var(--ff);color:var(--fg-2)">The Grand Hotel, Sat 6–11 PM. Tap to claim.</span></div><span style="font:500 12px var(--ff);color:var(--fg-3)">now</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Turn on notifications</span><span style="font:400 17px/1.5 var(--ff);color:var(--fg-2)">So you hear about new shifts, changes and messages from dispatch. There are no text messages, so this is how we reach you.</span></div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px"><button onClick="{{ next }}" style="height:58px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">Turn on notifications</button><button onClick="{{ skipPush }}" style="height:48px;border:0;background:transparent;color:var(--fg-2);font:600 15px var(--ff);cursor:pointer">Not now (I may miss shifts)</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.done }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;animation:var(--anim-screen)">
+        {{ doneIcon }}
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 40px/1.05 var(--fd);letter-spacing:-.035em">You're all set, Jordan.</span><span style="font:400 17px/1.5 var(--ff);color:var(--fg-2)">{{ doneBody }}</span></div>
+        <button onClick="{{ finish }}" style="height:58px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 18px var(--ff);cursor:pointer" style-active="transform:scale(.97)">See my shifts</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.desktop }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:24px;animation:var(--anim-screen)">
+        <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 36px/1.05 var(--fd);letter-spacing:-.035em">Continue on your phone</span><span style="font:400 17px/1.5 var(--ff);color:var(--fg-2)">Clocking in needs your phone's location and camera. Scan this with your phone camera to finish setting up.</span></div>
+        <div style="display:flex;gap:20px;align-items:center;padding:20px;border-radius:24px;background:var(--surface)">
+          <div style="width:148px;height:148px;border-radius:16px;background:#fff;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 1px var(--line)"><span style="font:500 11px 'Geist Mono',monospace;color:#8E8E8A">QR CODE</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 16px var(--ff)">Or open the link we emailed you</span><span style="font:400 14px/1.4 var(--ff);color:var(--fg-2)">jordan.ellis@gmail.com · sent 2:02 PM</span></div>
+        </div>
+        <button onClick="{{ next }}" style="height:52px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 16px var(--ff);cursor:pointer">Continue here anyway</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  static ORDER = ['invite', 'signin', 'code', 'profile', 'location', 'install', 'push', 'done'];
+  state = { step: this.props.step || 'invite', code: 0, os: 'ios', push: true };
+  componentDidUpdate(p) { if (p.step !== this.props.step && this.props.step) this.setState({ step: this.props.step }); }
+  componentWillUnmount() { clearInterval(this.ct); }
+  renderVals() {
+    const P = this.props, S = this.state, bp = P.bp || 'phone', ph = bp === 'phone', st = P.safeTop ?? 0, E = React.createElement;
+    const O = Component.ORDER, i = O.indexOf(S.step);
+    const to = s => this.setState({ step: s });
+    const next = () => to(S.step === 'desktop' ? 'signin' : O[Math.min(O.length - 1, i + 1)]);
+    const bars = O.slice(1, 7).map((_, k) => ({ flex: 1, height: 4, borderRadius: 9, background: k < i ? 'var(--fg)' : 'var(--line)', transition: 'background .3s' }));
+    const code = '482913';
+    const digits = code.split('').map((v, k) => ({ v: k < S.code ? v : '', style: { height: 64, borderRadius: 16, display: 'grid', placeItems: 'center', font: "700 28px var(--fd)", background: 'var(--surface)', boxShadow: k === S.code ? 'inset 0 0 0 2px var(--fg)' : (k < S.code ? 'inset 0 0 0 1.5px var(--line)' : 'none'), transition: 'box-shadow .15s' } }));
+    const osTabs = [['ios', 'iPhone'], ['android', 'Android']].map(([k, l]) => ({ label: l, go: () => this.setState({ os: k }), style: { height: 40, padding: '0 18px', border: 0, borderRadius: 999, cursor: 'pointer', font: "600 15px var(--ff)", background: S.os === k ? 'var(--elev)' : 'transparent', color: S.os === k ? 'var(--fg)' : 'var(--fg-2)', boxShadow: S.os === k ? 'var(--shadow)' : 'none', transition: 'all .2s' } }));
+    const installSteps = S.os === 'ios' ? [{ n: 1, icon: 'ios_share', t: 'Tap the Share button in Safari\u2019s toolbar' }, { n: 2, icon: 'add_box', t: 'Scroll and choose \u201cAdd to Home Screen\u201d' }, { n: 3, icon: 'touch_app', t: 'Open Regency from your Home Screen' }]
+      : [{ n: 1, icon: 'more_vert', t: 'Tap \u22ee in Chrome, or the Install banner' }, { n: 2, icon: 'install_mobile', t: 'Choose \u201cInstall app\u201d' }, { n: 3, icon: 'touch_app', t: 'Open Regency from your Home Screen' }];
+    const doneIcon = E('div', { style: { width: 96, height: 96, borderRadius: 999, background: 'var(--ok)', color: 'var(--bg)', display: 'grid', placeItems: 'center', animation: 'vwPop .5s cubic-bezier(.2,.9,.3,1.3) both' } }, E('span', { style: { fontFamily: "'Material Symbols Rounded'", fontSize: 54, fontVariationSettings: "'wght' 700" } }, 'check'));
+    return {
+      is: Object.fromEntries([...O, 'desktop'].map(k => [k, S.step === k])),
+      showProgress: i > 0 && S.step !== 'done',
+      stepNo: i > 0 ? `${Math.min(i, 6)} of 6` : '',
+      bars, digits, osTabs, installSteps, doneIcon,
+      codeCta: S.code >= 6 ? 'Verify' : 'Paste code from email',
+      typeCode: () => { if (S.code >= 6) return next(); clearInterval(this.ct); this.ct = setInterval(() => { if (this.state.code >= 6) { clearInterval(this.ct); return; } this.setState(s => ({ code: s.code + 1 })); }, 90); },
+      doneBody: S.push ? 'Location, the app and notifications are on. Your first shift is tonight at The Grand Hotel.' : 'Notifications are off, so dispatch can\u2019t alert you. You can turn them on any time in Profile.',
+      next, back: () => to(O[Math.max(0, i - 1)]), skipPush: () => { this.setState({ push: false }); to('done'); },
+      finish: () => P.go && P.go('home', { banner: S.push ? null : 'push' }),
+      L: { outer: { width: '100%', minHeight: '100%', boxSizing: 'border-box', display: 'flex', alignItems: ph ? 'stretch' : 'center', justifyContent: 'center', padding: ph ? 0 : 40, background: ph ? 'transparent' : 'radial-gradient(70% 60% at 50% 0%, var(--accent-soft), transparent 70%)' },
+        card: { width: '100%', maxWidth: ph ? 'none' : 480, minHeight: ph ? '100%' : 720, boxSizing: 'border-box', padding: ph ? `${st + 8}px 20px 32px` : '32px 36px 36px', display: 'flex', flexDirection: 'column', gap: 28, borderRadius: ph ? 0 : 32, background: ph ? 'transparent' : 'var(--sheet)', backdropFilter: ph ? 'none' : 'var(--blur-lg)', boxShadow: ph ? 'none' : '0 30px 80px rgba(0,0,0,.12), inset 0 0 0 1px var(--line)' } }
+    };
+  }
+}
+</script>
+</body>
+</html>

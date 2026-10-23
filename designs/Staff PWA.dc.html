@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Onest:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&amp;display=block">
+<style>html,body{margin:0;height:100%}*::-webkit-scrollbar{display:none}a{color:inherit}@keyframes vwRise{0%{transform:translateY(14px);opacity:0}100%{transform:none;opacity:1}}@keyframes vwScreen{0%{opacity:0;transform:scale(1.015)}100%{opacity:1;transform:none}}@keyframes vwShine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}@keyframes vwRing{0%{transform:scale(.6);opacity:.6}100%{transform:scale(1.9);opacity:0}}@keyframes vwUp{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}@keyframes vwFade{0%{opacity:0}100%{opacity:1}}@keyframes vwPulse{0%{transform:scale(.35);opacity:.55}100%{transform:scale(1);opacity:0}}@keyframes vwPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}@keyframes vwFlash{0%{opacity:.9}100%{opacity:0}}@keyframes vwSpin{100%{transform:rotate(360deg)}}</style>
+</helmet>
+<div style="{{ vars }}">
+<div style="position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--ff);font-synthesis:none;-webkit-font-smoothing:antialiased;display:flex">
+  <div style="position:absolute;inset:0;background:var(--ambient);pointer-events:none"></div>
+
+  <sc-if value="{{ showSide }}" hint-placeholder-val="{{ false }}">
+    <aside style="{{ L.side }}">
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 12px"><img src="assets/regency-logo.png" alt="Regency" style="height:36px;width:auto"><sc-if value="{{ desk }}" hint-placeholder-val="{{ false }}"><span style="font:600 18px var(--ff);letter-spacing:-.01em">Regency</span></sc-if></div>
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+        <button onClick="{{ n.go }}" title="{{ n.label }}" style="{{ n.sideStyle }}" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1">{{ n.icon }}</span><sc-if value="{{ desk }}" hint-placeholder-val="{{ false }}"><span style="flex:1;text-align:left">{{ n.label }}</span></sc-if><sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="{{ n.badgeStyle }}">{{ n.badge }}</span></sc-if></button>
+      </sc-for>
+      <button onClick="{{ goProfile }}" style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:8px;border:0;background:transparent;color:var(--fg);cursor:pointer;border-radius:14px"><span style="width:40px;height:40px;border-radius:99px;background:var(--surface-2);display:grid;place-items:center;font:600 14px var(--ff);flex:none">JE</span><sc-if value="{{ desk }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-direction:column;text-align:left"><span style="font:600 14px var(--ff)">Jordan Ellis</span><span style="font:400 12px var(--ff);color:var(--fg-2)">Valet attendant</span></span></sc-if></button>
+    </aside>
+  </sc-if>
+
+  <main style="position:relative;flex:1;min-width:0;height:100%">
+    <div style="height:100%;overflow-y:auto;scrollbar-width:none">
+      <sc-if value="{{ wideBack }}" hint-placeholder-val="{{ false }}"><div style="{{ L.wideBack }}"><button onClick="{{ back }}" style="height:44px;padding:0 16px 0 10px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);font:600 15px var(--ff);display:flex;align-items:center;gap:4px;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_back</span>{{ backLabel }}</button></div></sc-if>
+      <sc-if value="{{ r.home }}" hint-placeholder-val="{{ true }}"><dc-import name="Staff Home" bp="{{ bp }}" safe-top="{{ safeTop }}" mode="{{ mode }}" banner="{{ banner }}" go="{{ go }}" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ r.shifts }}" hint-placeholder-val="{{ false }}"><dc-import name="Staff Shifts" bp="{{ bp }}" safe-top="{{ safeTop }}" view="{{ shiftView }}" result="{{ result }}" no-location="{{ noLocation }}" go="{{ go }}" hint-size="100%,900px"></dc-import></sc-if>
+      <sc-if value="{{ r.account }}" hint-placeholder-val="{{ false }}"><dc-import name="Staff Account" bp="{{ bp }}" safe-top="{{ safeTop }}" view="{{ accountView }}" push-on="{{ pushOn }}" go="{{ go }}" hint-size="100%,900px"></dc-import></sc-if>
+    </div>
+
+    <sc-if value="{{ phoneChrome }}" hint-placeholder-val="{{ false }}">
+      <div style="{{ L.topbar }}">
+        <sc-if value="{{ isRoot }}" hint-placeholder-val="{{ true }}">
+          <div style="height:56px;padding:0 20px 0 14px;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);display:flex;align-items:center;gap:10px"><img src="assets/regency-logo.png" alt="Regency" style="height:30px;width:auto"><span style="font:600 18px var(--ff);letter-spacing:-.01em">{{ title }}</span></div>
+        </sc-if>
+        <sc-if value="{{ notRoot }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ back }}" aria-label="Back" style="width:56px;height:56px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);display:grid;place-items:center;cursor:pointer;font-family:'Material Symbols Rounded';font-size:24px" style-active="transform:scale(.94)">arrow_back</button>
+        </sc-if>
+        <button onClick="{{ goProfile }}" aria-label="Profile" style="width:56px;height:56px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);display:grid;place-items:center;cursor:pointer;font:600 16px var(--ff)" style-active="transform:scale(.94)">JE</button>
+      </div>
+      <div style="position:absolute;left:16px;right:16px;bottom:24px;z-index:20;height:76px;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(4,1fr);padding:7px;gap:4px;box-sizing:border-box">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.go }}" style="{{ n.tabStyle }}" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">{{ n.icon }}</span><span style="font:600 12px var(--ff)">{{ n.label }}</span><sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:99px;background:var(--fg);color:var(--bg);font:700 11px/18px var(--ff);text-align:center">{{ n.badge }}</span></sc-if></button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ r.clock }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ L.clockBack }}">
+      <div style="{{ L.clockCard }}"><dc-import name="Staff Clock" bp="{{ bp }}" safe-top="{{ safeTop }}" step="{{ clockStep }}" secs="{{ secs }}" sim="{{ sim }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ r.onboarding }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:60;background:var(--bg);overflow-y:auto"><dc-import name="Staff Onboarding" bp="{{ bp }}" safe-top="{{ safeTop }}" step="{{ obStep }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import></div>
+  </sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;route&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;shifts&quot;,&quot;shift&quot;,&quot;drop&quot;,&quot;open&quot;,&quot;inbox&quot;,&quot;notifs&quot;,&quot;profile&quot;,&quot;clock&quot;,&quot;onboarding&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#C9A24A&quot;,&quot;options&quot;:[&quot;#C9A24A&quot;,&quot;#8E1B2A&quot;,&quot;#1F3A5F&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;due&quot;,&quot;before&quot;,&quot;onshift&quot;],&quot;default&quot;:&quot;due&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sim&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;inside&quot;,&quot;outside&quot;,&quot;offline&quot;,&quot;denied&quot;],&quot;default&quot;:&quot;inside&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;safeTop&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  static LIGHT = { bg:'#FFFFFF', surface:'#F4F4F2', 'surface-2':'#E9E9E6', elev:'#FFFFFF', fg:'#0B0B0B', 'fg-2':'#5E5E5B', 'fg-3':'#8E8E8A', line:'#E6E6E3', accent:'#C9A24A', 'accent-ink':'#1C1404', 'accent-soft':'#F7EFDA', 'accent-text':'#7F611A', ok:'#2A7F36', 'ok-soft':'#E5F3E1', warn:'#B9480E', 'warn-soft':'#FCEDE2', bad:'#C02A20', 'bad-soft':'#FBE7E5', info:'#1E5BC6', 'info-soft':'#E6EDFA', hero:'#0E0F12' };
+  static DARK = { bg:'#0A0A0B', surface:'#18181A', 'surface-2':'#252528', elev:'#1E1E21', fg:'#F4F4F2', 'fg-2':'#A6A6A1', 'fg-3':'#76766F', line:'#2B2B2E', accent:'#D9B661', 'accent-ink':'#1C1404', 'accent-soft':'#2B2415', 'accent-text':'#E6C77E', ok:'#62C46F', 'ok-soft':'#14261A', warn:'#FF8F57', 'warn-soft':'#2E1B11', bad:'#FF6E63', 'bad-soft':'#311715', info:'#82AEFF', 'info-soft':'#14203A', hero:'#1E1E21' };
+  rootRef = React.createRef();
+  state = { route: this.props.route || 'home', params: { mode: this.props.mode, banner: this.props.banner, step: this.props.step }, hist: [], w: this.props.width || 390, h: 844 };
+  componentDidMount() { this.onR = () => this.setState({ ww: window.innerWidth, wh: window.innerHeight }); window.addEventListener('resize', this.onR); this.onR(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  go(route, params = {}) { this.setState(s => ({ hist: [...s.hist, { route: s.route, params: s.params }].slice(-20), route, params: { ...s.params, ...params } })); }
+  back() { this.setState(s => { const h = [...s.hist]; const p = h.pop() || { route: 'home', params: s.params }; return { hist: h, route: p.route, params: p.params }; }); }
+  renderVals() {
+    const P = this.props, S = this.state, dark = P.theme === 'dark';
+    const t = { ...(dark ? Component.DARK : Component.LIGHT) }; if (P.accent) t.accent = P.accent;
+    const hex = t.accent.replace('#', ''); const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)); const a = o => `rgba(${r},${g},${b},${o})`;
+    const fx = { ff: "'Onest',system-ui,sans-serif", fd: "'Bricolage Grotesque',sans-serif",
+      chrome: dark ? 'rgba(34,34,38,.55)' : 'rgba(255,255,255,.62)', blur: 'blur(22px) saturate(180%)', 'blur-lg': 'blur(36px) saturate(180%)',
+      sheet: dark ? 'rgba(30,30,34,.8)' : 'rgba(255,255,255,.8)', card: dark ? 'rgba(40,40,44,.5)' : 'rgba(255,255,255,.58)',
+      'card-line': dark ? 'inset 0 0 0 1px rgba(255,255,255,.07)' : 'inset 0 0 0 1px rgba(255,255,255,.9), 0 4px 18px rgba(0,0,0,.05)',
+      shadow: dark ? '0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.09)' : '0 10px 30px rgba(0,0,0,.08), inset 0 0 0 1px rgba(255,255,255,.75)',
+      ambient: `radial-gradient(70% 38% at 92% -4%, ${a(dark ? .3 : .34)}, transparent 70%), radial-gradient(55% 30% at -10% 22%, ${a(.16)}, transparent 70%), radial-gradient(60% 30% at 110% 70%, ${a(.12)}, transparent 70%)`,
+      'anim-rise': 'vwRise .55s cubic-bezier(.2,.8,.2,1) both', 'anim-screen': 'vwScreen .38s cubic-bezier(.2,.8,.2,1) both', 'anim-shine': 'vwShine 3.6s 1s ease-in-out infinite' };
+    const vars = { width: '100%', height: '100%' }; for (const k in t) vars['--' + k] = t[k]; for (const k in fx) vars['--' + k] = fx[k];
+    const w = P.width || S.ww || 390; const vh = P.height || S.wh || 844; const bp = w >= 1100 ? 'desktop' : w >= 700 ? 'tablet' : 'phone', ph = bp === 'phone', desk = bp === 'desktop';
+    const route = S.route, pr = S.params;
+    const ROOT = { home: 'home', shifts: 'shifts', open: 'open', inbox: 'inbox' };
+    const group = { home: 'home', shifts: 'shifts', shift: 'shifts', drop: 'shifts', result: 'shifts', open: 'open', inbox: 'inbox', notifs: 'inbox', profile: 'inbox' }[route];
+    const full = route === 'clock' || route === 'onboarding';
+    const navDefs = [['home', 'Home', 'home'], ['shifts', 'Shifts', 'calendar_month'], ['open', 'Open', 'add_circle', '4'], ['inbox', 'Inbox', 'chat_bubble']];
+    const nav = navDefs.map(([k, l, icon, badge]) => { const on = group === k && route !== 'profile'; return { label: l, icon, badge, go: () => this.go(k), badgeStyle: { ...(desk ? {} : { position: 'absolute', top: 4, right: 8 }), minWidth: 20, height: 20, borderRadius: 99, background: 'var(--fg)', color: 'var(--bg)', font: "700 11px/20px var(--ff)", textAlign: 'center' },
+      tabStyle: { position: 'relative', border: 0, borderRadius: 999, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: on ? 'var(--surface)' : 'transparent', color: 'var(--fg)', transition: 'background .2s, transform .15s' },
+      sideStyle: { position: 'relative', height: 48, display: 'flex', alignItems: 'center', justifyContent: desk ? 'flex-start' : 'center', gap: 12, padding: desk ? '0 14px' : 0, border: 0, borderRadius: 14, cursor: 'pointer', font: `${on ? 600 : 500} 15px var(--ff)`, background: on ? 'var(--chrome)' : 'transparent', boxShadow: on ? 'var(--shadow)' : 'none', color: on ? 'var(--fg)' : 'var(--fg-2)', transition: 'all .2s' } }; });
+    const safeTop = P.safeTop ?? 0;
+    const titles = { shift: 'Shift', drop: 'Shift', result: 'Shifts', notifs: 'Notifications', profile: 'Profile' };
+    return {
+       vars, bp, desk, safeTop,
+      showSide: !ph && !(route === 'onboarding'), phoneChrome: ph && !full,
+      isRoot: !!ROOT[route], notRoot: !ROOT[route], title: 'Regency',
+      wideBack: !ph && !ROOT[route] && !full, backLabel: 'Back',
+      r: { home: route === 'home', shifts: ['shifts', 'shift', 'drop', 'open', 'result'].includes(route), account: ['inbox', 'notifs', 'profile'].includes(route), clock: route === 'clock', onboarding: route === 'onboarding' },
+      shiftView: { shifts: 'list', shift: 'detail', drop: 'drop', open: 'open', result: 'result' }[route], result: pr.result,
+      accountView: { inbox: 'inbox', notifs: 'notifs', profile: 'profile' }[route], pushOn: pr.banner !== 'push',
+      mode: pr.mode || 'due', banner: pr.banner || null, clockStep: pr.step || 'locating', secs: pr.secs || 0, sim: P.sim, obStep: P.obStep || 'invite', noLocation: !!P.noLocation,
+      nav, go: (rt, p) => this.go(rt, p), back: () => this.back(), goProfile: () => this.go('profile'),
+      L: {
+        side: { position: 'relative', zIndex: 5, width: desk ? 248 : 84, flex: 'none', boxSizing: 'border-box', padding: desk ? '24px 16px' : '20px 12px', display: 'flex', flexDirection: 'column', gap: 4, borderRight: '1px solid var(--line)', background: 'var(--card)', backdropFilter: 'var(--blur)' },
+        topbar: { position: 'absolute', top: safeTop + 8, left: 20, right: 20, zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'auto' },
+        wideBack: { maxWidth: 1120, margin: '0 auto', padding: bp === 'tablet' ? '24px 32px 0' : '28px 48px 0', boxSizing: 'border-box' },
+        clockBack: ph ? { position: 'absolute', inset: 0, zIndex: 50 } : { position: 'absolute', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.45)', backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', animation: 'vwFade .25s' },
+        clockCard: ph ? { position: 'absolute', inset: 0 } : { position: 'relative', width: 440, height: Math.min(800, vh - 48), borderRadius: 32, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,.35)', animation: 'vwUp .35s cubic-bezier(.2,.9,.3,1)' }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

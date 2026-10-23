@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Onest:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&amp;display=block">
+<style>html,body{margin:0;height:100%}*::-webkit-scrollbar{display:none}a{color:inherit}@keyframes vwRise{0%{transform:translateY(14px);opacity:0}100%{transform:none;opacity:1}}@keyframes vwScreen{0%{opacity:0;transform:scale(1.015)}100%{opacity:1;transform:none}}@keyframes vwShine{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}@keyframes vwUp{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}@keyframes vwFade{0%{opacity:0}100%{opacity:1}}@keyframes vwPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}@keyframes vwSpin{100%{transform:rotate(360deg)}}</style>
+</helmet>
+<div style="{{ vars }}">
+<div style="position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--ff);font-synthesis:none;-webkit-font-smoothing:antialiased;display:flex">
+  <div style="position:absolute;inset:0;background:var(--ambient);pointer-events:none"></div>
+
+  <sc-if value="{{ showSide }}" hint-placeholder-val="{{ false }}">
+    <aside style="{{ L.side }}">
+      <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px"><img src="assets/regency-logo.png" alt="Regency" style="height:36px;width:auto"><sc-if value="{{ desk }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-direction:column"><span style="font:600 16px var(--ff);letter-spacing:-.01em">Regency</span><span style="font:500 12px var(--ff);color:var(--fg-2)">Dispatch</span></span></sc-if></div>
+      <sc-for list="{{ sideNav }}" as="n" hint-placeholder-count="9">
+        <button onClick="{{ n.go }}" title="{{ n.label }}" style="{{ n.sideStyle }}" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1">{{ n.icon }}</span><sc-if value="{{ desk }}" hint-placeholder-val="{{ false }}"><span style="flex:1;text-align:left">{{ n.label }}</span></sc-if><sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="{{ n.badgeStyle }}">{{ n.badge }}</span></sc-if></button>
+      </sc-for>
+      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:8px"><span style="width:40px;height:40px;border-radius:99px;background:var(--surface-2);display:grid;place-items:center;font:600 14px var(--ff);flex:none">JC</span><sc-if value="{{ desk }}" hint-placeholder-val="{{ false }}"><span style="display:flex;flex-direction:column"><span style="font:600 14px var(--ff)">Jamie Cole</span><span style="font:400 12px var(--ff);color:var(--fg-2)">Owner · Admin</span></span></sc-if></div>
+    </aside>
+  </sc-if>
+
+  <main style="position:relative;flex:1;min-width:0;height:100%">
+    <sc-if value="{{ isLive }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none"><dc-import name="Live Board" variant="{{ lbVariant }}" embedded="{{ true }}" safe-top="{{ safeTop }}" width="{{ w }}" theme="{{ theme }}" accent="{{ accentC }}" font="bricolage" glass="{{ true }}" motion="{{ true }}" go="{{ go }}" on-menu="{{ openMore }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import></div>
+    </sc-if>
+    <sc-if value="{{ notLive }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;overflow-y:auto;scrollbar-width:none">
+        <sc-if value="{{ wideBack }}" hint-placeholder-val="{{ false }}"><div style="{{ L.wideBack }}"><button onClick="{{ back }}" style="height:44px;padding:0 16px 0 10px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);font:600 15px var(--ff);display:flex;align-items:center;gap:4px;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_back</span>Back</button></div></sc-if>
+        <dc-import name="Admin Pages" view="{{ route }}" bp="{{ bp }}" safe-top="{{ safeTop }}" accent="{{ accentC }}" on-accent="{{ setAccent }}" go="{{ go }}" back="{{ back }}" hint-size="100%,900px"></dc-import>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ phoneChrome }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ notLive }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ L.topbar }}">
+          <sc-if value="{{ isRoot }}" hint-placeholder-val="{{ true }}"><button onClick="{{ openMore }}" style="height:56px;padding:0 20px 0 14px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);display:flex;align-items:center;gap:10px;cursor:pointer"><img src="assets/regency-logo.png" alt="Regency" style="height:30px;width:auto"><span style="font:600 18px var(--ff);letter-spacing:-.01em">Dispatch</span></button></sc-if>
+          <sc-if value="{{ notRoot }}" hint-placeholder-val="{{ false }}"><button onClick="{{ back }}" aria-label="Back" style="width:56px;height:56px;border:0;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);color:var(--fg);display:grid;place-items:center;cursor:pointer;font-family:'Material Symbols Rounded';font-size:24px" style-active="transform:scale(.94)">arrow_back</button></sc-if>
+          <span style="width:56px;height:56px;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);display:grid;place-items:center;font:600 16px var(--ff)">JC</span>
+        </div>
+      </sc-if>
+      <div style="position:absolute;left:16px;right:16px;bottom:24px;z-index:20;height:76px;border-radius:999px;background:var(--chrome);backdrop-filter:var(--blur);box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(5,1fr);padding:7px;gap:2px;box-sizing:border-box">
+        <sc-for list="{{ tabNav }}" as="n" hint-placeholder-count="5">
+          <button onClick="{{ n.go }}" style="{{ n.tabStyle }}" style-active="transform:scale(.94)"><span style="font-family:'Material Symbols Rounded';font-size:25px;line-height:1;font-variation-settings:'FILL' 1">{{ n.icon }}</span><span style="font:600 11px var(--ff)">{{ n.label }}</span><sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:3px;left:calc(50% + 5px);min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:99px;background:{{ n.badgeBg }};color:#fff;font:700 11px/18px var(--ff);text-align:center">{{ n.badge }}</span></sc-if></button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeMore }}" style="position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:40;animation:vwFade .2s"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;z-index:41;background:var(--sheet);backdrop-filter:var(--blur-lg);border-radius:30px 30px 0 0;padding:12px 20px 32px;display:flex;flex-direction:column;gap:8px;animation:vwUp .32s cubic-bezier(.2,.9,.3,1)">
+        <span style="align-self:center;width:40px;height:5px;border-radius:9px;background:var(--line);margin-bottom:8px"></span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+          <sc-for list="{{ moreNav }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.go }}" style="height:96px;border:0;border-radius:22px;background:var(--surface);color:var(--fg);display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;cursor:pointer" style-active="transform:scale(.97)"><span style="font-family:'Material Symbols Rounded';font-size:28px;font-variation-settings:'FILL' 1">{{ n.icon }}</span><span style="font:600 16px var(--ff)">{{ n.label }}</span></button></sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;route&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;live&quot;,&quot;events&quot;,&quot;event&quot;,&quot;newEvent&quot;,&quot;staff&quot;,&quot;person&quot;,&quot;venues&quot;,&quot;venue&quot;,&quot;hours&quot;,&quot;invoices&quot;,&quot;invoice&quot;,&quot;inbox&quot;,&quot;broadcast&quot;,&quot;settings&quot;],&quot;default&quot;:&quot;live&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#C9A24A&quot;,&quot;options&quot;:[&quot;#C9A24A&quot;,&quot;#8E1B2A&quot;,&quot;#1F3A5F&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;safeTop&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  static LIGHT = { bg:'#FFFFFF', surface:'#F4F4F2', 'surface-2':'#E9E9E6', elev:'#FFFFFF', fg:'#0B0B0B', 'fg-2':'#5E5E5B', 'fg-3':'#8E8E8A', line:'#E6E6E3', accent:'#C9A24A', 'accent-ink':'#1C1404', 'accent-soft':'#F7EFDA', 'accent-text':'#7F611A', ok:'#2A7F36', 'ok-soft':'#E5F3E1', warn:'#B9480E', 'warn-soft':'#FCEDE2', bad:'#C02A20', 'bad-soft':'#FBE7E5', info:'#1E5BC6', 'info-soft':'#E6EDFA' };
+  static DARK = { bg:'#0A0A0B', surface:'#18181A', 'surface-2':'#252528', elev:'#1E1E21', fg:'#F4F4F2', 'fg-2':'#A6A6A1', 'fg-3':'#76766F', line:'#2B2B2E', accent:'#D9B661', 'accent-ink':'#1C1404', 'accent-soft':'#2B2415', 'accent-text':'#E6C77E', ok:'#62C46F', 'ok-soft':'#14261A', warn:'#FF8F57', 'warn-soft':'#2E1B11', bad:'#FF6E63', 'bad-soft':'#311715', info:'#82AEFF', 'info-soft':'#14203A' };
+  rootRef = React.createRef();
+  state = { route: this.props.route || 'live', hist: [], w: this.props.width || 390, h: 844, more: false, accent: null };
+  componentDidMount() { this.onR = () => this.setState({ ww: window.innerWidth, wh: window.innerHeight }); window.addEventListener('resize', this.onR); this.onR(); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  componentDidUpdate(p) { if (p.route !== this.props.route && this.props.route) this.setState({ route: this.props.route, hist: [] }); }
+  go(route) { this.setState(s => ({ hist: [...s.hist, s.route].slice(-20), route, more: false })); }
+  back() { this.setState(s => { const h = [...s.hist]; return { hist: h, route: h.pop() || 'live' }; }); }
+  renderVals() {
+    const P = this.props, S = this.state, dark = P.theme === 'dark';
+    const accentC = S.accent || P.accent || (dark ? '#D9B661' : '#C9A24A');
+    const t = { ...(dark ? Component.DARK : Component.LIGHT), accent: accentC };
+    const hex = accentC.replace('#', ''); const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16)); const a = o => `rgba(${r},${g},${b},${o})`;
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255; t['accent-ink'] = lum > .55 ? '#1C1404' : '#FFFFFF';
+    const fx = { ff: "'Onest',system-ui,sans-serif", fd: "'Bricolage Grotesque',sans-serif",
+      chrome: dark ? 'rgba(34,34,38,.55)' : 'rgba(255,255,255,.62)', blur: 'blur(22px) saturate(180%)', 'blur-lg': 'blur(36px) saturate(180%)',
+      sheet: dark ? 'rgba(30,30,34,.82)' : 'rgba(255,255,255,.82)', card: dark ? 'rgba(40,40,44,.5)' : 'rgba(255,255,255,.58)',
+      'card-line': dark ? 'inset 0 0 0 1px rgba(255,255,255,.07)' : 'inset 0 0 0 1px rgba(0,0,0,.05), 0 4px 18px rgba(0,0,0,.05)',
+      shadow: dark ? '0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.09)' : '0 10px 30px rgba(0,0,0,.08), inset 0 0 0 1px rgba(255,255,255,.75)',
+      ambient: `radial-gradient(70% 38% at 92% -4%, ${a(dark ? .26 : .3)}, transparent 70%), radial-gradient(55% 30% at -10% 30%, ${a(.12)}, transparent 70%)`,
+      'anim-rise': 'vwRise .55s cubic-bezier(.2,.8,.2,1) both', 'anim-screen': 'vwScreen .38s cubic-bezier(.2,.8,.2,1) both', 'anim-shine': 'vwShine 3.6s 1s ease-in-out infinite' };
+    const vars = { width: '100%', height: '100%' }; for (const k in t) vars['--' + k] = t[k]; for (const k in fx) vars['--' + k] = fx[k];
+    const w = P.width || S.ww || 390; const vh = P.height || S.wh || 844; const bp = w >= 1100 ? 'desktop' : w >= 700 ? 'tablet' : 'phone', ph = bp === 'phone', desk = bp === 'desktop';
+    const route = S.route;
+    const GROUP = { live: 'live', events: 'events', event: 'events', newEvent: 'events', staff: 'staff', person: 'staff', venues: 'venues', venue: 'venues', hours: 'hours', invoices: 'invoices', invoice: 'invoices', inbox: 'inbox', broadcast: 'inbox', settings: 'settings' };
+    const grp = GROUP[route];
+    const ROOTS = ['live', 'events', 'staff', 'venues', 'hours', 'invoices', 'inbox', 'settings'];
+    const D = { live: ['Live Board', 'sensors', '2', 'var(--warn)'], events: ['Events', 'event'], staff: ['Staff', 'group'], venues: ['Venues', 'location_on'], hours: ['Hours', 'schedule', '4', 'var(--fg)'], invoices: ['Invoices', 'receipt_long'], inbox: ['Inbox', 'chat_bubble', '2', 'var(--fg)'], settings: ['Settings', 'settings'] };
+    const item = k => { const [label, icon, badge, bb] = D[k]; const on = grp === k; return { label: k === 'live' && ph ? 'Live' : label, icon, badge, badgeBg: bb === 'var(--warn)' ? 'var(--warn)' : '#0B0B0B', go: () => this.go(k),
+      badgeStyle: { ...(desk ? {} : { position: 'absolute', top: 4, right: 8 }), minWidth: 20, height: 20, padding: '0 6px', boxSizing: 'border-box', borderRadius: 99, background: bb, color: bb === 'var(--fg)' ? 'var(--bg)' : '#fff', font: "700 11px/20px var(--ff)", textAlign: 'center' },
+      tabStyle: { position: 'relative', border: 0, borderRadius: 999, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: on ? 'var(--surface)' : 'transparent', color: 'var(--fg)', transition: 'background .2s' },
+      sideStyle: { position: 'relative', height: 46, display: 'flex', alignItems: 'center', justifyContent: desk ? 'flex-start' : 'center', gap: 12, padding: desk ? '0 12px' : 0, border: 0, borderRadius: 14, cursor: 'pointer', font: `${on ? 600 : 500} 15px var(--ff)`, background: on ? 'var(--chrome)' : 'transparent', boxShadow: on ? 'var(--shadow)' : 'none', color: on ? 'var(--fg)' : 'var(--fg-2)', transition: 'all .2s' } }; };
+    const moreOn = ['staff', 'venues', 'invoices', 'settings'].includes(grp);
+    const tabNav = ['live', 'events', 'hours', 'inbox'].map(item).concat([{ label: 'More', icon: 'grid_view', go: () => this.setState({ more: true }), tabStyle: { position: 'relative', border: 0, borderRadius: 999, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, background: moreOn ? 'var(--surface)' : 'transparent', color: 'var(--fg)' } }]);
+    const safeTop = P.safeTop ?? 0;
+    return {
+       vars, bp, desk, safeTop, w, route, theme: dark ? 'dark' : 'light', accentC,
+      setAccent: c => this.setState({ accent: c }),
+      isLive: route === 'live', notLive: route !== 'live', lbVariant: desk ? 'desktop' : 'a',
+      showSide: !ph, phoneChrome: ph, isRoot: ROOTS.includes(route), notRoot: !ROOTS.includes(route), wideBack: !ph && !ROOTS.includes(route),
+      sideNav: ROOTS.map(item), tabNav, moreNav: ['staff', 'venues', 'invoices', 'settings'].map(item),
+      moreOpen: S.more, openMore: () => this.setState({ more: true }), closeMore: () => this.setState({ more: false }),
+      go: r => this.go(r === 'newEvent' ? 'newEvent' : r), back: () => this.back(),
+      L: {
+        side: { position: 'relative', zIndex: 5, width: desk ? 240 : 84, flex: 'none', boxSizing: 'border-box', padding: desk ? '24px 14px' : '20px 12px', display: 'flex', flexDirection: 'column', gap: 4, borderRight: '1px solid var(--line)', background: 'var(--card)', backdropFilter: 'var(--blur)' },
+        topbar: { position: 'absolute', top: safeTop + 8, left: 20, right: 20, zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+        wideBack: { maxWidth: 1160, margin: '0 auto', padding: bp === 'tablet' ? '24px 32px 0' : '28px 48px 0', boxSizing: 'border-box' }
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

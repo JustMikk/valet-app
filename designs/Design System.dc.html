@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@500;600&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&amp;display=block">
+<style>body{margin:0;background:#ECEBE7;font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#0B0B0B}a{color:#8A6A1F}a:hover{color:#0B0B0B}</style>
+</helmet>
+<div style="padding:64px 72px 96px;display:flex;flex-direction:column;gap:72px;width:1320px;box-sizing:border-box">
+
+  <header style="display:flex;justify-content:space-between;align-items:flex-end;gap:40px">
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="assets/regency-logo.png" alt="Regency Parking Service" style="height:44px;width:auto">
+        <span style="font:500 13px/1 'Geist Mono',monospace;color:#5E5E5B;letter-spacing:.04em">VALET WORKFORCE · DESIGN SYSTEM v0.1</span>
+      </div>
+      <h1 style="margin:0;font:700 64px/1 'Geist',sans-serif;letter-spacing:-.035em">Calm by default.<br>Loud when it matters.</h1>
+      <p style="margin:0;font:400 19px/1.45 'Geist',sans-serif;color:#5E5E5B;text-wrap:pretty">Derived from the reference: monochrome surfaces, one oversized number per screen, floating pill chrome, and color reserved for meaning. Built mobile-first for staff outdoors and admins on the move. Every token below exists in light and dark; the accent is tenant-swappable (Regency gold by default).</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,auto);gap:10px 28px;font:400 14px/1.4 'Geist',sans-serif;color:#5E5E5B">
+      <span style="color:#0B0B0B;font-weight:600">Type</span><span>Geist · Geist Mono</span>
+      <span style="color:#0B0B0B;font-weight:600">Icons</span><span>Material Symbols Rounded, filled</span>
+      <span style="color:#0B0B0B;font-weight:600">Grid</span><span>4 pt · 20 px mobile gutter</span>
+      <span style="color:#0B0B0B;font-weight:600">Targets</span><span>48 px min · 56 px primary</span>
+    </div>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font:600 13px/1 'Geist Mono',monospace;letter-spacing:.06em;color:#5E5E5B">01 — PRINCIPLES</h2>
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px">
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px"><span style="font:700 32px/1 'Geist';letter-spacing:-.03em">1</span><strong style="font:600 17px/1.3 'Geist'">One big number</strong><span style="font:400 14px/1.45 'Geist';color:#5E5E5B">Each screen leads with the single fact that matters: start time, time on shift, people needing you.</span></div>
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px"><span style="font:700 32px/1 'Geist';letter-spacing:-.03em">2</span><strong style="font:600 17px/1.3 'Geist'">Color = meaning</strong><span style="font:400 14px/1.45 'Geist';color:#5E5E5B">Surfaces stay black and white. Green, orange, red and blue only ever describe status — always paired with an icon and words.</span></div>
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px"><span style="font:700 32px/1 'Geist';letter-spacing:-.03em">3</span><strong style="font:600 17px/1.3 'Geist'">Gold = act</strong><span style="font:400 14px/1.45 'Geist';color:#5E5E5B">The tenant accent marks the one primary action per view. Never decoration, never status.</span></div>
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px"><span style="font:700 32px/1 'Geist';letter-spacing:-.03em">4</span><strong style="font:600 17px/1.3 'Geist'">Floating chrome</strong><span style="font:400 14px/1.45 'Geist';color:#5E5E5B">Top bar and tab bar are elevated pills; content scrolls beneath. Actions live in the thumb zone.</span></div>
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px"><span style="font:700 32px/1 'Geist';letter-spacing:-.03em">5</span><strong style="font:600 17px/1.3 'Geist'">Honest time</strong><span style="font:400 14px/1.45 'Geist';color:#5E5E5B">Relative time first ("late 12 min"), venue-local clock second. Location is a punch snapshot, never "live".</span></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font:600 13px/1 'Geist Mono',monospace;letter-spacing:.06em;color:#5E5E5B">02 — COLOR TOKENS</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ colorTokens }}" as="c" hint-placeholder-count="21">
+        <div style="background:#fff;border-radius:16px;padding:12px;display:flex;align-items:center;gap:14px">
+          <div style="display:flex;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);flex:none">
+            <div style="{{ c.lightSw }}"></div>
+            <div style="{{ c.darkSw }}"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+            <span style="font:600 13px/1.2 'Geist Mono',monospace">{{ c.name }}</span>
+            <span style="font:400 13px/1.3 'Geist';color:#5E5E5B">{{ c.role }}</span>
+            <span style="font:500 11px/1.2 'Geist Mono',monospace;color:#8E8E8A">{{ c.light }} / {{ c.dark }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin:0;font:400 14px/1.5 'Geist';color:#5E5E5B">Left half = light, right half = dark. Status text tokens meet 4.5:1 on <span style="font-family:'Geist Mono'">--bg</span> and their own <span style="font-family:'Geist Mono'">-soft</span> fill. Accent text on light uses <span style="font-family:'Geist Mono'">--accent-text</span>; gold fills always carry <span style="font-family:'Geist Mono'">--accent-ink</span> labels.</p>
+  </section>
+
+  <section style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <h2 style="margin:0;font:600 13px/1 'Geist Mono',monospace;letter-spacing:.06em;color:#5E5E5B">03 — TYPE SCALE (MOBILE)</h2>
+      <div style="background:#fff;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:22px">
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">display<br>56/56 · 700 · -3.5%</span><span style="font:700 56px/1 'Geist';letter-spacing:-.035em;font-variant-numeric:tabular-nums">6:00 PM</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">title-1<br>32/36 · 700 · -3%</span><span style="font:700 32px/36px 'Geist';letter-spacing:-.03em">The Grand Hotel</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">title-2<br>22/28 · 600 · -2%</span><span style="font:600 22px/28px 'Geist';letter-spacing:-.02em">Needs you now</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">tab / label-lg<br>19/24 · 600</span><span style="font:600 19px/24px 'Geist'">Events</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">body<br>17/24 · 400</span><span style="font:400 17px/24px 'Geist'">Park in the east lot. Ask for Priya at the front desk.</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">label<br>15/20 · 500</span><span style="font:500 15px/20px 'Geist'">Clock-in opens 5:45 PM</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">caption<br>13/18 · 500</span><span style="font:500 13px/18px 'Geist';color:#5E5E5B">Times shown in venue time · PT</span></div>
+        <div style="display:grid;grid-template-columns:140px 1fr;align-items:baseline;gap:16px"><span style="font:500 12px/1.3 'Geist Mono';color:#8E8E8A">mono / timer<br>Geist Mono 600</span><span style="font:600 28px/1 'Geist Mono';letter-spacing:-.02em">02:14:07</span></div>
+      </div>
+      <p style="margin:0;font:400 14px/1.5 'Geist';color:#5E5E5B">Numbers always use tabular figures. Desktop steps display to 64 and title-1 to 36; everything else holds. Never set staff-facing text below 15 px.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <h2 style="margin:0;font:600 13px/1 'Geist Mono',monospace;letter-spacing:.06em;color:#5E5E5B">04 — SPACE · RADIUS · ELEVATION</h2>
+      <div style="background:#fff;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:26px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 13px/1 'Geist'">Spacing (4-pt)</span>
+          <div style="display:flex;align-items:flex-end;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:4px;height:4px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">4</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:8px;height:8px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">8</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:12px;height:12px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">12</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:16px;height:16px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">16</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:20px;height:20px;background:#C9A24A"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">20</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:24px;height:24px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">24</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:32px;height:32px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">32</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:48px;height:48px;background:#0B0B0B"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">48</span></div>
+          </div>
+          <span style="font:400 13px/1.4 'Geist';color:#5E5E5B">20 = screen gutter (gold). 32 between sections, 12–16 inside cards.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 13px/1 'Geist'">Radius</span>
+          <div style="display:flex;gap:12px;align-items:flex-end">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:52px;height:40px;background:#F4F4F2;border:1px solid #E6E6E3;border-radius:10px"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">10 chip</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:52px;height:40px;background:#F4F4F2;border:1px solid #E6E6E3;border-radius:16px"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">16 field</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:52px;height:40px;background:#F4F4F2;border:1px solid #E6E6E3;border-radius:22px"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">22 card</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:52px;height:40px;background:#F4F4F2;border:1px solid #E6E6E3;border-radius:28px 28px 0 0"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">28 sheet</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:72px;height:40px;background:#F4F4F2;border:1px solid #E6E6E3;border-radius:999px"></div><span style="font:500 11px 'Geist Mono';color:#8E8E8A">pill</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 13px/1 'Geist'">Elevation</span>
+          <div style="display:flex;gap:16px;padding:8px 0">
+            <div style="flex:1;height:56px;border-radius:999px;background:#fff;border:1px solid #E6E6E3;display:grid;place-items:center;font:500 12px 'Geist Mono';color:#5E5E5B">0 · line</div>
+            <div style="flex:1;height:56px;border-radius:999px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);display:grid;place-items:center;font:500 12px 'Geist Mono';color:#5E5E5B">1 · float</div>
+            <div style="flex:1;height:56px;border-radius:999px;background:#fff;box-shadow:0 -8px 40px rgba(0,0,0,.14);display:grid;place-items:center;font:500 12px 'Geist Mono';color:#5E5E5B">2 · sheet</div>
+          </div>
+          <span style="font:400 13px/1.4 'Geist';color:#5E5E5B">Only floating chrome and sheets cast shadows. Lists separate with hairlines, cards with <span style="font-family:'Geist Mono'">--surface</span>.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font:600 13px/1 'Geist'">Layout</span>
+          <span style="font:400 13px/1.5 'Geist';color:#5E5E5B">Mobile 360–430: single column, 20 gutter, floating tab bar. ≥768: 32 gutter, two columns. ≥1200 (admin): 248 sidebar + fluid content + 360 attention rail. Motion: 180 ms ease-out for state, 320 ms spring for sheets; live updates fade in, never reorder under a finger.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font:600 13px/1 'Geist Mono',monospace;letter-spacing:.06em;color:#5E5E5B">05 — COMPONENTS · LIGHT / DARK</h2>
+    <div style="display:flex;gap:24px;align-items:flex-start">
+      <sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+        <div style="{{ t.vars }}">
+          <div style="width:620px;background:var(--bg);color:var(--fg);border-radius:32px;padding:32px 28px;display:flex;flex-direction:column;gap:40px;box-sizing:border-box">
+            <span style="font:600 12px/1 'Geist Mono',monospace;letter-spacing:.06em;color:var(--fg-3)">{{ t.label }}</span>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">top-bar · menu pill + icon button</span>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="height:56px;padding:0 22px 0 18px;border-radius:999px;background:var(--elev);box-shadow:var(--shadow);display:flex;align-items:center;gap:12px">
+                  <span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1,'wght' 600">menu</span>
+                  <span style="font:600 19px/1 'Geist';letter-spacing:-.01em">Live Board</span>
+                </div>
+                <div style="position:relative;width:56px;height:56px;border-radius:999px;background:var(--elev);box-shadow:var(--shadow);display:grid;place-items:center">
+                  <span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">notifications</span>
+                  <span style="position:absolute;top:13px;right:14px;width:10px;height:10px;border-radius:99px;background:var(--bad);box-shadow:0 0 0 2px var(--elev)"></span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">hero-stat · display + delta line</span>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <span style="font:700 56px/1 'Geist';letter-spacing:-.035em;font-variant-numeric:tabular-nums">2h 14m</span>
+                <div style="display:flex;align-items:center;gap:6px;font:600 17px/1 'Geist'">
+                  <span style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:var(--ok);font-variation-settings:'wght' 700">north_east</span>
+                  <span style="color:var(--ok)">On the clock</span>
+                  <span style="font-weight:400;color:var(--fg-2)">since 5:51 PM</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">tabs · underline</span>
+              <div style="display:flex;gap:28px;border-bottom:1px solid var(--line);margin:0 -28px;padding:0 28px">
+                <span style="padding:0 2px 14px;font:600 19px/1 'Geist';border-bottom:3px solid var(--fg);margin-bottom:-1px">Events</span>
+                <span style="padding:0 2px 14px;font:500 19px/1 'Geist';color:var(--fg-3)">Timeline</span>
+                <span style="padding:0 2px 14px;font:500 19px/1 'Geist';color:var(--fg-3)">People</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">chip-group · filter / range</span>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <span style="height:40px;padding:0 14px;border-radius:10px;display:inline-flex;align-items:center;font:600 16px 'Geist';background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1.5px var(--accent)">Today</span>
+                <span style="height:40px;padding:0 14px;border-radius:10px;display:inline-flex;align-items:center;font:500 16px 'Geist';color:var(--fg-3)">Tomorrow</span>
+                <span style="height:40px;padding:0 14px;border-radius:10px;display:inline-flex;align-items:center;font:500 16px 'Geist';color:var(--fg-3)">Sat 24</span>
+                <span style="height:40px;padding:0 14px;border-radius:10px;display:inline-flex;align-items:center;font:500 16px 'Geist';color:var(--fg-3)">Sun 25</span>
+                <span style="margin-left:auto;width:40px;height:40px;display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:24px;color:var(--fg-2);font-variation-settings:'FILL' 1">tune</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">button · primary (accent) / strong / secondary / ghost / destructive</span>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <button style="grid-column:span 2;height:56px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 18px 'Geist';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">login</span>Clock in</button>
+                <button style="height:56px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:600 17px 'Geist';cursor:pointer">Approve</button>
+                <button style="height:56px;border:0;border-radius:999px;background:var(--surface);color:var(--fg);font:600 17px 'Geist';cursor:pointer">Message</button>
+                <button style="height:48px;border:0;border-radius:999px;background:transparent;color:var(--fg);font:600 16px 'Geist';display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer">View roster<span style="font-family:'Material Symbols Rounded';font-size:22px">chevron_right</span></button>
+                <button style="height:48px;border:0;border-radius:999px;background:var(--bad-soft);color:var(--bad);font:600 16px 'Geist';cursor:pointer">Mark no-show</button>
+              </div>
+              <span style="font:400 13px/1.4 'Geist';color:var(--fg-2)">L 56 · M 48 · S 40. One accent button per view. Disabled = <span style="font-family:'Geist Mono'">--surface</span> fill, <span style="font-family:'Geist Mono'">--fg-3</span> label, plus a reason line.</span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">list-row · label / value / chevron</span>
+              <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+                <div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 18px 'Geist'">Clock-in opens</span><span style="font:600 18px 'Geist';font-variant-numeric:tabular-nums">5:45 PM</span></div>
+                <div style="min-height:64px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)"><span style="flex:1;font:400 18px 'Geist'">400 Market St, San Francisco</span><span style="font:600 16px 'Geist';color:var(--fg-2)">Directions</span><span style="font-family:'Material Symbols Rounded';font-size:24px">chevron_right</span></div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">status-badge · slot &amp; health states (icon + words, never color alone)</span>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--ok-soft);color:var(--ok)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">verified</span>On site</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--warn-soft);color:var(--warn)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">flag</span>Flagged · queued</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--surface);color:var(--fg)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">schedule</span>Expected</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--fg);color:var(--bg)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">timer</span>Due now</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--warn-soft);color:var(--warn)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">running_with_errors</span>Late 12 min</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--info-soft);color:var(--info)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">front_hand</span>Waiting approval</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';color:var(--fg-2);box-shadow:inset 0 0 0 1.5px var(--fg-3);border:0"><span style="font-family:'Material Symbols Rounded';font-size:18px">person_add</span>Open slot</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--surface);color:var(--fg-2)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">check_circle</span>Clocked out</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--bad-soft);color:var(--bad)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">logout</span>Missing clock-out</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--bad);color:var(--bg)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">block</span>No-show</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--surface);color:var(--fg-3)"><span style="font-family:'Material Symbols Rounded';font-size:18px">undo</span>Dropped</span>
+                <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--surface);color:var(--fg-2)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">notifications_off</span>Push off</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">coverage-bar · on site + expected + open = headcount</span>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:4px;height:14px">
+                  <div style="flex:4;border-radius:4px;background:var(--ok)"></div>
+                  <div style="flex:1;border-radius:4px;background:var(--warn)"></div>
+                  <div style="flex:1;border-radius:4px;background:repeating-linear-gradient(135deg,transparent 0 4px,var(--fg-3) 4px 5.5px);box-shadow:inset 0 0 0 1.5px var(--fg-3)"></div>
+                </div>
+                <div style="display:flex;gap:16px;font:500 14px 'Geist';color:var(--fg-2);flex-wrap:wrap">
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:var(--ok)"></span><b style="color:var(--fg)">4</b> on site</span>
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:var(--warn)"></span><b style="color:var(--fg)">1</b> late</span>
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1.5px var(--fg-3)"></span><b style="color:var(--fg)">1</b> open</span>
+                  <span style="margin-left:auto;font-weight:600;color:var(--fg)">of 6</span>
+                </div>
+                <span style="font:400 13px/1.4 'Geist';color:var(--fg-2)">Expected-on-time segments use <span style="font-family:'Geist Mono'">--fg-3</span>; they turn <span style="font-family:'Geist Mono'">--warn</span> once late. Open is always hatched + outlined so it reads without color.</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">person-row · avatar / evidence / state</span>
+              <div style="display:flex;flex-direction:column;border-top:1px solid var(--line)">
+                <div style="min-height:72px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line)">
+                  <div style="width:44px;height:44px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font:600 15px 'Geist';flex:none">AK</div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font:600 17px 'Geist'">Ana Kovač</span><span style="font:400 14px 'Geist';color:var(--fg-2)">In 5:52 PM · 38 m from center · ±12 m</span></div>
+                  <span style="height:30px;padding:0 11px 0 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;font:600 14px 'Geist';background:var(--ok-soft);color:var(--ok)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">verified</span>2h 12m</span>
+                </div>
+                <div style="min-height:72px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line)">
+                  <div style="width:44px;height:44px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--fg-3);display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;color:var(--fg-2)">person_add</div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font:600 17px 'Geist'">Open slot</span><span style="font:400 14px 'Geist';color:var(--fg-2)">Started 1h 04m ago</span></div>
+                  <span style="height:40px;padding:0 16px;border-radius:999px;display:inline-flex;align-items:center;font:600 15px 'Geist';background:var(--fg);color:var(--bg)">Assign</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">attention-card · what · how long · resolve in place</span>
+              <div style="background:var(--surface);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;gap:12px;align-items:flex-start">
+                  <div style="width:40px;height:40px;border-radius:999px;background:var(--warn-soft);color:var(--warn);display:grid;place-items:center;flex:none;font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">running_with_errors</div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font:600 17px/1.3 'Geist'">Marcus Reed is 12 min late</span><span style="font:400 14px/1.35 'Geist';color:var(--fg-2)">Osteria Nove · started 5:30 PM · unresolved 2 min</span></div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <span style="flex:1;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:600 15px 'Geist';background:var(--fg);color:var(--bg)">Message</span>
+                  <span style="flex:1;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:600 15px 'Geist';background:var(--elev);color:var(--fg)">Call</span>
+                  <span style="flex:1;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:600 15px 'Geist';background:var(--elev);color:var(--fg)">Replace</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">feature-card · dark, one per screen, dismissible</span>
+              <div style="position:relative;border-radius:22px;padding:22px;background:radial-gradient(120% 140% at 85% 110%,rgba(201,162,74,.38),transparent 55%),#0E0F12;color:#F4F4F2;display:flex;flex-direction:column;gap:10px;overflow:hidden">
+                <span style="position:absolute;top:18px;right:18px;font-family:'Material Symbols Rounded';font-size:22px;color:#8E8E8A">close</span>
+                <span style="font:600 21px/1.2 'Geist';letter-spacing:-.01em">3 open shifts this weekend</span>
+                <span style="font:400 16px/1.4 'Geist';color:#C9C9C4;max-width:440px">Westfield Gala and The Laurel Club still need attendants. First to claim gets it.</span>
+                <span style="display:flex;align-items:center;gap:2px;font:600 18px 'Geist';margin-top:4px">See open shifts<span style="font-family:'Material Symbols Rounded';font-size:24px">chevron_right</span></span>
+              </div>
+              <div style="display:flex;gap:7px;justify-content:center"><span style="width:8px;height:8px;border-radius:9px;background:var(--fg)"></span><span style="width:8px;height:8px;border-radius:9px;background:var(--line)"></span><span style="width:8px;height:8px;border-radius:9px;background:var(--line)"></span></div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">field · label / input / helper</span>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span style="font:500 15px 'Geist'">Note for your manager</span>
+                <div style="height:56px;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--fg);display:flex;align-items:center;padding:0 16px;font:400 17px 'Geist'">Garage level 3, no signal<span style="width:2px;height:22px;background:var(--accent);margin-left:2px"></span></div>
+                <span style="font:400 13px 'Geist';color:var(--fg-2)">Optional · your manager sees this with your selfie</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">system-banner · offline / sync / stale</span>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="min-height:44px;border-radius:999px;padding:0 16px;display:flex;align-items:center;gap:8px;background:var(--warn-soft);color:var(--warn);font:600 15px 'Geist'"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">cloud_off</span>Offline · board last updated 6:02 PM</div>
+                <div style="min-height:44px;border-radius:999px;padding:0 16px;display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--fg);font:600 15px 'Geist'"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--fg-2)">sync</span>Clock-in saved · will sync when you have signal</div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">tab-bar · floating, active = filled pill</span>
+              <div style="height:80px;border-radius:999px;background:var(--elev);box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(4,1fr);padding:8px;gap:4px;box-sizing:border-box">
+                <div style="border-radius:999px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">space_dashboard</span><span style="font:600 13px 'Geist'">Board</span></div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">event</span><span style="font:600 13px 'Geist'">Events</span></div>
+                <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">inbox</span><span style="font:600 13px 'Geist'">Inbox</span><span style="position:absolute;top:6px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:99px;background:var(--bad);color:#fff;font:700 11px/18px 'Geist';text-align:center;padding:0 4px;box-sizing:border-box">2</span></div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px"><span style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1;font-variation-settings:'FILL' 1">group</span><span style="font:600 13px 'Geist'">Staff</span></div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font:500 12px/1 'Geist Mono';color:var(--fg-3)">sheet · confirm consequence in words</span>
+              <div style="background:var(--elev);border-radius:28px;box-shadow:0 -8px 40px rgba(0,0,0,.14);padding:12px 20px 20px;display:flex;flex-direction:column;gap:16px">
+                <span style="align-self:center;width:40px;height:5px;border-radius:9px;background:var(--line)"></span>
+                <span style="font:600 22px/1.25 'Geist';letter-spacing:-.02em">Mark Marcus Reed as no-show?</span>
+                <span style="font:400 16px/1.45 'Geist';color:var(--fg-2)">He'll get 0 hours for Osteria Nove. This counts toward his reliability and is logged under your name.</span>
+                <div style="display:flex;gap:10px"><span style="flex:1;height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:600 16px 'Geist';background:var(--surface)">Cancel</span><span style="flex:1;height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;font:600 16px 'Geist';background:var(--bad);color:var(--bg)">Mark no-show</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <h2 style="margin:0;font:600 13px/1 'Geist Mono',monospace;letter-spacing:.06em;color:#5E5E5B">06 — RULES</h2>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;font:400 15px/1.5 'Geist'">
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:8px"><strong style="font-weight:600">Do</strong><span style="color:#5E5E5B">Use inline <span style="font-family:'Geist Mono'">var(--token)</span> values only · keep one accent action per view · pair every status color with icon + words · show "venue time · PT" where ambiguous · keep primary staff actions in the bottom 40% of the screen.</span></div>
+      <div style="background:#fff;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:8px"><strong style="font-weight:600">Don't</strong><span style="color:#5E5E5B">Use gold for status · show moving dots or "last seen" · hide unavailable actions (disable + explain instead) · show bill rates on any staff surface · rely on hover for anything.</span></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#C9A24A&quot;,&quot;options&quot;:[&quot;#C9A24A&quot;,&quot;#8E1B2A&quot;,&quot;#1F3A5F&quot;,&quot;#2F6B4F&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tenant&quot;}}">
+class Component extends DCLogic {
+  static LIGHT = { bg:'#FFFFFF', surface:'#F4F4F2', 'surface-2':'#E9E9E6', elev:'#FFFFFF', fg:'#0B0B0B', 'fg-2':'#5E5E5B', 'fg-3':'#8E8E8A', line:'#E6E6E3', accent:'#C9A24A', 'accent-ink':'#1C1404', 'accent-soft':'#F7EFDA', 'accent-text':'#7F611A', ok:'#2A7F36', 'ok-soft':'#E5F3E1', warn:'#B9480E', 'warn-soft':'#FCEDE2', bad:'#C02A20', 'bad-soft':'#FBE7E5', info:'#1E5BC6', 'info-soft':'#E6EDFA', hero:'#0E0F12', shadow:'0 10px 30px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05)' };
+  static DARK = { bg:'#0A0A0B', surface:'#18181A', 'surface-2':'#252528', elev:'#1E1E21', fg:'#F4F4F2', 'fg-2':'#A6A6A1', 'fg-3':'#76766F', line:'#2B2B2E', accent:'#D9B661', 'accent-ink':'#1C1404', 'accent-soft':'#2B2415', 'accent-text':'#E6C77E', ok:'#62C46F', 'ok-soft':'#14261A', warn:'#FF8F57', 'warn-soft':'#2E1B11', bad:'#FF6E63', 'bad-soft':'#311715', info:'#82AEFF', 'info-soft':'#14203A', hero:'#1E1E21', shadow:'0 10px 30px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04)' };
+  static ROLES = { bg:'Screen background', surface:'Cards, fields, secondary buttons', 'surface-2':'Avatars, pressed states', elev:'Floating pills, sheets', fg:'Primary text, strong buttons', 'fg-2':'Secondary text', 'fg-3':'Inactive tabs, expected', line:'Hairlines, dividers', accent:'Primary action fill (tenant)', 'accent-ink':'Label on accent fill', 'accent-soft':'Selected chip fill', 'accent-text':'Accent as text', ok:'On site, verified', 'ok-soft':'Success fill', warn:'Late, flagged, overrun', 'warn-soft':'Warning fill', bad:'Short, missing, no-show', 'bad-soft':'Danger fill', info:'Waiting for approval', 'info-soft':'Info fill', hero:'Feature card ground' };
+  vars(base, accent) {
+    const t = { ...base };
+    if (accent) t.accent = accent;
+    const o = {};
+    for (const k in t) o['--' + k] = t[k];
+    return o;
+  }
+  renderVals() {
+    const accent = this.props.accent;
+    const L = Component.LIGHT, D = Component.DARK;
+    const sw = c => ({ width: 28, height: 44, background: c });
+    const colorTokens = Object.keys(Component.ROLES).map(k => ({
+      name: '--' + k, role: Component.ROLES[k],
+      light: (k === 'accent' && accent) || L[k], dark: (k === 'accent' && accent) || D[k],
+      lightSw: sw((k === 'accent' && accent) || L[k]), darkSw: sw((k === 'accent' && accent) || D[k])
+    }));
+    return {
+      colorTokens,
+      themes: [
+        { label: 'LIGHT', vars: this.vars(L, accent) },
+        { label: 'DARK', vars: this.vars(D, accent) }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
