@@ -11,7 +11,7 @@ const CTA = "text-18"
 const SKIP = "h-12 text-15 text-fg-2"
 
 /** Why location is needed, and a promise list; allowing is simulated until the provider exists. */
-export function LocationStep({ onNext }: { onNext: () => void }) {
+export function LocationStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
   return (
     <OnboardingScreen grow className="gap-5.5">
       <div className="grid size-18 place-items-center rounded-r22 bg-accent-soft text-accent-text">
@@ -39,7 +39,7 @@ export function LocationStep({ onNext }: { onNext: () => void }) {
         <Button variant="accent" size="xl" className={CTA} onClick={onNext}>
           Allow location
         </Button>
-        <Button variant="ghost" className={SKIP} onClick={onNext}>
+        <Button variant="ghost" className={SKIP} onClick={onSkip}>
           Not now (you won&apos;t be able to clock in)
         </Button>
       </div>
@@ -51,6 +51,7 @@ type InstallStepProps = {
   os: InstallOs
   onOs: (os: InstallOs) => void
   onNext: () => void
+  onSkip: () => void
 }
 
 const OS_TABS: { key: InstallOs; label: string }[] = [
@@ -59,7 +60,7 @@ const OS_TABS: { key: InstallOs; label: string }[] = [
 ]
 
 /** Add-to-Home-Screen guide with an iPhone / Android switch. */
-export function InstallStep({ os, onOs, onNext }: InstallStepProps) {
+export function InstallStep({ os, onOs, onNext, onSkip }: InstallStepProps) {
   return (
     <OnboardingScreen grow className="gap-5.5">
       <div className="flex flex-col gap-2.5">
@@ -108,7 +109,7 @@ export function InstallStep({ os, onOs, onNext }: InstallStepProps) {
         <Button variant="accent" size="xl" className={CTA} onClick={onNext}>
           I&apos;ve added it
         </Button>
-        <Button variant="ghost" className={SKIP} onClick={onNext}>
+        <Button variant="ghost" className={SKIP} onClick={onSkip}>
           Remind me later
         </Button>
       </div>

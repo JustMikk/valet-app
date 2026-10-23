@@ -1,10 +1,11 @@
 import { Icon } from "@/components/shared"
-import { CLOCK_VENUE } from "@/mocks/clock"
 
 import { ClockScreen, ClockTopBar } from "../clock-frame"
 
 /** Step 1 of 2: pulse rings while the (simulated) location reading narrows to ±18 m. */
-export function LocatingStep({ accuracy, onClose }: { accuracy: number; onClose: () => void }) {
+type LocatingStepProps = { accuracy: number; neededAccuracyM: number; onClose: () => void }
+
+export function LocatingStep({ accuracy, neededAccuracyM, onClose }: LocatingStepProps) {
   return (
     <ClockScreen>
       <ClockTopBar leading="close" onLeading={onClose} title="Step 1 of 2 · Location" />
@@ -37,7 +38,7 @@ export function LocatingStep({ accuracy, onClose }: { accuracy: number; onClose:
           className="flex h-11 items-center gap-2.5 rounded-pill bg-surface px-4.5"
         >
           <span className="font-mono text-18 font-semibold tabular-nums">±{accuracy} m</span>
-          <span className="text-15 text-fg-2">need ±{CLOCK_VENUE.neededAccuracyM} m</span>
+          <span className="text-15 text-fg-2">need ±{neededAccuracyM} m</span>
         </div>
       </div>
       <span className="text-center text-14 leading-x140 text-fg-3">

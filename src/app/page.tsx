@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { DemoControls } from "@/features/demo"
+
 // Demo launcher until sign-in and role routing exist (Product Handoff 13.1 is undecided).
 const ENTRIES = [
   { href: "/staff", title: "Staff app", note: "Valet attendants · phone first" },
@@ -29,6 +31,7 @@ export default function Home() {
           </Link>
         ))}
       </div>
+      <DemoControls />
     </main>
   )
 }

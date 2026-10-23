@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils"
 type CameraStepProps = {
   /** Inside the venue (clock-in) or capturing for an approval request. */
   inside: boolean
+  /** Meters from the venue, shown in the "Inside" chip. */
+  distanceM: number
   onClose: () => void
   onShoot: () => void
 }
@@ -13,9 +15,9 @@ type CameraStepProps = {
  * Step 2 of 2: selfie stage. The live front-camera preview is a placeholder until the camera
  * provider exists (handoff §5.1); the oval, status chip and shutter are the final UI.
  */
-export function CameraStep({ inside, onClose, onShoot }: CameraStepProps) {
+export function CameraStep({ inside, distanceM, onClose, onShoot }: CameraStepProps) {
   const chip: { icon: IconName; label: string; className: string } = inside
-    ? { icon: "verified", label: "Inside · 38 m from venue", className: "camera-chip-ok" }
+    ? { icon: "verified", label: `Inside · ${distanceM} m from venue`, className: "camera-chip-ok" }
     : { icon: "wrong_location", label: "For approval request", className: "camera-chip-warn" }
 
   return (

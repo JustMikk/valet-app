@@ -4,12 +4,20 @@ import type { ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import { AppShell, type ShellNavItem } from "@/components/shared"
-import { STAFF_USER } from "@/mocks/staff"
 
-const NAV: ShellNavItem[] = [
+import { useHome, useProfile } from "../data/queries"
+
+/** Home, Shifts, Open (with a count of claimable shifts) and Inbox. */
+const navItems = (openCount: number): ShellNavItem[] => [
   { key: "home", label: "Home", icon: "home", href: "/staff" },
   { key: "shifts", label: "Shifts", icon: "calendar_month", href: "/staff/shifts" },
-  { key: "open", label: "Open", icon: "add_circle", href: "/staff/open", badge: { text: "4" } },
+  {
+    key: "open",
+    label: "Open",
+    icon: "add_circle",
+    href: "/staff/open",
+    ...(openCount > 0 ? { badge: { text: String(openCount) } } : {}),
+  },
   { key: "inbox", label: "Inbox", icon: "chat_bubble", href: "/staff/inbox" },
 ]
 
@@ -28,6 +36,8 @@ function navKeyFor(path: string): string | null {
 export function StaffShell({ children }: { children: ReactNode }) {
   const pathname = usePathname().replace(/\/$/, "") || "/"
   const router = useRouter()
+  const profile = useProfile().data
+  const nav = navItems(useHome().data?.open.count ?? 0)
 
   const mode =
     pathname === "/staff/onboarding" ? "bare" : pathname === "/staff/clock" ? "overlay" : "app"
@@ -44,13 +54,13 @@ export function StaffShell({ children }: { children: ReactNode }) {
       brand={{ title: "Regency" }}
       phoneTitle="Regency"
       user={{
-        initials: STAFF_USER.initials,
-        name: STAFF_USER.name,
-        role: STAFF_USER.role,
+        initials: profile?.initials ?? "",
+        name: profile?.name ?? "",
+        role: profile?.role ?? "",
         href: "/staff/profile",
       }}
-      sidebarItems={NAV}
-      tabItems={NAV}
+      sidebarItems={nav}
+      tabItems={nav}
       currentKey={navKeyFor(pathname)}
       isRoot={ROOTS.includes(pathname)}
       mode={mode}

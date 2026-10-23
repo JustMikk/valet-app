@@ -1,13 +1,18 @@
 import { ActionButton, Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { CLOCK_VENUE } from "@/mocks/clock"
+import type { ClockVenueView } from "../clock-view"
 
-type ConfirmStepProps = { onRetake: () => void; onSubmit: () => void }
+type ConfirmStepProps = {
+  venue: ClockVenueView
+  busy?: boolean
+  onRetake: () => void
+  onSubmit: () => void
+}
 
 const ROW = "box-content flex min-h-13.5 items-center border-b border-line"
 
 /** Confirm sheet over the captured selfie: time, venue, location and selfie checks. */
-export function ConfirmStep({ onRetake, onSubmit }: ConfirmStepProps) {
+export function ConfirmStep({ venue, busy = false, onRetake, onSubmit }: ConfirmStepProps) {
   return (
     <div className="absolute inset-0 camera-bg-confirm">
       {/* The camera flash replays each time the step mounts. */}
@@ -23,19 +28,19 @@ export function ConfirmStep({ onRetake, onSubmit }: ConfirmStepProps) {
         <div className="flex flex-col gap-1.5">
           <span className="text-15 font-medium text-fg-2">Clock in at</span>
           <span className="font-display text-48 leading-x100 font-bold tracking-n040">
-            {CLOCK_VENUE.clockInTime}
+            {venue.clockInTime}
           </span>
         </div>
         <div className="flex flex-col border-t border-line">
           <div className={ROW}>
-            <span className="flex-1 text-17">{CLOCK_VENUE.name}</span>
-            <span className="text-15 text-fg-2">{CLOCK_VENUE.hours}</span>
+            <span className="flex-1 text-17">{venue.name}</span>
+            <span className="text-15 text-fg-2">{venue.hours}</span>
           </div>
           <div className={ROW}>
             <span className="flex-1 text-17">Location</span>
             <span className="inline-flex items-center gap-1.25 text-15 font-semibold text-ok">
               <Icon name="verified" filled size={20} />
-              Inside · 38 m
+              Inside · {venue.distanceM} m
             </span>
           </div>
           <div className={ROW}>
@@ -56,6 +61,7 @@ export function ConfirmStep({ onRetake, onSubmit }: ConfirmStepProps) {
             icon="login"
             shine
             className="flex-2 px-1.5 text-18"
+            disabled={busy}
             onClick={onSubmit}
           >
             Clock in

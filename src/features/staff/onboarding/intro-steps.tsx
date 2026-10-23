@@ -3,10 +3,13 @@ import Image from "next/image"
 
 import { Icon, TextField } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import { staffRepo } from "@/lib/data"
 import { cn } from "@/lib/utils"
 import { ONBOARDING_INVITE } from "@/mocks/onboarding"
 import { STAFF_USER } from "@/mocks/staff"
 
+import { ErrorNotice } from "../data/query-state"
+import { useProfile } from "../data/queries"
 import { OnboardingScreen, STEP_BODY, STEP_TITLE } from "./onboarding-frame"
 
 const CTA = "text-18"
@@ -44,7 +47,25 @@ export function InviteStep({ onNext }: { onNext: () => void }) {
   )
 }
 
-export function SigninStep({ onNext }: { onNext: () => void }) {
+type SigninStepProps = { email: string; onEmail: (email: string) => void; onNext: () => void }
+
+export function SigninStep({ email, onEmail, onNext }: SigninStepProps) {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const send = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      await staffRepo.requestCode(email.trim())
+      onNext()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't send the code. Try again.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <OnboardingScreen className="gap-6">
       <div className="flex flex-col gap-2.5">
@@ -56,12 +77,19 @@ export function SigninStep({ onNext }: { onNext: () => void }) {
       </div>
       <TextField
         label="Email"
-        defaultValue={STAFF_USER.email}
-        readOnly
+        value={email}
+        onChange={(e) => onEmail(e.target.value)}
         type="email"
         autoComplete="email"
       />
-      <Button variant="accent" size="xl" className={CTA} onClick={onNext}>
+      {error && <ErrorNotice message={error} />}
+      <Button
+        variant="accent"
+        size="xl"
+        className={CTA}
+        disabled={busy || !email.trim()}
+        onClick={send}
+      >
         Email me a code
       </Button>
     </OnboardingScreen>
@@ -69,8 +97,10 @@ export function SigninStep({ onNext }: { onNext: () => void }) {
 }
 
 /** Six boxes that fill in one digit at a time when "Paste code from email" is tapped. */
-export function CodeStep({ onNext }: { onNext: () => void }) {
+export function CodeStep({ email, onNext }: { email: string; onNext: () => void }) {
   const [typed, setTyped] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -79,8 +109,21 @@ export function CodeStep({ onNext }: { onNext: () => void }) {
     }
   }, [])
 
+  const verify = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      await staffRepo.verifyCode(email.trim(), ONBOARDING_INVITE.code)
+      onNext()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't verify the code. Try again.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const run = () => {
-    if (typed >= 6) return onNext()
+    if (typed >= 6) return void verify()
     if (timer.current) clearInterval(timer.current)
     timer.current = setInterval(() => {
       setTyped((n) => {
@@ -94,7 +137,7 @@ export function CodeStep({ onNext }: { onNext: () => void }) {
     <OnboardingScreen className="gap-6">
       <div className="flex flex-col gap-2.5">
         <h1 className={STEP_TITLE}>Enter the code</h1>
-        <p className={STEP_BODY}>Sent to {STAFF_USER.email}. It expires in 10 minutes.</p>
+        <p className={STEP_BODY}>Sent to {email}. It expires in 10 minutes.</p>
       </div>
       <div className="grid grid-cols-6 gap-2" role="group" aria-label="Six digit code">
         {ONBOARDING_INVITE.code.split("").map((digit, k) => (
@@ -110,7 +153,8 @@ export function CodeStep({ onNext }: { onNext: () => void }) {
           </span>
         ))}
       </div>
-      <Button variant="accent" size="xl" className={CTA} onClick={run}>
+      {error && <ErrorNotice message={error} />}
+      <Button variant="accent" size="xl" className={CTA} disabled={busy} onClick={run}>
         {typed >= 6 ? "Verify" : "Paste code from email"}
       </Button>
       <Button variant="ghost" size="compact" className="text-15 text-fg-2">
@@ -121,6 +165,7 @@ export function CodeStep({ onNext }: { onNext: () => void }) {
 }
 
 export function ProfileStep({ onNext }: { onNext: () => void }) {
+  const profile = useProfile().data
   return (
     <OnboardingScreen className="gap-5.5">
       <h1 className={STEP_TITLE}>Confirm your profile</h1>
@@ -135,10 +180,15 @@ export function ProfileStep({ onNext }: { onNext: () => void }) {
           Optional photo. It helps dispatch recognise you on the board.
         </span>
       </div>
-      <TextField label="Full name" defaultValue={STAFF_USER.name} readOnly autoComplete="name" />
+      <TextField
+        label="Full name"
+        defaultValue={profile?.name ?? STAFF_USER.name}
+        readOnly
+        autoComplete="name"
+      />
       <TextField
         label="Phone (for dispatch to call)"
-        defaultValue={STAFF_USER.phone}
+        defaultValue={profile?.phone ?? STAFF_USER.phone}
         readOnly
         type="tel"
         autoComplete="tel"

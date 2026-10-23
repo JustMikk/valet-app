@@ -1,5 +1,6 @@
 // Illustrative staff-app data from the design export (Regency Valet Parking tenant). Typed
 // fixtures stand in for the data layer until repositories exist (docs/DECISIONS.md ADR-011).
+import type { NotificationItem, OpenShift, ShiftCard, UpNext } from "@/lib/data/staff/schemas"
 import type { StatusSpec } from "@/lib/status/presets"
 
 export const STAFF_USER = {
@@ -24,20 +25,12 @@ export const TONIGHT = {
   scheduledSecs: 18540,
 } as const
 
-export type UpNext = { dow: string; day: string; venue: string; time: string }
-export const UP_NEXT: UpNext[] = [
+export const UP_NEXT: Omit<UpNext, "assignmentId">[] = [
   { dow: "SAT", day: "24", venue: "Harbor Pavilion · Wedding", time: "4:00 – 11:30 PM" },
   { dow: "TUE", day: "27", venue: "Osteria Nove", time: "5:30 – 10:30 PM" },
 ]
 
-export type ShiftCard = {
-  id: string
-  status: StatusSpec
-  date: string
-  venue: string
-  time: string
-  right: string
-}
+type ShiftFixture = Omit<ShiftCard, "isTonight">
 
 const confirmed: StatusSpec = {
   tone: "subtle",
@@ -47,7 +40,7 @@ const confirmed: StatusSpec = {
 }
 const approved: StatusSpec = { tone: "ok", icon: "check_circle", filled: true, label: "Approved" }
 
-export const UPCOMING_SHIFTS: ShiftCard[] = [
+export const UPCOMING_SHIFTS: ShiftFixture[] = [
   {
     id: "tonight",
     status: { tone: "strong", icon: "timer", filled: true, label: "Today · on now" },
@@ -82,7 +75,7 @@ export const UPCOMING_SHIFTS: ShiftCard[] = [
   },
 ]
 
-export const PAST_SHIFTS: ShiftCard[] = [
+export const PAST_SHIFTS: ShiftFixture[] = [
   {
     id: "past-1",
     status: approved,
@@ -133,17 +126,9 @@ export const DROP_REASONS = [
 ] as const
 
 export type ClaimOutcome = "claimed" | "filled" | "overlap"
-export type OpenShift = {
-  id: string
-  date: string
-  venue: string
-  time: string
-  spots: number
-  conflict?: string
-  outcome: ClaimOutcome
-}
+type OpenShiftFixture = OpenShift & { outcome: ClaimOutcome }
 
-export const OPEN_SHIFTS: OpenShift[] = [
+export const OPEN_SHIFTS: OpenShiftFixture[] = [
   {
     id: "laurel",
     date: "FRI OCT 23 · TONIGHT",
@@ -179,53 +164,7 @@ export const OPEN_SHIFTS: OpenShift[] = [
   },
 ]
 
-export type ShiftResultKey = ClaimOutcome | "dropped"
-export const SHIFT_RESULTS: Record<
-  ShiftResultKey,
-  {
-    title: string
-    body: string
-    primaryLabel: string
-    primaryHref: string
-    icon: "check" | "group_off" | "event_busy" | "undo"
-    tone: "ok" | "fg" | "warn"
-  }
-> = {
-  claimed: {
-    title: "It’s yours.",
-    body: "Harbor Pavilion · Brunch, Sun Oct 25, 10:00 AM – 3:00 PM is now in your shifts. Dispatch has been notified.",
-    primaryLabel: "View in my shifts",
-    primaryHref: "/staff/shifts",
-    icon: "check",
-    tone: "ok",
-  },
-  filled: {
-    title: "Just filled.",
-    body: "Someone claimed the last spot at The Grand Hotel (Wed Oct 28) a moment before you. Other open shifts are still available.",
-    primaryLabel: "See remaining shifts",
-    primaryHref: "/staff/open",
-    icon: "group_off",
-    tone: "fg",
-  },
-  overlap: {
-    title: "That overlaps a shift you hold.",
-    body: "The Laurel Club (7:30 PM – 1:00 AM) overlaps The Grand Hotel tonight (6:00 – 11:00 PM). You can only hold one at a time.",
-    primaryLabel: "View my Grand Hotel shift",
-    primaryHref: "/staff",
-    icon: "event_busy",
-    tone: "warn",
-  },
-  dropped: {
-    title: "Shift dropped.",
-    body: "Harbor Pavilion (Sat Oct 24) has been reopened, and dispatch was alerted it’s a late drop. Thanks for letting us know early.",
-    primaryLabel: "Back to my shifts",
-    primaryHref: "/staff/shifts",
-    icon: "undo",
-    tone: "fg",
-  },
-}
-
-export type ChatMessage =
+export type ChatFixture =
   | { kind: "day"; text: string }
   | {
       kind: "message"
@@ -238,7 +177,7 @@ export type ChatMessage =
       from: "them" | "me" | "broadcast"
     }
 
-export const CHAT_MESSAGES: ChatMessage[] = [
+export const CHAT_MESSAGES: ChatFixture[] = [
   { kind: "day", text: "TODAY · FRI OCT 23" },
   {
     kind: "message",
@@ -267,18 +206,10 @@ export const CHAT_MESSAGES: ChatMessage[] = [
   },
 ]
 
-export type NotificationTone = "accent" | "info" | "ok" | "warn"
-export type NotificationItem = {
-  icon:
-    "timer" | "chat_bubble" | "add_circle" | "edit_calendar" | "check_circle" | "event_available"
-  tone: NotificationTone
-  title: string
-  body: string
-  time: string
-  href: string
-}
-
-export const NOTIFICATION_GROUPS: { label: string; items: NotificationItem[] }[] = [
+export const NOTIFICATION_GROUPS: {
+  label: string
+  items: Omit<NotificationItem, "id" | "unread">[]
+}[] = [
   {
     label: "TODAY",
     items: [

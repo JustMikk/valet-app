@@ -2,11 +2,14 @@ import { Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { CLOCK_NOTE_PRESETS, CLOCK_VENUE } from "@/mocks/clock"
+import { CLOCK_NOTE_PRESETS } from "@/mocks/clock"
 
 import { ClockScreen, ClockTopBar } from "../clock-frame"
+import type { ClockVenueView } from "../clock-view"
 
 type ApprovalStepProps = {
+  venue: ClockVenueView
+  busy?: boolean
   note: string
   onNote: (note: string) => void
   onBack: () => void
@@ -15,7 +18,15 @@ type ApprovalStepProps = {
 }
 
 /** Request approval: selfie recap, a "where are you" note, send. Time counts from the request. */
-export function ApprovalStep({ note, onNote, onBack, onRetake, onSend }: ApprovalStepProps) {
+export function ApprovalStep({
+  venue,
+  busy = false,
+  note,
+  onNote,
+  onBack,
+  onRetake,
+  onSend,
+}: ApprovalStepProps) {
   return (
     <ClockScreen>
       <ClockTopBar leading="back" onLeading={onBack} title="Request approval" />
@@ -25,8 +36,7 @@ export function ApprovalStep({ note, onNote, onBack, onRetake, onSend }: Approva
         </h1>
         <p className="m-0 text-16 leading-x145 text-fg-2">
           We&apos;ll send your selfie, this location snapshot and your note. If approved, your time
-          starts from <b className="text-fg">now ({CLOCK_VENUE.requestTime})</b>, not when they
-          reply.
+          starts from <b className="text-fg">now ({venue.requestTime})</b>, not when they reply.
         </p>
       </div>
       <div className="flex items-center gap-3.5 rounded-r20 bg-surface p-3.5">
@@ -35,7 +45,7 @@ export function ApprovalStep({ note, onNote, onBack, onRetake, onSend }: Approva
         </div>
         <div className="flex flex-1 flex-col gap-1">
           <span className="text-16 font-semibold">Selfie captured</span>
-          <span className="text-14 text-fg-2">420 m from venue · ±18 m</span>
+          <span className="text-14 text-fg-2">{venue.distanceM} m from venue · ±18 m</span>
         </div>
         <Button variant="elevated" size="xs" className="h-10 px-3.5 text-14" onClick={onRetake}>
           Retake
@@ -74,7 +84,13 @@ export function ApprovalStep({ note, onNote, onBack, onRetake, onSend }: Approva
         />
       </div>
       <div className="mt-auto">
-        <Button variant="accent" size="lg" className="w-full text-18" onClick={onSend}>
+        <Button
+          variant="accent"
+          size="lg"
+          className="w-full text-18"
+          disabled={busy}
+          onClick={onSend}
+        >
           Send request
         </Button>
       </div>
