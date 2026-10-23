@@ -9,6 +9,8 @@ import { formatDate } from "@/lib/time/labels"
 import { rows, sql } from "../db/client"
 import { badRequest, conflict, notFound } from "../http/handler"
 import { adminCtx } from "./common"
+import { syncRecentInvoices } from "./event-invoice"
+import { nextInvoiceNumber, totalsOf, writeLines, type InvoiceLineInput } from "./invoice-store"
 
 const DAY = 24 * 60 * 60_000
 const PAYMENT_TERMS_DAYS = 14
@@ -26,6 +28,10 @@ type InvoiceDbRow = {
   due_at: Date | null
   total_cents: number
   minutes: number
+  /** Set for an invoice drafted from one event; period invoices have none. */
+  event_id: string | null
+  label: string | null
+  summary: string | null
 }
 
 /** "Oct 16 – 31" within one month, "Oct 28 – Nov 3" across two. */
@@ -51,7 +57,7 @@ async function loadInvoices(tenantId: string, id?: string): Promise<InvoiceDbRow
   return rows<InvoiceDbRow>(
     sql()`select i.id, i.number, v.name as venue, v.id as venue_id, v.timezone as tz,
             i.period_start::text, i.period_end::text, i.status, i.billed_to, i.due_at,
-            i.total_cents, i.minutes
+            i.total_cents, i.minutes, i.event_id, i.label, i.summary
           from invoices i join venues v on v.id = i.venue_id
           where i.tenant_id = ${tenantId} and (${id ?? null}::uuid is null or i.id = ${id ?? null}::uuid)
           order by i.period_start desc, case i.status when 'draft' then 0 else 1 end, v.name`,
@@ -60,10 +66,12 @@ async function loadInvoices(tenantId: string, id?: string): Promise<InvoiceDbRow
 
 export async function listInvoices(adminId: string, now: Date): Promise<InvoiceRow[]> {
   const ctx = await adminCtx(adminId)
+  // Approved hours that have no invoice yet get one before the list is read.
+  await syncRecentInvoices(ctx.tenantId, now)
   return (await loadInvoices(ctx.tenantId)).map((row) => ({
     id: row.id,
     venue: row.venue,
-    period: periodLabel(row.period_start, row.period_end),
+    period: row.label ?? periodLabel(row.period_start, row.period_end),
     status: statusOf(row, now),
     hours: formatHoursDecimal(row.minutes),
     amountCents: row.total_cents,
@@ -99,12 +107,13 @@ export async function getInvoice(
   if (!row) throw notFound("Invoice not found.")
   const lines = await rows<{
     what: string
+    detail: string
     staff_count: number
     minutes: number
     rate_cents: number
     amount_cents: number
   }>(
-    sql()`select what, staff_count, minutes, rate_cents, amount_cents from invoice_lines
+    sql()`select what, detail, staff_count, minutes, rate_cents, amount_cents from invoice_lines
           where invoice_id = ${row.id} order by position`,
   )
   const status = statusOf(row, now).label
@@ -112,13 +121,17 @@ export async function getInvoice(
     id: row.id,
     number: `${row.number} · ${status.replace(/ \d+d$/, "").toUpperCase()}`,
     venue: row.venue,
-    period: `${periodLabel(row.period_start, row.period_end)}, ${row.period_end.slice(0, 4)} · from approved hours`,
+    period:
+      row.summary ??
+      `${periodLabel(row.period_start, row.period_end)}, ${row.period_end.slice(0, 4)} · from approved hours`,
+    eventId: row.event_id ?? undefined,
     totalCents: row.total_cents,
-    notice: row.status === "draft" ? await pendingNotice(row) : null,
+    notice: row.status === "draft" && !row.event_id ? await pendingNotice(row) : null,
     billedTo: row.billed_to,
     sent: row.status !== "draft",
     lines: lines.map((line) => ({
       what: line.what,
+      detail: line.detail || undefined,
       staffCount: line.staff_count,
       minutes: line.minutes,
       rateCents: line.rate_cents,
@@ -183,7 +196,7 @@ export async function createInvoice(
 
   const [existing] = await rows<{ id: string }>(
     sql()`select id from invoices
-          where venue_id = ${venue.id} and period_start = ${input.periodStart}::date
+          where venue_id = ${venue.id} and event_id is null and period_start = ${input.periodStart}::date
             and period_end = ${input.periodEnd}::date limit 1`,
   )
   if (existing) {
@@ -199,6 +212,8 @@ export async function createInvoice(
             and a.clocked_in_at is not null and a.clocked_out_at is not null
             and (e.starts_at at time zone ${venue.timezone})::date
                 between ${input.periodStart}::date and ${input.periodEnd}::date
+            and not exists (select 1 from invoices billed where billed.event_id = e.id)
+            and not exists (select 1 from invoice_events ie where ie.event_id = e.id)
           group by e.id, e.kind, e.title, e.starts_at
           order by e.starts_at`,
   )
@@ -209,21 +224,16 @@ export async function createInvoice(
     )
   }
 
-  const lines = events.map((event) => ({
+  const lines: InvoiceLineInput[] = events.map((event) => ({
+    detail: "",
     what: `${event.label} · ${formatDate(event.starts_at, venue.timezone)}`,
     staff_count: event.staff_count,
     minutes: event.minutes,
     rate_cents: venue.bill_rate_cents,
     amount_cents: amountCents(event.minutes, venue.bill_rate_cents),
   }))
-  const total = lines.reduce((sum, line) => sum + line.amount_cents, 0)
-  const minutes = lines.reduce((sum, line) => sum + line.minutes, 0)
-  const year = now.getUTCFullYear()
-  const [{ next }] = await rows<{ next: number }>(
-    sql()`select coalesce(max(substring(number from '([0-9]+)$')::int), 0) + 1 as next
-          from invoices where tenant_id = ${ctx.tenantId}`,
-  )
-  const number = `INV-${year}-${String(next).padStart(4, "0")}`
+  const { total, minutes } = totalsOf(lines)
+  const number = await nextInvoiceNumber(ctx.tenantId, now)
 
   const [created] = await rows<{ id: string }>(
     sql()`insert into invoices (tenant_id, venue_id, number, period_start, period_end, status,
@@ -232,9 +242,10 @@ export async function createInvoice(
                   ${input.periodEnd}::date, 'draft', ${venue.billing_email}, ${total}, ${minutes})
           returning id`,
   )
-  await sql()`insert into invoice_lines (invoice_id, position, what, staff_count, minutes, rate_cents, amount_cents)
-              select ${created.id}, x.position, x.what, x.staff_count, x.minutes, x.rate_cents, x.amount_cents
-              from jsonb_to_recordset(${JSON.stringify(lines.map((line, i) => ({ ...line, position: i + 1 })))}::jsonb)
-                as x(position int, what text, staff_count int, minutes int, rate_cents int, amount_cents int)`
+  await writeLines(created.id, lines)
+  // Remember which events this billed, so none of them is drafted again as an event invoice.
+  await sql()`insert into invoice_events (invoice_id, event_id)
+              select ${created.id}, x::uuid
+              from jsonb_array_elements_text(${JSON.stringify(events.map((e) => e.id))}::jsonb) as x`
   return { id: created.id }
 }

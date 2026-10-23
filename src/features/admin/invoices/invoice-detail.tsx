@@ -69,9 +69,10 @@ function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
             >
               <div className="flex flex-1 flex-col gap-0.5">
                 <span className="text-15 font-semibold">{line.what}</span>
+                {line.detail && <span className="text-13 text-fg-2">{line.detail}</span>}
                 <span className="text-13 text-fg-2">
-                  {line.staffCount} staff · {formatHoursDecimal(line.minutes)} ×{" "}
-                  {formatRate(line.rateCents)}
+                  {!line.detail && `${line.staffCount} staff · `}
+                  {formatHoursDecimal(line.minutes)} × {formatRate(line.rateCents)}
                 </span>
               </div>
               <span className="font-mono text-15 font-semibold">

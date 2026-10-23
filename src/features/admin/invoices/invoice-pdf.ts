@@ -48,6 +48,7 @@ export function invoicePages(invoice: InvoiceDetail, company: string): PdfPage[]
       header()
     }
     put({ text: line.what, x: LEFT, size: 10 })
+    if (line.detail) put({ text: line.detail, x: LEFT, size: 8 }, y - 12)
     put({ text: String(line.staffCount), x: COLUMNS.staff, size: 10, align: "right" })
     put({ text: formatHoursDecimal(line.minutes), x: COLUMNS.hours, size: 10, align: "right" })
     put({ text: formatRate(line.rateCents), x: COLUMNS.rate, size: 10, align: "right" })

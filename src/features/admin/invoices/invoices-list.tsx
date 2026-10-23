@@ -18,7 +18,7 @@ export function InvoicesList() {
     <AdminPage>
       <AdminHead
         title="Invoices"
-        sub="Built from approved hours"
+        sub="Drafted when an event's hours are approved"
         cta={{
           label: "New invoice",
           icon: "request_quote",

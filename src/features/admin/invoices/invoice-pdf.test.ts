@@ -52,6 +52,18 @@ describe("invoicePages", () => {
     )
   })
 
+  it("prints each worker's in and out times under their name on an event invoice", () => {
+    const event = {
+      ...invoice,
+      lines: [
+        { ...invoice.lines[0], what: "Ana Ruiz", detail: "6:00 PM – 10:30 PM", staffCount: 1 },
+      ],
+    }
+    expect(texts(invoicePages(event, "Regency"))).toEqual(
+      expect.arrayContaining(["Ana Ruiz", "6:00 PM – 10:30 PM"]),
+    )
+  })
+
   it("leaves the notice off a sent invoice", () => {
     const all = texts(invoicePages({ ...invoice, notice: null, sent: true }, "Regency"))
     expect(all.some((text) => text.includes("still in review"))).toBe(false)

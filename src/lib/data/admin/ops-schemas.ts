@@ -149,8 +149,18 @@ export const InvoiceDetailDto = z.object({
   notice: z.nullable(str),
   billedTo: str,
   sent: bool,
+  /** Set when the system drafted it from one event, so the screen can link back to it. */
+  eventId: z.optional(str),
   lines: z.array(
-    z.object({ what: str, staffCount: int, minutes: int, rateCents: int, amountCents: int }),
+    z.object({
+      what: str,
+      /** An event invoice's line is one worker: "6:02 PM – 11:10 PM". Period lines have none. */
+      detail: z.optional(str),
+      staffCount: int,
+      minutes: int,
+      rateCents: int,
+      amountCents: int,
+    }),
   ),
 })
 export type InvoiceDetail = z.infer<typeof InvoiceDetailDto>

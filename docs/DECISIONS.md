@@ -318,3 +318,19 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 **Decision.** `next.config.ts` treats `VERCEL` as the server target (the API runs, `NEXT_PUBLIC_DATA_SOURCE=api`) and builds into the default `.next` folder Vercel reads. `VALET_TARGET=static` still forces the export. Local `pnpm build` and CI remain the static export.
 
 **Needed on Vercel (Project → Settings → Environment Variables):** `DATABASE_URL`, `SESSION_SECRET` (32+ random bytes), `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; optional `CRON_SECRET`. Leave `DEMO_MODE` unset. The database needs `pnpm db:setup` once (migrations, seed) and `pnpm admin:create` for the first dispatcher.
+
+---
+
+## ADR-019 — Invoices are drafted automatically per event
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: invoices created automatically from the event's time and the people who worked it; spec §10.3 "one per event in MVP")
+
+**Decision.**
+
+- When the last of an event's hours is approved (Hours screen: one entry, "approve all clean", or an adjusted time), the system drafts that event's invoice: one line per worker who clocked in, showing their in and out times, hours, the venue's bill rate and the amount. The header line says what the event was, when it ran and how many of the requested crew worked ("Wedding · Sat Nov 7 · 6:00 – 11:00 PM · 4 of 5 staff"). Dispatchers get a notification ("Invoice drafted") that opens it.
+- Billable time is each worker's approved clock-in to clock-out. The event must be over, and nobody who clocked in may still be waiting for approval. Someone who never clocked in has no hours: no line, and they do not hold the invoice back.
+- Sending stays manual: it emails the venue and locks the hours (§10.3 step 5), so the dispatcher previews and sends it.
+- A draft follows its event: it is rebuilt if the crew's hours change and withdrawn if the event is no longer ready; once sent it never changes. Opening the invoice list also drafts any event whose hours were approved before this existed (quietly, last 60 days).
+- The hand-made period invoice (venue and dates) still works as a fallback. It records the events it billed (`invoice_events`), and those are never drafted again; events with their own invoice are left out of it.
+
+**Consequences.** Migrations 008–009. Lines are a snapshot like before. Early arrival still counts (the Hours screen shows the same total): D43.

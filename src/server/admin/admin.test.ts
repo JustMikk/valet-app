@@ -174,6 +174,7 @@ type H = Parameters<typeof describeFlag>[0]
 const hours = (over: Partial<H> = {}): H => ({
   assignment_id: "h1",
   staff_id: "s1",
+  event_id: "event-1",
   hours_status: "in_review",
   clocked_in_at: T("2026-10-23T17:52:00-07:00"),
   clocked_out_at: T("2026-10-23T23:02:00-07:00"),

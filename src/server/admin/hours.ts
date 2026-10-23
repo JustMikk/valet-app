@@ -8,6 +8,7 @@ import { formatDate, formatDuration, formatTime, wallTime, zonedInstant } from "
 import { rows, sql } from "../db/client"
 import { badRequest, conflict, notFound } from "../http/handler"
 import { adminCtx, initialsOf, notifyStaff } from "./common"
+import { syncEventInvoices } from "./event-invoice"
 import { weekStart } from "./staff"
 
 const MIN = 60_000
@@ -16,6 +17,7 @@ const LATE_SYNC_MIN = 60
 
 type HoursRow = {
   assignment_id: string
+  event_id: string
   staff_id: string
   hours_status: "in_review" | "approved"
   clocked_in_at: Date
@@ -85,7 +87,7 @@ export function toEntry(row: HoursRow): { entry: HoursEntry; clean: boolean } {
 
 async function loadRows(tenantId: string, ids?: string[]): Promise<HoursRow[]> {
   return rows<HoursRow>(
-    sql()`select a.id as assignment_id, a.staff_id, a.hours_status, a.clocked_in_at, a.clocked_out_at,
+    sql()`select a.id as assignment_id, a.event_id, a.staff_id, a.hours_status, a.clocked_in_at, a.clocked_out_at,
             s.name, e.starts_at, e.ends_at, v.name as venue, v.timezone as tz, t.flag_early_out,
             pin.status as in_status, pin.flag_reason as in_flag, pin.offline as in_offline,
             pin.note as in_note, pin.distance_m as in_dist, pin.device_at as in_device_at,
@@ -157,6 +159,11 @@ async function approveRows(selected: HoursRow[]): Promise<void> {
               from events e
               where e.id = a.event_id
                 and a.id in (select jsonb_array_elements_text(${ids}::jsonb)::uuid)`
+  // The last approval of an event drafts its invoice.
+  await syncEventInvoices(
+    selected.map((r) => r.event_id),
+    new Date(),
+  )
   await notifyStaff(
     selected.map((r) => ({
       staffId: r.staff_id,
@@ -236,6 +243,7 @@ export async function adjustEntry(
               update assignments set clocked_out_at = ${out.toISOString()}, status = 'completed',
                                      hours_status = 'approved'
               where id = ${assignmentId}`
+  await syncEventInvoices([row.event_id], new Date())
   const outLabel = formatTime(out, row.tz)
   await notifyStaff([
     {

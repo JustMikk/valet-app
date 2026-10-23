@@ -27,6 +27,7 @@ const TABLES = [
 
 const WIPE = [
   "hours_adjustments",
+  "invoice_events",
   "invoice_lines",
   "invoices",
   "notifications",
