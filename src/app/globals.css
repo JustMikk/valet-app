@@ -257,10 +257,19 @@
   --animate-spin-medium: vw-spin 1.4s linear infinite;
   --animate-sheet-up-slow: vw-up 0.34s var(--ease-sheet) both;
   --animate-blink: vw-blink 2s infinite;
+  --animate-route: vw-route 0.22s ease-out both;
   --animate-grow: vw-grow 0.7s var(--ease-out-soft) both;
   --animate-roll: vw-roll 0.5s var(--ease-pop) both;
   --animate-out: vw-out 0.34s cubic-bezier(0.4, 0, 0.6, 1) forwards;
 
+  @keyframes vw-route {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
   @keyframes vw-blink {
     0%,
     100% {

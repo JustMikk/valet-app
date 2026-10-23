@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 
 /**
  * The app's scrolling content pane. Each route enters with the design's screen transition
- * (fade + scale 1.015 → 1, .38 s; DESIGN_README "Motion"), and a new route starts at the top
+ * (a plain .22 s fade: scaling a page full of blurred glass janks, see OPEN_QUESTIONS D19), and a new route starts at the top
  * instead of inheriting the previous page's scroll position.
  */
 export function RouteScreen({ back, children }: { back: ReactNode; children: ReactNode }) {
@@ -20,7 +20,7 @@ export function RouteScreen({ back, children }: { back: ReactNode; children: Rea
     <div ref={pane} className="no-scrollbar flex h-full flex-col overflow-y-auto">
       {back}
       {/* Keyed so each route remounts and replays the transition; the Back row stays put. */}
-      <div key={pathname} className="min-h-0 flex-1 animate-screen">
+      <div key={pathname} className="min-h-0 flex-1 animate-route">
         {children}
       </div>
     </div>
