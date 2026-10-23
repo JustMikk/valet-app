@@ -1,8 +1,6 @@
 import { Icon } from "@/components/shared"
 import { cn } from "@/lib/utils"
-import type { ChatMessage } from "@/mocks/staff"
-
-type MessageItem = Extract<ChatMessage, { kind: "message" }>
+import type { ChatMessage } from "@/lib/data"
 
 const BUBBLE = {
   them: "self-start rounded-[20px_20px_20px_6px] bg-surface text-fg",
@@ -12,7 +10,7 @@ const BUBBLE = {
 } as const
 
 type ChatBubbleProps = {
-  message: MessageItem
+  message: ChatMessage
   onClaim: () => void
 }
 
@@ -29,6 +27,12 @@ export function ChatBubble({ message: m, onClaim }: ChatBubbleProps) {
           BUBBLE[m.from],
         )}
       >
+        {m.from === "broadcast" && (
+          <span className="flex items-center gap-1.5 text-12 font-semibold tracking-p040 text-accent-text">
+            <Icon name="campaign" filled size={15} loose />
+            ANNOUNCEMENT
+          </span>
+        )}
         {m.ref && (
           <span className="flex items-center gap-1.5 text-12 font-semibold opacity-75">
             <Icon name="event" size={15} loose />
@@ -52,8 +56,8 @@ export function ChatBubble({ message: m, onClaim }: ChatBubbleProps) {
             className="mt-1 flex items-center gap-2.5 rounded-r14 border-0 bg-elev px-3.5 py-3 text-left text-fg"
           >
             <span className="flex flex-1 flex-col gap-0.5">
-              <span className="text-15 font-semibold">{m.event}</span>
-              <span className="text-13 text-fg-2">Sat Oct 31 · 7 PM – 1 AM · 4 spots</span>
+              <span className="text-15 font-semibold">{m.event.title}</span>
+              <span className="text-13 text-fg-2">{m.event.meta}</span>
             </span>
             <span className="text-14 font-semibold text-accent-text">Claim</span>
           </button>

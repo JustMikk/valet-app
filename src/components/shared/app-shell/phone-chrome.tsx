@@ -10,6 +10,7 @@ import { Icon } from "../icon"
 import { ResponsiveSheet } from "../responsive-sheet"
 import { TabBar } from "../tab-bar"
 import { useShellMenu } from "./menu-context"
+import { NotificationBell } from "./notification-bell"
 import type { ShellApp, ShellNavItem, ShellUser } from "./types"
 
 const CIRCLE =
@@ -26,6 +27,10 @@ type PhoneChromeProps = {
   currentKey: string | null
   isRoot: boolean
   showTopBar: boolean
+  /** Unread notifications; undefined draws no bell. */
+  unread?: number
+  /** The avatar opens the account sheet instead of linking to Profile. */
+  accountMenu?: boolean
   onBack: () => void
 }
 
@@ -40,9 +45,11 @@ export function PhoneChrome({
   currentKey,
   isRoot,
   showTopBar,
+  unread,
+  accountMenu,
   onBack,
 }: PhoneChromeProps) {
-  const { open: moreOpen, setOpen: setMoreOpen } = useShellMenu()
+  const { open: moreOpen, setOpen: setMoreOpen, setAccountOpen } = useShellMenu()
   const moreOn = moreItems?.some((item) => item.key === currentKey) ?? false
 
   const brandPill = (
@@ -83,19 +90,32 @@ export function PhoneChrome({
               <Icon name="arrow_back" size={24} />
             </button>
           )}
-          {user.href ? (
-            <Link
-              href={user.href}
-              aria-label={user.name}
-              className={cn(CIRCLE, "text-16 font-semibold")}
-            >
-              {user.initials}
-            </Link>
-          ) : (
-            <span className={cn(CIRCLE, "text-16 font-semibold")} aria-hidden="true">
-              {user.initials}
-            </span>
-          )}
+          <div className="flex items-center gap-2.5">
+            {unread !== undefined && <NotificationBell unread={unread} variant="glass" />}
+            {accountMenu ? (
+              <button
+                type="button"
+                aria-label={`Account: ${user.name}`}
+                aria-haspopup="dialog"
+                onClick={() => setAccountOpen(true)}
+                className={cn(CIRCLE, "text-16 font-semibold")}
+              >
+                {user.initials}
+              </button>
+            ) : user.href ? (
+              <Link
+                href={user.href}
+                aria-label={user.name}
+                className={cn(CIRCLE, "text-16 font-semibold")}
+              >
+                {user.initials}
+              </Link>
+            ) : (
+              <span className={cn(CIRCLE, "text-16 font-semibold")} aria-hidden="true">
+                {user.initials}
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -134,6 +154,27 @@ export function PhoneChrome({
               </Link>
             ))}
           </div>
+          {accountMenu && (
+            <button
+              type="button"
+              onClick={() => {
+                setMoreOpen(false)
+                setAccountOpen(true)
+              }}
+              className="flex h-16 w-full items-center gap-3 rounded-card border-0 bg-surface px-4 text-left text-fg transition-transform duration-160 active:scale-98"
+            >
+              <span
+                aria-hidden="true"
+                className="grid size-10 flex-none place-items-center rounded-pill bg-surface-2 text-14 font-semibold"
+              >
+                {user.initials}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-16 font-semibold">{user.name}</span>
+                <span className="text-13 text-fg-2">Account · switch or sign out</span>
+              </span>
+            </button>
+          )}
         </ResponsiveSheet>
       )}
     </div>

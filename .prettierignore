@@ -1,4 +1,6 @@
 .next
+.next-server
+.next-static-check
 out
 coverage
 pnpm-lock.yaml

@@ -1,12 +1,11 @@
 import type { ReactNode } from "react"
 
-import { AdminShell } from "@/features/admin"
-import { TenantAccentProvider } from "@/lib/tenant"
+import { AdminSessionProvider, AdminShell } from "@/features/admin"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <TenantAccentProvider>
+    <AdminSessionProvider>
       <AdminShell>{children}</AdminShell>
-    </TenantAccentProvider>
+    </AdminSessionProvider>
   )
 }

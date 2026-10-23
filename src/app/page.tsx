@@ -1,34 +1,53 @@
+import Image from "next/image"
 import Link from "next/link"
 
-// Demo launcher until sign-in and role routing exist (Product Handoff 13.1 is undecided).
-const ENTRIES = [
-  { href: "/staff", title: "Staff app", note: "Valet attendants · phone first" },
-  { href: "/staff/onboarding", title: "Staff onboarding", note: "Invite, sign-in, permissions" },
-  { href: "/admin", title: "Admin app", note: "Dispatch · Live Board, events, hours" },
-  { href: "/design-system", title: "Design system", note: "Tokens and components" },
-] as const
+import { ThemeToggle } from "@/components/shared"
+import { Button } from "@/components/ui/button"
 
+/** Public landing page: who this is for and where to sign in. */
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-130 flex-col justify-center gap-8 px-5 py-12 bg-ambient">
-      <div className="flex flex-col gap-2">
-        <h1 className="font-display text-40 leading-x100 font-bold tracking-n035">
-          Valet Workforce
-        </h1>
-        <p className="text-16 text-fg-2">Regency Valet Parking · demo build</p>
-      </div>
-      <div className="flex flex-col border-t border-line">
-        {ENTRIES.map((entry) => (
-          <Link
-            key={entry.href}
-            href={entry.href}
-            className="flex min-h-18 flex-col justify-center gap-0.5 border-b border-line text-fg"
+    <div className="min-h-dvh bg-ambient">
+      <main className="mx-auto flex min-h-dvh w-full max-w-130 flex-col justify-center gap-9 px-5 py-12">
+        <div className="flex items-center justify-between gap-4">
+          <Image
+            src="/brand/regency-logo.png"
+            alt="Regency"
+            width={90}
+            height={50}
+            className="h-12 w-auto"
+          />
+          <ThemeToggle />
+        </div>
+        <div className="flex flex-col gap-3">
+          <h1 className="m-0 font-display text-44 leading-x100 font-bold tracking-n040">
+            Valet Workforce
+          </h1>
+          <p className="m-0 text-17 leading-x145 text-fg-2">
+            Shifts, clock-in and dispatch for Regency Valet Parking.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2.5">
+          <Button
+            variant="accent"
+            size="xl"
+            className="text-17"
+            nativeButton={false}
+            render={<Link href="/login?role=staff" />}
           >
-            <span className="text-17 font-semibold">{entry.title}</span>
-            <span className="text-14 text-fg-2">{entry.note}</span>
-          </Link>
-        ))}
-      </div>
-    </main>
+            Staff sign in
+          </Button>
+          <Button
+            variant="secondary"
+            size="xl"
+            className="text-17"
+            nativeButton={false}
+            render={<Link href="/login?role=admin" />}
+          >
+            Dispatch sign in
+          </Button>
+        </div>
+      </main>
+    </div>
   )
 }

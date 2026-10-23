@@ -1,15 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
-import { Icon } from "@/components/shared"
+import { Icon, PillTabs } from "@/components/shared"
 import { useBreakpoint } from "@/hooks/use-breakpoint"
+import type { Thread } from "@/lib/data"
 import { cn } from "@/lib/utils"
-import { THREADS, type Thread } from "@/mocks/admin"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
+import { QueryState } from "../data/query-state"
+import { useInbox } from "../data/queries"
 import { Conversation } from "./conversation"
+
+type InboxTab = "messages" | "announcements"
 
 function ThreadRow({
   thread,
@@ -53,22 +57,41 @@ function ThreadRow({
   )
 }
 
-/** Admin inbox: thread list and conversation side by side from tablet; one at a time on phone. */
+/**
+ * Admin inbox: thread list and conversation side by side from tablet; one at a time on phone.
+ * The open thread lives in `?thread=` so a person's "Message" button can land on it.
+ */
 export function AdminInbox() {
   const router = useRouter()
   const phone = useBreakpoint() === "phone"
-  const [selected, setSelected] = useState(0)
-  const [open, setOpen] = useState(false)
+  const inbox = useInbox()
+  const requested = useSearchParams().get("thread") ?? undefined
+  const [picked, setPicked] = useState<InboxTab | null>(null)
 
+  const threads = inbox.data?.threads ?? []
+  // Opening a thread from elsewhere (a person's Message button) lands on the tab it belongs to.
+  const requestedThread = threads.find((t) => t.id === requested)
+  const tab: InboxTab = picked ?? (requestedThread?.announcement ? "announcements" : "messages")
+  const shown = threads.filter((t) => t.announcement === (tab === "announcements"))
+  const unreadIn = (announcement: boolean) =>
+    threads.filter((t) => t.announcement === announcement && t.unread).length
+  const tabs = [
+    { value: "messages" as const, label: "Chats", count: unreadIn(false) || undefined },
+    { value: "announcements" as const, label: "Announcements", count: unreadIn(true) || undefined },
+  ]
+
+  const open = requested !== undefined
   const showList = !phone || !open
   const showThread = !phone || open
+  const selected = requested ?? (phone ? undefined : shown[0]?.id)
+  const data = inbox.data
 
   return (
     <AdminPage>
       {!(phone && open) && (
         <AdminHead
           title="Inbox"
-          sub="2 unread"
+          sub={data ? (data.unread ? `${data.unread} unread` : "All caught up") : "…"}
           cta={{
             label: "Announce",
             icon: "campaign",
@@ -78,21 +101,53 @@ export function AdminInbox() {
       )}
       <div className="grid items-start gap-7 tablet:grid-cols-[minmax(17.5rem,22.5rem)_minmax(0,1fr)]">
         {showList && (
-          <div className="flex flex-col border-t border-line">
-            {THREADS.map((thread, i) => (
-              <ThreadRow
-                key={thread.name}
-                thread={thread}
-                selected={!phone && i === selected}
-                onOpen={() => {
-                  setSelected(i)
-                  setOpen(true)
-                }}
-              />
-            ))}
+          <div className="flex flex-col gap-3.5">
+            <PillTabs
+              label="Inbox"
+              items={tabs}
+              value={tab}
+              onValueChange={(next) => {
+                setPicked(next)
+                // The open thread belongs to the other tab: show that tab's first one instead.
+                if (
+                  requestedThread &&
+                  requestedThread.announcement !== (next === "announcements")
+                ) {
+                  router.replace("/admin/inbox")
+                }
+              }}
+            />
+            <div className="flex flex-col border-t border-line">
+              <QueryState query={inbox} rows={4}>
+                {() =>
+                  shown.length === 0 ? (
+                    <p className="m-0 py-8 text-center text-15 text-fg-2">
+                      {tab === "announcements"
+                        ? "No announcements sent yet."
+                        : "No chats with staff yet."}
+                    </p>
+                  ) : (
+                    shown.map((thread) => (
+                      <ThreadRow
+                        key={thread.id}
+                        thread={thread}
+                        selected={!phone && thread.id === selected}
+                        onOpen={() => router.replace(`/admin/inbox?thread=${thread.id}`)}
+                      />
+                    ))
+                  )
+                }
+              </QueryState>
+            </div>
           </div>
         )}
-        {showThread && <Conversation onBack={phone ? () => setOpen(false) : undefined} />}
+        {showThread && selected && (
+          <Conversation
+            key={selected}
+            id={selected}
+            onBack={phone ? () => router.replace("/admin/inbox") : undefined}
+          />
+        )}
       </div>
     </AdminPage>
   )

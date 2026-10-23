@@ -1,17 +1,36 @@
+// The Live Board's derived view: health, coverage bars and the attention queue, computed from
+// events and slots (their states and facts). Pure and shared: the server counts what needs the
+// dispatcher for the navigation badge, the screens render it. Wording is built from facts
+// (minutes late, distance outside, who dropped), never stored as prose.
+import type { LiveEvent, LiveSlot, SlotState } from "@/lib/data/admin/ops-schemas"
 import type { IconName } from "@/lib/icons/icon-names"
 import type { StatusSpec } from "@/lib/status/presets"
-import type { LiveEvent, LiveSlot, SlotState } from "@/mocks/admin-live"
 
-/** How each slot state reads: tone, glyph and words (Live Board "ST"). */
-export const SLOT_STATUS: Record<SlotState, StatusSpec> = {
-  onsite: { tone: "ok", icon: "verified", filled: true, label: "On site" },
-  flagged: { tone: "warn", icon: "flag", filled: true, label: "Flagged" },
-  late: { tone: "warn", icon: "running_with_errors", filled: true, label: "Late 19m" },
-  waiting: { tone: "info", icon: "front_hand", filled: true, label: "Approval" },
-  due: { tone: "strong", icon: "timer", filled: true, label: "Due now" },
-  upcoming: { tone: "neutral", icon: "schedule", filled: true, label: "Assigned" },
-  open: { tone: "outline", icon: "person_add", filled: false, label: "Open" },
-  override: { tone: "warn", icon: "verified_user", filled: true, label: "Override" },
+/** How each slot state reads: tone, glyph and words. Late carries its minutes. */
+export function slotStatus(slot: Pick<LiveSlot, "state" | "facts">): StatusSpec {
+  switch (slot.state) {
+    case "onsite":
+      return { tone: "ok", icon: "verified", filled: true, label: "On site" }
+    case "flagged":
+      return { tone: "warn", icon: "flag", filled: true, label: "Flagged" }
+    case "late":
+      return {
+        tone: "warn",
+        icon: "running_with_errors",
+        filled: true,
+        label: `Late ${slot.facts.lateMin ?? 0}m`,
+      }
+    case "waiting":
+      return { tone: "info", icon: "front_hand", filled: true, label: "Approval" }
+    case "due":
+      return { tone: "strong", icon: "timer", filled: true, label: "Due now" }
+    case "upcoming":
+      return { tone: "neutral", icon: "schedule", filled: true, label: "Assigned" }
+    case "open":
+      return { tone: "outline", icon: "person_add", filled: false, label: "Open" }
+    case "override":
+      return { tone: "warn", icon: "verified_user", filled: true, label: "Override" }
+  }
 }
 
 /** Bar segment fill per state; open slots are hatched instead. */
@@ -80,10 +99,17 @@ export type AttentionItem = {
   selfie: boolean
   eventId: string
   slotIndex: number
+  /** The slot this is about (a person), when there is one. */
+  slotId: string | null
+  /** The pending clock-in request, for Approve / Reject. */
+  punchId: string | null
   actions: { id: ActionId; label: string }[]
 }
 
 export type Pulse = { need: number; live: number; onShift: number; expected: number; open: number }
+
+/** Unfilled events inside this many minutes of starting raise an alert (the "4-hour alert"). */
+export const UNFILLED_ALERT_MIN = 4 * 60
 
 function countSlots(slots: LiveSlot[]): Counts {
   const c: Counts = { onsite: 0, waiting: 0, late: 0, exp: 0, open: 0 }
@@ -148,6 +174,21 @@ export function summarizeEvent(event: LiveEvent): EventSummary {
 export const first = (name: string) => name.split(" ")[0] ?? name
 export const venueName = (venue: string) => venue.split(" ·")[0] ?? venue
 
+/** "1h 26m" or "52 min": how long until or since something, for sentences. */
+export function spanLabel(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes))
+  if (m < 60) return `${m} min`
+  const rest = m % 60
+  return rest === 0 ? `${Math.floor(m / 60)}h` : `${Math.floor(m / 60)}h ${rest}m`
+}
+
+/** Why the first open slot is open, in a clause: "late drop by Cole B. at 5:12 PM". */
+function openReason(slot: LiveSlot | undefined): string {
+  const f = slot?.facts
+  if (f?.droppedBy && f.droppedAt) return `drop by ${f.droppedBy} at ${f.droppedAt}`
+  return "unfilled since posting"
+}
+
 /** Everything the board shows, derived from the events and who has been messaged. */
 export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>) {
   const summaries = events.map(summarizeEvent).sort((a, b) => a.health.rank - b.health.rank)
@@ -159,6 +200,7 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
     const { counts } = summary
 
     if (event.live && counts.open) {
+      const firstOpen = event.slots.find((s) => s.state === "open")
       attention.push({
         key: `short-${event.id}`,
         kind: "short",
@@ -166,11 +208,13 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
         tone: "bad",
         icon: "error",
         title: `${event.venue} is short ${counts.open}`,
-        sub: "Live since 6:00 PM · late drop by Cole B. at 5:12 PM · open 52 min",
+        sub: `Live since ${event.startLabel} · ${openReason(firstOpen)} · open ${spanLabel(firstOpen?.facts.openMin ?? -event.startsInMin)}`,
         short: `Live · ${counts.open} open`,
         selfie: false,
         eventId: event.id,
         slotIndex: -1,
+        slotId: null,
+        punchId: null,
         actions: [
           { id: "assign", label: "Assign" },
           { id: "broadcast", label: "Broadcast" },
@@ -180,21 +224,24 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
 
     event.slots.forEach((slot, i) => {
       if (slot.state === "late") {
-        const sent = messaged[`${event.id}${i}`]
+        const sent = Boolean(messaged[slot.id] || slot.facts.nudgedAt)
+        const at = slot.facts.nudgedAt
         attention.push({
-          key: `late${event.id}${i}`,
+          key: `late${slot.id}`,
           kind: "late",
           rank: 1,
           tone: "warn",
           icon: "running_with_errors",
-          title: `${slot.name} is 19 min late`,
+          title: `${slot.name} is ${slot.facts.lateMin ?? 0} min late`,
           sub: sent
-            ? `${event.venue} · message delivered 6:04 PM · read just now`
-            : `${event.venue} · started 5:45 PM · push reminder 5:55 PM`,
-          short: `${event.venue} · 19 min`,
+            ? `${event.venue} · message delivered${at ? ` ${at}` : ""} · read just now`
+            : `${event.venue} · started ${event.startLabel}`,
+          short: `${event.venue} · ${slot.facts.lateMin ?? 0} min`,
           selfie: false,
           eventId: event.id,
           slotIndex: i,
+          slotId: slot.id,
+          punchId: null,
           actions: [
             { id: sent ? "message-again" : "message", label: sent ? "Message again" : "Message" },
             { id: "call", label: "Call" },
@@ -203,18 +250,21 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
         })
       }
       if (slot.state === "waiting") {
+        const f = slot.facts
         attention.push({
-          key: `wait${event.id}${i}`,
+          key: `wait${slot.id}`,
           kind: "waiting",
           rank: 1.5,
           tone: "info",
           icon: "front_hand",
           title: `${slot.name} asks to clock in`,
-          sub: `${event.venue} · 212 m outside fence, ±64 m · “Garage level 3” · waiting 6 min`,
-          short: `${event.venue} · waiting 6 min`,
+          sub: `${event.venue} · ${f.outsideM ?? 0} m outside fence, ±${f.accuracyM ?? 0} m${f.note ? ` · “${f.note}”` : ""} · waiting ${f.waitedMin ?? 0} min`,
+          short: `${event.venue} · waiting ${f.waitedMin ?? 0} min`,
           selfie: true,
           eventId: event.id,
           slotIndex: i,
+          slotId: slot.id,
+          punchId: f.punchId ?? null,
           actions: [
             { id: "approve", label: "Approve" },
             { id: "reject", label: "Reject" },
@@ -223,7 +273,7 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
       }
     })
 
-    if (!event.live && counts.open && event.start < 22.07) {
+    if (!event.live && counts.open && event.startsInMin <= UNFILLED_ALERT_MIN) {
       attention.push({
         key: `unf${event.id}`,
         kind: "unfilled",
@@ -231,11 +281,13 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
         tone: "warn",
         icon: "person_add",
         title: `${event.venue}: ${counts.open} slots unfilled`,
-        sub: "Starts 7:30 PM (in 1h 26m) · 4-hour alert",
-        short: "Starts in 1h 26m",
+        sub: `Starts ${event.startLabel} (in ${spanLabel(event.startsInMin)}) · 4-hour alert`,
+        short: `Starts in ${spanLabel(event.startsInMin)}`,
         selfie: false,
         eventId: event.id,
         slotIndex: -1,
+        slotId: null,
+        punchId: null,
         actions: [
           { id: "assign", label: "Assign" },
           { id: "broadcast", label: "Broadcast" },
@@ -275,7 +327,7 @@ export function boardPeople(events: LiveEvent[], query: string) {
       .map((slot) => ({
         name: slot.name,
         where: `${event.venue} · ${slot.meta.split(" · ")[0]}`,
-        status: SLOT_STATUS[slot.state],
+        status: slotStatus(slot),
       })),
   )
 }

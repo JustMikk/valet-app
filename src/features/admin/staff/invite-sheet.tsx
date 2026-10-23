@@ -5,26 +5,42 @@ import { useState } from "react"
 import { Icon, ResponsiveSheet } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 
-const SEED = ["kai.morgan@gmail.com", "ana.ruiz@outlook.com"]
+import { ErrorNotice } from "../data/query-state"
+import { useInvite } from "../data/queries"
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type InviteSheetProps = { open: boolean; onOpenChange: (open: boolean) => void }
 
 /** Invite by email: addresses become removable chips; Enter or comma adds the typed one. */
 export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
-  const [emails, setEmails] = useState<string[]>(SEED)
+  const [emails, setEmails] = useState<string[]>([])
   const [draft, setDraft] = useState("")
+  const [skipped, setSkipped] = useState<string[]>([])
+  const invite = useInvite()
 
   const add = () => {
-    const value = draft.trim().replace(/,$/, "")
+    const value = draft.trim().replace(/,$/, "").toLowerCase()
     if (EMAIL.test(value) && !emails.includes(value)) setEmails((list) => [...list, value])
     setDraft("")
   }
 
+  const send = () =>
+    invite.mutate(emails, {
+      onSuccess: (result) => {
+        setEmails([])
+        setSkipped(result.skipped)
+        if (result.skipped.length === 0) onOpenChange(false)
+      },
+    })
+
   return (
     <ResponsiveSheet
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => {
+        if (!next) setSkipped([])
+        onOpenChange(next)
+      }}
       title="Invite staff"
       description="They get an email link to join Regency. No app store needed."
     >
@@ -61,11 +77,17 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
           className="min-w-30 flex-1 border-0 bg-transparent p-0 text-15 text-fg outline-none placeholder:text-fg-3"
         />
       </div>
+      {skipped.length > 0 && (
+        <p role="status" className="m-0 text-14 leading-x140 font-medium text-fg-2">
+          {skipped.join(", ")} {skipped.length === 1 ? "is" : "are"} already on your team.
+        </p>
+      )}
+      {invite.error && <ErrorNotice message={invite.error.message} />}
       <Button
         variant="accent"
         className="text-17"
-        disabled={emails.length === 0}
-        onClick={() => onOpenChange(false)}
+        disabled={emails.length === 0 || invite.isPending}
+        onClick={send}
       >
         {emails.length
           ? `Send ${emails.length} invite${emails.length > 1 ? "s" : ""}`

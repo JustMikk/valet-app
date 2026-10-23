@@ -4,18 +4,39 @@ import { useRouter } from "next/navigation"
 
 import { Icon, PageContainer } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import type { ClaimResult, DropResult } from "@/lib/data"
 import { cn } from "@/lib/utils"
-import { SHIFT_RESULTS, type ShiftResultKey } from "@/mocks/staff"
 
+import { keys, useStash } from "../data/queries"
 import { useDemoParam } from "../session/use-demo-param"
+import {
+  factsFromClaim,
+  factsFromDrop,
+  RESULT_EXAMPLES,
+  resultContent,
+  type ResultKey,
+} from "./result-copy"
 
-const KEYS = Object.keys(SHIFT_RESULTS) as ShiftResultKey[]
+const KEYS = ["claimed", "filled", "overlap", "dropped"] as const satisfies readonly ResultKey[]
 const TONE = { ok: "bg-ok", fg: "bg-fg", warn: "bg-warn" } as const
 
 /** Outcome of a claim or a drop: claimed, just filled, overlap, dropped. */
 export function ShiftResult() {
   const router = useRouter()
-  const result = SHIFT_RESULTS[useDemoParam("r", KEYS) ?? "claimed"]
+  const key = useDemoParam("r", KEYS) ?? "claimed"
+  const claim = useStash<ClaimResult>(keys.lastClaim)
+  const drop = useStash<DropResult>(keys.lastDrop)
+
+  // The result of what was just done; the design's example when the page is opened cold.
+  const facts =
+    key === "dropped"
+      ? drop
+        ? factsFromDrop(drop)
+        : RESULT_EXAMPLES.dropped
+      : claim && claim.outcome === key
+        ? factsFromClaim(claim)
+        : RESULT_EXAMPLES[key]
+  const result = resultContent(key, facts)
 
   return (
     <PageContainer className="max-w-130 gap-5.5 tablet:mt-6">

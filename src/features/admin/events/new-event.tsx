@@ -3,131 +3,174 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-import { Icon, TextField } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { FILL_MODES, NEW_EVENT_FIELDS, type FillMode } from "@/mocks/admin"
 
 import { AdminHead, AdminPage, FORM } from "../common/admin-page"
+import { StepProgress } from "../common/step-progress"
+import { ErrorNotice } from "../data/query-state"
+import { useCreateEvent, useCreateVenue, useSettings, useVenues } from "../data/queries"
+import { VenueDetailsStep } from "../venues/venue-details-step"
+import { detailsReady, draftFor, hasPlace, requestFrom } from "../venues/venue-draft"
+import { EventCrewStep, type Crew } from "./event-crew-step"
+import { EventVenueStep, type VenueMode } from "./event-venue-step"
+import { EventWhenStep, type When } from "./event-when-step"
 
-const MIN_STAFF = 1
-const MAX_STAFF = 40
-const STEP =
-  "grid size-11 place-items-center rounded-pill border-0 bg-surface text-fg transition-transform duration-160 active:scale-90 disabled:text-fg-3"
+type Stage = "venue" | "details" | "when" | "crew"
 
-/** New event form: venue, date, time, name, headcount, instructions and how to fill. */
+const LABELS: Record<Stage, string> = {
+  venue: "Venue",
+  details: "Venue details",
+  when: "When",
+  crew: "Crew",
+}
+
+/** A new venue adds one step (its details); an existing one skips it. */
+const stagesFor = (mode: VenueMode): Stage[] =>
+  mode === "new" ? ["venue", "details", "when", "crew"] : ["venue", "when", "crew"]
+
+/**
+ * New event in steps: the venue (pick one, or find and add a new one on the map without leaving),
+ * its details when new, when it happens, then the crew. Back keeps everything typed.
+ */
 export function NewEvent() {
+  const defaultRadiusM = useSettings().data?.rules.radiusM ?? 150
+  // The default radius arrives with settings: remount once so a new venue starts from it.
+  return <EventWizard key={defaultRadiusM} defaultRadiusM={defaultRadiusM} />
+}
+
+function EventWizard({ defaultRadiusM }: { defaultRadiusM: number }) {
   const router = useRouter()
-  const [need, setNeed] = useState(8)
-  const [fill, setFill] = useState<FillMode>("open")
+  const venues = useVenues()
+  const createVenue = useCreateVenue()
+  const createEvent = useCreateEvent()
+
+  const [stage, setStage] = useState<Stage>("venue")
+  const [chosenMode, setMode] = useState<VenueMode>("existing")
+  const [venueId, setVenueId] = useState("")
+  const [venueDraft, setVenueDraft] = useState(() => draftFor(undefined, defaultRadiusM))
+  const [when, setWhen] = useState<When>({ date: "", start: "10:00", end: "15:00", name: "" })
+  const [crew, setCrew] = useState<Crew>({ need: 8, instructions: "", fill: "open", assignIds: [] })
+
+  const list = venues.data ?? []
+  // With no venues yet, adding one is the only way forward.
+  const mode: VenueMode = venues.data && list.length === 0 ? "new" : chosenMode
+  const venue = venueId || list[0]?.id || ""
+  const stages = stagesFor(mode)
+  const venueRequest = requestFrom(venueDraft)
+  const window =
+    venue && when.date && when.start && when.end
+      ? { venueId: venue, date: when.date, start: when.start, end: when.end }
+      : null
+  const whenReady = Boolean(when.date && when.start && when.end && when.name.trim())
+
+  const canContinue =
+    stage === "venue"
+      ? mode === "new"
+        ? hasPlace(venueDraft)
+        : Boolean(venue)
+      : stage === "details"
+        ? detailsReady(venueDraft) && !createVenue.isPending
+        : stage === "when"
+          ? whenReady
+          : whenReady && Boolean(venue) && !createEvent.isPending
+
+  const goBack = () => {
+    if (stage === "details") setStage("venue")
+    else if (stage === "when") setStage(mode === "new" ? "details" : "venue")
+    else if (stage === "crew") setStage("when")
+  }
+
+  const addVenue = () => {
+    if (!venueRequest) return
+    createVenue.mutate(venueRequest, {
+      onSuccess: (created) => {
+        // From here on the new venue is a venue like any other: selected, on the map, in the list.
+        setVenueId(created.id)
+        setMode("existing")
+        setVenueDraft(draftFor(undefined, defaultRadiusM))
+        setStage("when")
+      },
+    })
+  }
+
+  const publish = (publishNow: boolean) =>
+    createEvent.mutate(
+      {
+        venueId: venue,
+        date: when.date,
+        start: when.start,
+        end: when.end,
+        name: when.name.trim(),
+        headcount: crew.need,
+        instructions: crew.instructions.trim() || undefined,
+        fill: crew.fill,
+        assignStaffIds: crew.fill === "assign" ? crew.assignIds : undefined,
+        publish: publishNow,
+      },
+      {
+        onSuccess: ({ id }) =>
+          router.push(publishNow ? `/admin/events/detail?id=${id}` : "/admin/events"),
+      },
+    )
+
+  const next = () => {
+    if (!canContinue) return
+    if (stage === "venue") setStage(mode === "new" ? "details" : "when")
+    else if (stage === "details") addVenue()
+    else if (stage === "when") setStage("crew")
+    else publish(true)
+  }
+
+  const error =
+    stage === "details" ? createVenue.error : stage === "crew" ? createEvent.error : null
 
   return (
     <AdminPage>
       <AdminHead title="New event" sub="Spots you don’t assign are posted as open shifts" />
       <form
-        className={FORM}
+        className={`${FORM} gap-6`}
         onSubmit={(e) => {
           e.preventDefault()
-          router.push("/admin/events/detail")
+          next()
         }}
       >
-        {NEW_EVENT_FIELDS.map((field) => (
-          <div key={field.label} className="flex flex-col gap-2">
-            <label htmlFor={`f-${field.label}`} className="text-15 font-medium">
-              {field.label}
-            </label>
-            <div className="flex h-14 items-center gap-2.5 rounded-field bg-surface px-4 text-17">
-              <Icon name={field.icon} size={22} className="text-fg-2" />
-              <input
-                id={`f-${field.label}`}
-                defaultValue={field.value}
-                readOnly={field.chevron}
-                className="min-w-0 flex-1 border-0 bg-transparent p-0 text-17 text-fg outline-none"
-              />
-              {field.chevron && <Icon name="expand_more" size={22} className="text-fg-2" />}
-            </div>
-          </div>
-        ))}
+        <StepProgress steps={stages.map((s) => LABELS[s])} current={stages.indexOf(stage)} />
 
-        <div className="box-content flex min-h-16 items-center justify-between border-y border-line">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-17 font-medium">Staff needed</span>
-            <span className="text-13 text-fg-2">Unassigned spots post as open shifts</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="Fewer staff"
-              disabled={need <= MIN_STAFF}
-              onClick={() => setNeed((n) => Math.max(MIN_STAFF, n - 1))}
-              className={STEP}
-            >
-              <Icon name="remove" size={22} />
-            </button>
-            <output
-              aria-live="polite"
-              className="w-11 text-center font-display text-26 font-bold tabular-nums"
-            >
-              {need}
-            </output>
-            <button
-              type="button"
-              aria-label="More staff"
-              disabled={need >= MAX_STAFF}
-              onClick={() => setNeed((n) => Math.min(MAX_STAFF, n + 1))}
-              className={STEP}
-            >
-              <Icon name="add" size={22} />
-            </button>
-          </div>
-        </div>
+        {stage === "venue" && (
+          <EventVenueStep
+            mode={mode}
+            onMode={setMode}
+            venues={list}
+            venueId={venue}
+            onVenueId={setVenueId}
+            draft={venueDraft}
+            onDraft={setVenueDraft}
+          />
+        )}
+        {stage === "details" && <VenueDetailsStep draft={venueDraft} onChange={setVenueDraft} />}
+        {stage === "when" && <EventWhenStep value={when} onChange={setWhen} />}
+        {stage === "crew" && <EventCrewStep value={crew} onChange={setCrew} window={window} />}
 
-        <TextField
-          label="Instructions"
-          multiline
-          rows={3}
-          placeholder="Dress code, who to report to, where staff park"
-        />
-
-        <div role="radiogroup" aria-label="How to fill" className="flex flex-col gap-2">
-          <span className="text-15 font-medium">How to fill</span>
-          {FILL_MODES.map((mode) => {
-            const on = fill === mode.key
-            return (
-              <button
-                key={mode.key}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => setFill(mode.key)}
-                className={cn(
-                  "flex min-h-16 items-center gap-3 rounded-field border-0 px-4 text-left text-fg transition-[background-color,box-shadow] duration-200",
-                  on
-                    ? "bg-accent-soft shadow-[inset_0_0_0_1.5px_var(--accent)]"
-                    : "bg-surface shadow-none",
-                )}
-              >
-                <Icon name={mode.icon} filled size={22} />
-                <span className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-16 font-semibold">{mode.label}</span>
-                  <span className="text-13 text-fg-2">{mode.note}</span>
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
+        {error && <ErrorNotice message={error.message} />}
         <div className="flex gap-2.5">
-          <Button
-            type="button"
-            variant="secondary"
-            className="flex-1 text-17"
-            onClick={() => router.push("/admin/events")}
-          >
-            Save draft
-          </Button>
-          <Button type="submit" variant="accent" className="flex-2 text-17">
-            Publish event
+          {stage !== "venue" && (
+            <Button type="button" variant="secondary" className="flex-1 text-17" onClick={goBack}>
+              Back
+            </Button>
+          )}
+          {stage === "crew" && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1 text-17"
+              disabled={!canContinue}
+              onClick={() => publish(false)}
+            >
+              Save draft
+            </Button>
+          )}
+          <Button type="submit" variant="accent" className="flex-2 text-17" disabled={!canContinue}>
+            {stage === "crew" ? "Publish event" : stage === "details" ? "Add venue" : "Continue"}
           </Button>
         </div>
       </form>

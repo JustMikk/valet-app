@@ -5,10 +5,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { PillTabs, StatusBadge } from "@/components/shared"
+import type { EventCard, EventList, EventTab } from "@/lib/data"
+import { ADMIN_STATUS } from "@/lib/status/admin"
 import { cn } from "@/lib/utils"
-import { ADMIN_STATUS, EVENT_DAYS, EVENT_TABS, type EventCard, type EventTab } from "@/mocks/admin"
 
 import { AdminHead, AdminPage, CARD_GRID } from "../common/admin-page"
+import { QueryState } from "../data/query-state"
+import { useEvents } from "../data/queries"
 
 const STATE_SPEC = {
   live: ADMIN_STATUS.live,
@@ -16,21 +19,15 @@ const STATE_SPEC = {
   draft: ADMIN_STATUS.draft,
 } as const
 
-function matches(tab: EventTab, event: EventCard): boolean {
-  if (tab === "short") return event.state === "short"
-  if (tab === "draft") return event.state === "draft"
-  return true
-}
-
 function EventTile({ event, index }: { event: EventCard; index: number }) {
-  const open = event.need - event.confirmed
+  const open = Math.max(0, event.need - event.confirmed)
   const status = event.state === "short" ? ADMIN_STATUS.short(open) : STATE_SPEC[event.state]
   const onSitePct = (event.onSite / event.need) * 100
   const confirmedPct = ((event.confirmed - event.onSite) / event.need) * 100
 
   return (
     <Link
-      href="/admin/events/detail"
+      href={`/admin/events/detail?id=${event.id}`}
       style={{ animationDelay: `${index * 50}ms` }}
       className="flex animate-rise flex-col gap-3 rounded-card glass-card p-4.5 text-left text-fg no-underline transition-transform duration-160 active:scale-985"
     >
@@ -72,36 +69,51 @@ function EventTile({ event, index }: { event: EventCard; index: number }) {
   )
 }
 
+function Days({ list }: { list: EventList }) {
+  return (
+    <div className="flex flex-col gap-7">
+      {list.days.map((day) => (
+        <section key={day.label} className="flex flex-col gap-2.5">
+          <h2 className="m-0 text-13 font-semibold tracking-p050 text-fg-3">{day.label}</h2>
+          <div className={CARD_GRID}>
+            {day.items.map((event, i) => (
+              <EventTile key={event.id} event={event} index={i} />
+            ))}
+          </div>
+        </section>
+      ))}
+      {list.days.length === 0 && (
+        <p className="m-0 py-8 text-center text-15 text-fg-2">Nothing here.</p>
+      )}
+    </div>
+  )
+}
+
 /** Events: day-grouped cards with coverage bars, filtered by tab. */
 export function EventsList() {
   const router = useRouter()
   const [tab, setTab] = useState<EventTab>("upcoming")
+  const events = useEvents(tab)
+  const data = events.data
 
-  const days = EVENT_DAYS.map((day) => ({
-    ...day,
-    items: day.items.filter((event) => matches(tab, event)),
-  })).filter((day) => day.items.length > 0)
+  const tabs = [
+    { value: "upcoming" as const, label: "Upcoming" },
+    { value: "short" as const, label: "Short-staffed", count: data?.short || undefined },
+    { value: "draft" as const, label: "Drafts", count: data?.drafts || undefined },
+    { value: "past" as const, label: "Past" },
+  ]
 
   return (
     <AdminPage>
       <AdminHead
         title="Events"
-        sub="7 upcoming · 4 short-staffed"
+        sub={data ? `${data.upcoming} upcoming · ${data.short} short-staffed` : "…"}
         cta={{ label: "New event", icon: "add", onClick: () => router.push("/admin/events/new") }}
       />
-      <PillTabs label="Show" items={EVENT_TABS} value={tab} onValueChange={setTab} />
-      <div className="flex flex-col gap-7">
-        {days.map((day) => (
-          <section key={day.label} className="flex flex-col gap-2.5">
-            <h2 className="m-0 text-13 font-semibold tracking-p050 text-fg-3">{day.label}</h2>
-            <div className={CARD_GRID}>
-              {day.items.map((event, i) => (
-                <EventTile key={event.id} event={event} index={i} />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+      <PillTabs label="Show" items={tabs} value={tab} onValueChange={setTab} />
+      <QueryState query={events} rows={3}>
+        {(list) => <Days list={list} />}
+      </QueryState>
     </AdminPage>
   )
 }

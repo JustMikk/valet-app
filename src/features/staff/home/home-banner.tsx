@@ -16,7 +16,7 @@ const BANNER = {
   },
   sync: {
     icon: "cloud_sync",
-    text: "Clock-in saved at 5:51 PM · will sync when you have signal",
+    text: "Clock-in saved · will sync when you have signal",
     tone: "neutral",
     to: null,
   },
@@ -30,12 +30,18 @@ const BANNER = {
 
 type HomeBannerProps = {
   banner: BannerKey
+  /** Time the offline clock-in was captured, shown in the sync notice. */
+  syncTime?: string
   onOpen: (to: string) => void
 }
 
 /** Push-off, pending-sync and install prompts above the hero (Staff Home banners). */
-export function HomeBanner({ banner, onOpen }: HomeBannerProps) {
+export function HomeBanner({ banner, syncTime, onOpen }: HomeBannerProps) {
   const spec = BANNER[banner]
+  const text =
+    banner === "sync" && syncTime
+      ? `Clock-in saved at ${syncTime} · will sync when you have signal`
+      : spec.text
   const classes = cn(
     "flex min-h-13 w-full items-center gap-2.5 rounded-r18 border-0 px-4 py-2.5 text-left text-15 leading-x135 font-semibold",
     spec.tone === "warn" ? "bg-warn-soft text-warn" : "bg-surface text-fg-2",
@@ -43,7 +49,7 @@ export function HomeBanner({ banner, onOpen }: HomeBannerProps) {
   const content = (
     <>
       <Icon name={spec.icon} filled size={20} />
-      <span className="flex-1">{spec.text}</span>
+      <span className="flex-1">{text}</span>
       <Icon name="chevron_right" size={20} />
     </>
   )

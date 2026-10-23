@@ -7,8 +7,7 @@ import { AttentionCard, ChipGroup, Icon, StatusBadge, ToastPill } from "@/compon
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-import type { EventSummary } from "./live-model"
-import { sheetSlots } from "./live-model"
+import { sheetSlots, type EventSummary } from "@/lib/live/model"
 import { attentionActions, LiveDot, SlotBar, SlotRow } from "./live-parts"
 import type { LiveBoard } from "./use-live-board"
 
@@ -92,7 +91,7 @@ const ACTION = "h-10 px-3.5 text-14 whitespace-nowrap"
 
 /** Live Board for 1100 px and wider: KPI strip, event list, roster and attention column. */
 export function LiveDesktop({ board }: { board: LiveBoard }) {
-  const [selectedId, setSelectedId] = useState("grand")
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [day, setDay] = useState<Day>("today")
   const { pulse } = board
   const selected = board.summaries.find((e) => e.id === selectedId) ?? board.summaries[0]
@@ -106,7 +105,11 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
           </h1>
           <span className="flex items-center gap-2 text-14 font-medium whitespace-nowrap text-fg-2">
             <LiveDot />
-            <span>· updated 6:04:12 PM · venue times PT</span>
+            <span>
+              · updated{" "}
+              {board.updatedAt ? new Date(board.updatedAt).toLocaleTimeString("en-US") : "…"} ·
+              venue times {board.zone}
+            </span>
           </span>
         </div>
         <ChipGroup label="Day" items={DAYS} value={day} onValueChange={setDay} />
@@ -194,9 +197,9 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
               </Button>
             </div>
             <ul className="m-0 flex list-none flex-col border-t border-line p-0">
-              {sheetSlots(selected).map(({ slot, index }) => (
+              {sheetSlots(selected).map(({ slot }) => (
                 <SlotRow
-                  key={index}
+                  key={slot.id}
                   compact
                   slot={slot}
                   onAssign={() => board.assign(selected.id)}

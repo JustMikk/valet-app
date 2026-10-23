@@ -1,16 +1,21 @@
 import { Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { formatMinutesSeconds } from "@/lib/time/duration"
-import { CLOCK_VENUE } from "@/mocks/clock"
 
 import { ClockScreen } from "../clock-frame"
+import type { ClockVenueView } from "../clock-view"
 
-type PendingStepProps = { waitSecs: number; note: string; onSimulateApproval: () => void }
+type PendingStepProps = {
+  venue: ClockVenueView
+  waitSecs: number
+  note: string
+  onSimulateApproval: () => void
+}
 
 const ROW = "box-content flex min-h-14 items-center border-b border-line"
 
 /** Waiting for approval: spinner, running wait time, and the note that was sent. */
-export function PendingStep({ waitSecs, note, onSimulateApproval }: PendingStepProps) {
+export function PendingStep({ venue, waitSecs, note, onSimulateApproval }: PendingStepProps) {
   return (
     <ClockScreen>
       <div className="flex flex-1 flex-col justify-center gap-6">
@@ -28,8 +33,8 @@ export function PendingStep({ waitSecs, note, onSimulateApproval }: PendingStepP
             Waiting for approval
           </h1>
           <p className="m-0 text-17 leading-x145 text-fg-2">
-            Sent to dispatch at {CLOCK_VENUE.requestTime}. If approved, you&apos;re on the clock
-            from {CLOCK_VENUE.requestTime}. We&apos;ll notify you either way.
+            Sent to dispatch at {venue.requestTime}. If approved, you&apos;re on the clock from{" "}
+            {venue.requestTime}. We&apos;ll notify you either way.
           </p>
         </div>
         <div className="flex flex-col border-t border-line">

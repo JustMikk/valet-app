@@ -81,13 +81,15 @@ const eslintConfig = defineConfig([
   },
   // Node scripts report through the console.
   {
-    files: ["scripts/**/*.mjs"],
+    files: ["scripts/**/*.{mjs,ts}"],
     rules: { "no-console": "off" },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".next-server/**",
+    ".next-static-check/**",
     "out/**",
     "coverage/**",
     ".agents/**",

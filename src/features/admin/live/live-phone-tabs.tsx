@@ -4,16 +4,21 @@ import { useState } from "react"
 
 import { Icon, PersonAvatar, StatusBadge } from "@/components/shared"
 import { cn } from "@/lib/utils"
-import { TIMELINE } from "@/mocks/admin-live"
 
 import { HEALTH_TEXT, SlotBar } from "./live-parts"
 import type { LiveBoard } from "./use-live-board"
 
 const ROW_PRESS = "transition-[transform,background-color] duration-160 active:scale-97"
-const pct = (hour: number) => ((hour - TIMELINE.from) / TIMELINE.span) * 100
-const hourLabel = (h: number) => (h === 24 ? "12a" : `${h > 12 ? h - 12 : h}p`)
+/** "4p", "12a", "12p": the axis labels, on a 24-hour count that may run past midnight. */
+const hourLabel = (h: number) => {
+  const hour = ((h % 24) + 24) % 24
+  return `${hour % 12 === 0 ? 12 : hour % 12}${hour >= 12 ? "p" : "a"}`
+}
 
 export function Timeline({ board, onOpen }: { board: LiveBoard; onOpen: (id: string) => void }) {
+  const axis = board.timeline
+  if (!axis) return null
+  const pct = (hour: number) => ((hour - axis.from) / axis.span) * 100
   return (
     <div className="flex flex-col gap-6">
       {board.attention.length > 0 && (
@@ -50,7 +55,7 @@ export function Timeline({ board, onOpen }: { board: LiveBoard; onOpen: (id: str
       )}
       <div className="flex flex-col gap-2.5">
         <div aria-hidden="true" className="relative h-4.5 font-mono text-11 font-medium text-fg-3">
-          {TIMELINE.ticks.map((h) => (
+          {axis.ticks.map((h) => (
             <span key={h} className="absolute -translate-x-0.5" style={{ left: `${pct(h)}%` }}>
               {hourLabel(h)}
             </span>
@@ -60,7 +65,7 @@ export function Timeline({ board, onOpen }: { board: LiveBoard; onOpen: (id: str
           <div
             aria-hidden="true"
             className="absolute -top-1.5 -bottom-1.5 z-2 w-0.5 bg-fg"
-            style={{ left: `${pct(TIMELINE.now)}%` }}
+            style={{ left: `${pct(axis.now)}%` }}
           >
             <span className="absolute -top-1.5 -left-1.25 size-3 rounded-pill bg-fg" />
           </div>
@@ -89,7 +94,7 @@ export function Timeline({ board, onOpen }: { board: LiveBoard; onOpen: (id: str
                   className="absolute inset-y-1"
                   style={{
                     left: `${pct(event.start)}%`,
-                    width: `${((Math.min(event.end, 25) - event.start) / TIMELINE.span) * 100}%`,
+                    width: `${((Math.min(event.end, axis.from + axis.span) - event.start) / axis.span) * 100}%`,
                   }}
                 >
                   <SlotBar
@@ -104,7 +109,8 @@ export function Timeline({ board, onOpen }: { board: LiveBoard; onOpen: (id: str
           ))}
         </div>
         <span className="text-13 leading-x140 text-fg-3">
-          4 PM – 1 AM · venue time (PT). Bars show coverage composition; tap for roster.
+          {hourLabel(axis.from).toUpperCase()} – {hourLabel(axis.from + axis.span).toUpperCase()} ·
+          venue time ({board.zone}). Bars show coverage composition; tap for roster.
         </span>
       </div>
     </div>
