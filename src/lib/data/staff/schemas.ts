@@ -68,6 +68,9 @@ export const HomeShiftDto = z.object({
   venueGeo: z.object({ lat: z.number(), lng: z.number() }),
   /** IANA zone of the venue: every label and clock reading is venue time. */
   timezone: str,
+  /** Fence radius and the worst GPS accuracy that can still be judged (tenant settings). */
+  radiusM: int,
+  neededAccuracyM: int,
   contact: Contact,
   dress: str,
   startsAt: iso,
@@ -204,6 +207,10 @@ export const ClockPunchRequest = z.object({
   deviceTimestamp: iso,
   location: z.optional(LocationSample),
   selfie: bool,
+  /** The live selfie as a small JPEG data URL; absent when the camera is simulated. */
+  selfieImage: z.optional(
+    z.string().check(z.maxLength(600_000), z.regex(/^data:image\/jpeg;base64,/)),
+  ),
   offline: bool,
   requestApproval: z.optional(bool),
   note: z.optional(z.string().check(z.maxLength(280))),

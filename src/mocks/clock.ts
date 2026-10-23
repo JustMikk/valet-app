@@ -14,6 +14,12 @@ export const LOCATION_FIX_STEPS = [
   { n: 3, text: "Come back here and tap Try again" },
 ] as const
 
+export const CAMERA_FIX_STEPS = [
+  { n: 1, text: "Open Settings → Privacy → Camera" },
+  { n: 2, text: "Find Safari Websites (or Regency) and choose “Allow”" },
+  { n: 3, text: "Come back here and tap Try again" },
+] as const
+
 export const CLOCK_STEPS = [
   "locating",
   "outside",

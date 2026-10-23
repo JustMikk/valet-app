@@ -67,6 +67,8 @@ export function toHomeShift(row: ShiftRow, now: Date): HomeShift {
     mapsUrl: row.maps_url,
     venueGeo: { lat: row.lat, lng: row.lng },
     timezone: row.timezone,
+    radiusM: row.radius_m,
+    neededAccuracyM: row.min_accuracy_m,
     contact: { text: row.contact_text, name: row.contact_name, tel: row.contact_tel },
     dress: row.dress_code,
     startsAt: row.starts_at.toISOString(),

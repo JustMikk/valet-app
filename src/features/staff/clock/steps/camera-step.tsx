@@ -2,7 +2,15 @@ import { Icon } from "@/components/shared"
 import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 
+import type { CameraStatus } from "../use-camera"
+
 type CameraStepProps = {
+  /** Callback ref for the live <video>. */
+  attach: (video: HTMLVideoElement | null) => void
+  status: CameraStatus
+  /** A frame has arrived, so the shutter can be pressed. */
+  ready: boolean
+  onFrame: () => void
   /** Inside the venue (clock-in) or capturing for an approval request. */
   inside: boolean
   /** Meters from the venue, shown in the "Inside" chip. */
@@ -12,18 +20,42 @@ type CameraStepProps = {
 }
 
 /**
- * Step 2 of 2: selfie stage. The live front-camera preview is a placeholder until the camera
- * provider exists (handoff §5.1); the oval, status chip and shutter are the final UI.
+ * Step 2 of 2: selfie stage. The front camera is live behind the oval (a placeholder label shows
+ * while it starts, or for a simulated camera); the shutter is enabled once a frame has arrived.
  */
-export function CameraStep({ inside, distanceM, onClose, onShoot }: CameraStepProps) {
+export function CameraStep({
+  attach,
+  status,
+  ready,
+  onFrame,
+  inside,
+  distanceM,
+  onClose,
+  onShoot,
+}: CameraStepProps) {
   const chip: { icon: IconName; label: string; className: string } = inside
     ? { icon: "verified", label: `Inside · ${distanceM} m from venue`, className: "camera-chip-ok" }
     : { icon: "wrong_location", label: "For approval request", className: "camera-chip-warn" }
+  const live = status === "live"
 
   return (
     <div className="absolute inset-0 animate-screen text-white camera-bg">
+      <video
+        ref={attach}
+        autoPlay
+        playsInline
+        muted
+        aria-hidden="true"
+        onLoadedData={onFrame}
+        // Mirrored like a selfie preview; the stored photo is not.
+        className={cn("absolute inset-0 size-full -scale-x-100 object-cover", !live && "hidden")}
+      />
       <div className="absolute top-[calc(50%-190px)] left-1/2 -ml-28.75 grid h-75 w-57.5 place-items-center rounded-[50%] camera-oval">
-        <span className="font-mono text-12 tracking-p060 text-white/55">LIVE FRONT CAMERA</span>
+        {!live && (
+          <span className="font-mono text-12 tracking-p060 text-white/55">
+            {status === "starting" ? "STARTING CAMERA" : "LIVE FRONT CAMERA"}
+          </span>
+        )}
       </div>
       <div className="absolute top-[calc(var(--safe-top)+8px)] right-5 left-5 flex items-center justify-between tablet:top-5">
         <button
@@ -53,8 +85,9 @@ export function CameraStep({ inside, distanceM, onClose, onShoot }: CameraStepPr
         <button
           type="button"
           aria-label="Take selfie"
+          disabled={!ready}
           onClick={onShoot}
-          className="size-21 rounded-pill border-5 border-white bg-transparent p-1.25 transition-transform duration-150 active:scale-90"
+          className="size-21 rounded-pill border-5 border-white bg-transparent p-1.25 transition-[transform,opacity] duration-150 active:scale-90 disabled:opacity-50"
         >
           <span className="block size-full rounded-pill bg-white" />
         </button>

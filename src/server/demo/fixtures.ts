@@ -96,7 +96,12 @@ type EventSpec = {
   past?: { clockIn: Date; clockOut: Date; approved: boolean }
 }
 
-export function buildFixtures(now: Date, scenario: Scenario) {
+type Options = {
+  /** Move The Grand Hotel here (the tonight shift), so a real GPS fix can be inside its fence. */
+  grandCenter?: { lat: number; lng: number }
+}
+
+export function buildFixtures(now: Date, scenario: Scenario, options: Options = {}) {
   const today = wallTime(now, TZ)
   /** Venue-local wall time `days` from today. */
   const day = (days: number, hour: number, minute = 0) =>
@@ -405,7 +410,7 @@ export function buildFixtures(now: Date, scenario: Scenario) {
       ...CREW.map(([name, email], i) => staffRow(crewIds[i], name, email, "")),
     ],
     venues: (Object.keys(VENUES) as VenueKey[]).map((key) => {
-      const v = VENUES[key]
+      const v = key === "grand" ? { ...VENUES.grand, ...options.grandCenter } : VENUES[key]
       return {
         id: venueIds[key],
         tenant_id: tenantId,

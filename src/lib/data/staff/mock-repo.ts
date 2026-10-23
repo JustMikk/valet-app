@@ -65,6 +65,8 @@ function homeShift(now: number): Home["shift"] {
     mapsUrl: TONIGHT.mapsUrl,
     venueGeo: GRAND,
     timezone: "America/Los_Angeles",
+    radiusM: CLOCK_VENUE.radiusM,
+    neededAccuracyM: CLOCK_VENUE.neededAccuracyM,
     contact: TONIGHT.contact,
     dress: TONIGHT.dress,
     startsAt: new Date(starts).toISOString(),

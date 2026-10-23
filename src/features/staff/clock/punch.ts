@@ -31,6 +31,8 @@ type PunchInput = {
   assignmentId: string
   location?: LocationSample
   selfie: boolean
+  /** The live selfie (JPEG data URL); null or absent when the camera is simulated. */
+  selfieImage?: string | null
   offline?: boolean
   requestApproval?: boolean
   note?: string
@@ -45,6 +47,7 @@ export function punchRequest(input: PunchInput): ClockPunchRequest {
     deviceTimestamp: (input.at ?? new Date()).toISOString(),
     ...(input.location ? { location: input.location } : {}),
     selfie: input.selfie,
+    ...(input.selfieImage ? { selfieImage: input.selfieImage } : {}),
     offline: input.offline ?? false,
     ...(input.requestApproval ? { requestApproval: true } : {}),
     ...(input.note ? { note: input.note } : {}),

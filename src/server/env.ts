@@ -9,6 +9,9 @@ const Env = z.object({
   DEMO_MODE: z.optional(z.string()),
   /** Seconds before dispatch "approves" a pending out-of-fence clock-in request in the demo. */
   DEMO_AUTO_APPROVE_SECS: z.optional(z.string()),
+  /** Optional: move the demo's Grand Hotel to these coordinates, so real GPS can clock in there. */
+  DEMO_VENUE_LAT: z.optional(z.string()),
+  DEMO_VENUE_LNG: z.optional(z.string()),
 })
 export type Env = z.infer<typeof Env>
 

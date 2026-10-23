@@ -10,7 +10,8 @@ import { staffRepo, type Home, type HomeShift } from "@/lib/data"
 import { formatTime } from "@/lib/time/labels"
 import type { ShiftMode } from "@/lib/time/shift-mode"
 
-import { punchRequest, simulatedFix, CLOCK_SIMS } from "../clock/punch"
+import { punchRequest } from "../clock/punch"
+import { useDevice } from "../clock/use-device"
 import { QueryState } from "../data/query-state"
 import { useAfterPunch, useHome, useProfile } from "../data/queries"
 import { useStaffSession } from "../session/staff-session"
@@ -24,6 +25,8 @@ import { UpNext } from "./up-next"
 const MODES = ["before", "due", "onshift"] as const satisfies readonly ShiftMode[]
 /** Seconds already worked in the ?mode=onshift demo state (2:14:07). */
 const DEMO_ELAPSED_SECS = 8047
+/** How long to wait for a position at clock-out before sending the punch without one. */
+const CLOCK_OUT_FIX_MS = 8000
 
 /** Staff Home: the shift that matters now, the clock-in / clock-out CTA, what's next, open shifts. */
 export function StaffHome() {
@@ -52,7 +55,7 @@ function HomeContent({ shift, upNext, open }: ContentProps) {
   const afterPunch = useAfterPunch()
   const demoMode = useDemoParam("mode", MODES)
   const demoBanner = useDemoParam("banner", BANNER_KEYS)
-  const sim = useDemoParam("sim", CLOCK_SIMS) ?? "inside"
+  const device = useDevice(shift.venueGeo, "out")
   const [clockOutOpen, setClockOutOpen] = useState(false)
   const [demoClockedInAt] = useState(() => Date.now() - DEMO_ELAPSED_SECS * 1000)
   const now = useNow(1000)
@@ -64,14 +67,20 @@ function HomeContent({ shift, upNext, open }: ContentProps) {
   })
 
   const clockOut = useMutation({
-    mutationFn: () =>
-      staffRepo.clockOut(
+    mutationFn: async () => {
+      // One reading as the worker leaves. No fix never blocks leaving: it lands flagged instead.
+      const outcome = await device.location.acquire({
+        targetAccuracyM: shift.neededAccuracyM,
+        timeoutMs: CLOCK_OUT_FIX_MS,
+      })
+      return staffRepo.clockOut(
         punchRequest({
           assignmentId: shift.assignmentId,
-          location: simulatedFix(sim, shift.venueGeo, "out"),
+          location: outcome.ok ? outcome.fix : undefined,
           selfie: false,
         }),
-      ),
+      )
+    },
     onSuccess: async (punch) => {
       await afterPunch(punch)
       setClockOutOpen(false)

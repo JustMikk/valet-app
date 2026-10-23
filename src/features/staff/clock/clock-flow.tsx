@@ -14,7 +14,6 @@ import { keys, useHome, useStash } from "../data/queries"
 import { useDemoParam } from "../session/use-demo-param"
 import { ClockFrame, ClockScreen } from "./clock-frame"
 import { DEMO_DONE, doneContent, doneInfoFromPunch, venueView, type DoneInfo } from "./clock-view"
-import { CLOCK_SIMS } from "./punch"
 import { ApprovalStep } from "./steps/approval-step"
 import { CameraStep } from "./steps/camera-step"
 import { ConfirmStep } from "./steps/confirm-step"
@@ -23,7 +22,9 @@ import { DoneStep } from "./steps/done-step"
 import { LocatingStep } from "./steps/locating-step"
 import { OutsideStep } from "./steps/outside-step"
 import { PendingStep } from "./steps/pending-step"
+import { useCamera } from "./use-camera"
 import { useClockFlow } from "./use-clock-flow"
+import { useDevice } from "./use-device"
 import { useTicker } from "@/hooks/use-ticker"
 
 /**
@@ -38,19 +39,21 @@ export function ClockFlow() {
   const homeData = hydrated ? home.data : undefined
   const homeError = hydrated ? home.error : null
   const shift = homeData?.shift
-  const sim = useDemoParam("sim", CLOCK_SIMS) ?? "inside"
   const initialStep = useDemoParam("step", CLOCK_STEPS) ?? "locating"
   const lastPunch = useStash<ClockPunch>(keys.lastPunch)
   const now = useNow(1000)
-  const flow = useClockFlow({ shift, sim, initialStep })
+  const device = useDevice(shift?.venueGeo, "in")
+  const flow = useClockFlow({ shift, device, initialStep })
   const { step } = flow
+  const camera = useCamera(step === "camera", device.camera)
+  const cameraBlocked = camera.status === "denied" || camera.status === "unavailable"
   const waitSecs = useTicker(step === "pending")
 
   const venue = venueView({
     check: flow.check,
     fallbackName: shift?.venue,
     fallbackHours: shift?.rangeLabel,
-    sim,
+    sim: device.sim ?? "inside",
     nowLabel: formatTime(flow.offlineAt ?? now, shift?.timezone ?? "America/Los_Angeles"),
   })
 
@@ -105,6 +108,7 @@ export function ClockFlow() {
       {step === "approval" && (
         <ApprovalStep
           venue={venue}
+          photo={flow.photo}
           busy={flow.busy}
           note={flow.note}
           onNote={flow.setNote}
@@ -121,17 +125,28 @@ export function ClockFlow() {
           onSimulateApproval={flow.simulateApproval}
         />
       )}
-      {step === "camera" && (
+      {step === "camera" && !cameraBlocked && (
         <CameraStep
-          inside={sim !== "outside"}
+          attach={camera.attach}
+          status={camera.status}
+          ready={camera.ready}
+          onFrame={camera.onFrame}
+          inside={flow.check ? flow.check.verdict === "inside" : device.sim !== "outside"}
           distanceM={venue.distanceM}
           onClose={close}
-          onShoot={() => flow.setStep(sim === "outside" ? "approval" : "confirm")}
+          onShoot={() => {
+            const shot = camera.shoot()
+            if (shot) flow.photographed(shot.image)
+          }}
         />
+      )}
+      {step === "camera" && cameraBlocked && (
+        <DeniedStep kind="camera" onClose={close} onRetry={camera.retry} />
       )}
       {step === "confirm" && (
         <ConfirmStep
           venue={venue}
+          photo={flow.photo}
           busy={flow.busy}
           onRetake={() => flow.setStep("camera")}
           onSubmit={flow.submitClockIn}

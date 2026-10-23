@@ -125,10 +125,10 @@ async function insertPunch(
   const loc = req.location
   const insert = sql()`insert into punches
       (assignment_id, staff_id, kind, idempotency_key, device_at, server_at, lat, lng, accuracy_m,
-       distance_m, geofence, selfie, offline, status, note, flagged, flag_reason)
+       distance_m, geofence, selfie, selfie_image, offline, status, note, flagged, flag_reason)
     values (${row.assignment_id}, ${staffId}, ${kind}, ${req.idempotencyKey}, ${at.toISOString()},
        ${now.toISOString()}, ${loc?.lat ?? null}, ${loc?.lng ?? null}, ${loc?.accuracyM ?? null},
-       ${fix.distanceM}, ${fix.verdict}, ${req.selfie}, ${req.offline}, ${decision.status},
+       ${fix.distanceM}, ${fix.verdict}, ${req.selfie}, ${req.selfieImage ?? null}, ${req.offline}, ${decision.status},
        ${req.note ?? null}, ${decision.flagged}, ${decision.reason})
     returning id, assignment_id, kind, status, geofence, distance_m, flagged, device_at, server_at`
   if (decision.status === "pending_approval") {
@@ -232,11 +232,15 @@ export async function punchOut(
   const at = new Date(Math.max(effectiveTime(req, now).getTime(), row.clocked_in_at.getTime()))
   const fix = evaluate(req, row)
   // Leaving is never blocked: outside the fence at clock-out is allowed but flagged (§8.6).
-  const flagged = fix.verdict === "outside" || fix.verdict === "low_accuracy"
+  const flagged = fix.verdict !== "inside"
   const decision: Decision = {
     status: "accepted",
     flagged,
-    reason: flagged ? `Clock-out ${fix.verdict.replace("_", " ")}` : null,
+    reason: flagged
+      ? fix.verdict === "unknown"
+        ? "Clock-out location not captured"
+        : `Clock-out ${fix.verdict.replace("_", " ")}`
+      : null,
   }
   try {
     const punch = await insertPunch(staffId, req, row, "out", at, fix, decision, now)

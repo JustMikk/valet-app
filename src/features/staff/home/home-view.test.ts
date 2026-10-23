@@ -15,6 +15,8 @@ const shift: HomeShift = {
   mapsUrl: "https://maps.google.com/?q=400+Market+St",
   venueGeo: { lat: 37.79, lng: -122.39 },
   timezone: "America/Los_Angeles",
+  radiusM: 150,
+  neededAccuracyM: 75,
   contact: { text: "Ask for Priya, front desk", name: "Priya", tel: "+14155550142" },
   dress: "Black suit",
   startsAt: new Date(START).toISOString(),

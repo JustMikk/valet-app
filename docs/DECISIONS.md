@@ -209,3 +209,26 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - Device APIs (GPS, camera, push) are still simulated (`?sim=`), so `lib/platform` is the next step for the clock flow; the server already judges whatever position it is sent.
 - `route-budgets.json`, Lighthouse and axe still cover only `/` and `/design-system` (build mode, ADR-011).
 - The demo database is shared and `POST /api/demo/reset` is unauthenticated when `DEMO_MODE=1`: acceptable for a demo, and it must be off anywhere else.
+
+---
+
+## ADR-013 — Platform providers: real GPS and camera behind `lib/platform`
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: when staff clock in, detect their location and turn the camera on to take a photo)
+
+**Context.** The clock flow simulated the reading and the selfie (`?sim=`). Handoff §5.1 requires every device capability behind an interface so Capacitor plugins can replace the web ones, and CONSTRAINTS "Device APIs" lets only `src/lib/platform/**` touch `navigator.geolocation` and `mediaDevices`.
+
+**Decision.**
+
+- `LocationProvider.acquire` (web: `watchPosition`, high accuracy, no cached position) refines for up to 20 s, stops at the first fix as accurate as the venue needs, and returns the best fix on timeout. It is acquisition for one punch, not tracking: the watch is cleared on every exit path, including abort. Distinct failures: denied, unsupported, unavailable, timeout.
+- `CameraProvider.open` (web: `getUserMedia`, front camera, video only) returns a session that previews live in a `<video>` and captures one frame as a JPEG (longest side 640 px, quality 0.72, about 25–60 KB). There is no file picker or gallery path. The camera is released when the step ends, the screen unmounts or the photo is taken.
+- Simulated providers implement the same interfaces for `?sim=` links and for the fixture-only static build (no venue to stand at). With the demo API and no `?sim=`, the real devices are used.
+- The selfie travels with the punch (`selfieImage`, validated as a JPEG data URL under 600 KB) and is stored in `punches.selfie_image` (migration 003). The server still judges the position and requires the selfie flag; a clock-out with no location lands flagged rather than blocked.
+- `DEMO_VENUE_LAT` / `DEMO_VENUE_LNG` (optional) move the demo's Grand Hotel to a real coordinate, so a real GPS fix can be inside its fence when testing in person.
+
+**Consequences.**
+
+- Geolocation and camera need a secure context: `localhost` works; a phone reaching the dev server over plain `http://<lan-ip>` will not get either permission, so on-device testing needs HTTPS (a tunnel or a deployed preview).
+- Push is still not built (`PushProvider`, service worker and manifest are a separate task).
+- Selfie retention is still the owner's decision (product spec §13, OPEN_QUESTIONS P9); photos accumulate in the demo database until reset.
+- Verified in Edge with a fake camera device and a controlled position against the live API: inside (38 m, judged by the server), outside (420 m), location denied, camera refused, camera released after capture, photo stored.

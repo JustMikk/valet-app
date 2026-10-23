@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 import { Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,6 +11,7 @@ import type { ClockVenueView } from "../clock-view"
 
 type ApprovalStepProps = {
   venue: ClockVenueView
+  photo: string | null
   busy?: boolean
   note: string
   onNote: (note: string) => void
@@ -20,6 +23,7 @@ type ApprovalStepProps = {
 /** Request approval: selfie recap, a "where are you" note, send. Time counts from the request. */
 export function ApprovalStep({
   venue,
+  photo,
   busy = false,
   note,
   onNote,
@@ -40,8 +44,18 @@ export function ApprovalStep({
         </p>
       </div>
       <div className="flex items-center gap-3.5 rounded-r20 bg-surface p-3.5">
-        <div className="grid h-20 w-16 flex-none place-items-center rounded-r14 text-white/60 selfie-thumb">
-          <Icon name="face" filled size={26} />
+        <div className="relative grid h-20 w-16 flex-none place-items-center overflow-hidden rounded-r14 text-white/60 selfie-thumb">
+          {photo ? (
+            <Image
+              src={photo}
+              alt="Your selfie"
+              fill
+              unoptimized
+              className="-scale-x-100 object-cover"
+            />
+          ) : (
+            <Icon name="face" filled size={26} />
+          )}
         </div>
         <div className="flex flex-1 flex-col gap-1">
           <span className="text-16 font-semibold">Selfie captured</span>
