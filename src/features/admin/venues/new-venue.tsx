@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
 import { useCreateVenue, useSettings } from "../data/queries"
@@ -9,6 +9,8 @@ import { VenueForm } from "./venue-form"
 /** Add a venue: its place, geofence, contact and billing, then straight to its detail page. */
 export function NewVenue() {
   const router = useRouter()
+  // Opened from another screen (New event), the new venue goes back there, selected.
+  const back = useSearchParams().get("return")
   const create = useCreateVenue()
   const defaultRadiusM = useSettings().data?.rules.radiusM ?? 150
 
@@ -24,7 +26,12 @@ export function NewVenue() {
         error={create.error?.message}
         onSubmit={(values) =>
           create.mutate(values, {
-            onSuccess: (venue) => router.replace(`/admin/venues/detail?id=${venue.id}`),
+            onSuccess: (venue) =>
+              router.replace(
+                back?.startsWith("/admin/")
+                  ? `${back}?venue=${venue.id}`
+                  : `/admin/venues/detail?id=${venue.id}`,
+              ),
           })
         }
       />

@@ -1,47 +1,60 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { Icon, TextField } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import { useHydrated } from "@/hooks/use-hydrated"
 import type { FillMode } from "@/lib/data"
-import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage, FORM } from "../common/admin-page"
 import { FIELD_CONTROL, FormField } from "../common/form-field"
-import { ErrorNotice } from "../data/query-state"
+import { ErrorNotice, ScreenSkeleton } from "../data/query-state"
 import { useCreateEvent, useVenues } from "../data/queries"
+import { clearDraft, readDraft, saveDraft } from "./event-draft"
+import { FillModePicker } from "./fill-mode-picker"
+import { HeadcountStepper } from "./headcount-stepper"
 
-const FILL_MODES = [
-  { key: "open", label: "Post as open shifts", note: "First to claim gets it", icon: "bolt" },
-  {
-    key: "assign",
-    label: "Assign people now",
-    note: "Pick names; the rest post as open",
-    icon: "how_to_reg",
-  },
-] as const satisfies readonly { key: FillMode; label: string; note: string; icon: IconName }[]
+const NEW_VENUE = "__new__"
 
-const MIN_STAFF = 1
-const MAX_STAFF = 40
-const STEP =
-  "grid size-11 place-items-center rounded-pill border-0 bg-surface text-fg transition-transform duration-160 active:scale-90 disabled:text-fg-3"
-
-/** New event form: venue, date, time, name, headcount, instructions and how to fill. */
+/** New event: reads back a draft left while adding a venue, once the browser has hydrated. */
 export function NewEvent() {
+  const hydrated = useHydrated()
+  const fromUrl = useSearchParams().get("venue") ?? ""
+  if (!hydrated) {
+    return (
+      <AdminPage>
+        <ScreenSkeleton rows={3} />
+      </AdminPage>
+    )
+  }
+  return <EventForm newVenueId={fromUrl} />
+}
+
+/** The form: venue, date, time, name, headcount, instructions and how to fill. */
+function EventForm({ newVenueId }: { newVenueId: string }) {
   const router = useRouter()
+  // Read once, on mount (the form only mounts after hydration, so storage is safe to read here).
+  const [initial] = useState(readDraft)
+  useEffect(() => clearDraft(), [])
   const venues = useVenues()
   const create = useCreateEvent()
-  const [venueId, setVenueId] = useState("")
-  const [date, setDate] = useState("")
-  const [start, setStart] = useState("10:00")
-  const [end, setEnd] = useState("15:00")
-  const [name, setName] = useState("")
-  const [need, setNeed] = useState(8)
-  const [instructions, setInstructions] = useState("")
-  const [fill, setFill] = useState<FillMode>("open")
+  const [venueId, setVenueId] = useState(newVenueId || initial.venueId)
+  const [date, setDate] = useState(initial.date)
+  const [start, setStart] = useState(initial.start)
+  const [end, setEnd] = useState(initial.end)
+  const [name, setName] = useState(initial.name)
+  const [need, setNeed] = useState(initial.need)
+  const [instructions, setInstructions] = useState(initial.instructions)
+  const [fill, setFill] = useState<FillMode>(initial.fill)
+
+  /** Leaves for the Add venue steps, keeping what was typed; the new venue comes back selected. */
+  const addVenue = () => {
+    saveDraft({ venueId: "", date, start, end, name, need, instructions, fill })
+    router.push("/admin/venues/new?return=/admin/events/new")
+  }
 
   const venue = venueId || venues.data?.[0]?.id || ""
   const ready = Boolean(venue && date && start && end && name.trim())
@@ -85,7 +98,9 @@ export function NewEvent() {
           <select
             id="f-venue"
             value={venue}
-            onChange={(e) => setVenueId(e.target.value)}
+            onChange={(e) =>
+              e.target.value === NEW_VENUE ? addVenue() : setVenueId(e.target.value)
+            }
             className={FIELD_CONTROL}
           >
             {(venues.data ?? []).map((v) => (
@@ -93,6 +108,7 @@ export function NewEvent() {
                 {v.name}
               </option>
             ))}
+            <option value={NEW_VENUE}>+ Add a new venue…</option>
           </select>
           <Icon name="expand_more" size={22} className="text-fg-2" />
         </FormField>
@@ -140,38 +156,7 @@ export function NewEvent() {
           />
         </FormField>
 
-        <div className="box-content flex min-h-16 items-center justify-between border-y border-line">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-17 font-medium">Staff needed</span>
-            <span className="text-13 text-fg-2">Unassigned spots post as open shifts</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="Fewer staff"
-              disabled={need <= MIN_STAFF}
-              onClick={() => setNeed((n) => Math.max(MIN_STAFF, n - 1))}
-              className={STEP}
-            >
-              <Icon name="remove" size={22} />
-            </button>
-            <output
-              aria-live="polite"
-              className="w-11 text-center font-display text-26 font-bold tabular-nums"
-            >
-              {need}
-            </output>
-            <button
-              type="button"
-              aria-label="More staff"
-              disabled={need >= MAX_STAFF}
-              onClick={() => setNeed((n) => Math.min(MAX_STAFF, n + 1))}
-              className={STEP}
-            >
-              <Icon name="add" size={22} />
-            </button>
-          </div>
-        </div>
+        <HeadcountStepper value={need} onChange={setNeed} />
 
         <TextField
           label="Instructions"
@@ -183,33 +168,7 @@ export function NewEvent() {
           placeholder="Dress code, who to report to, where staff park"
         />
 
-        <div role="radiogroup" aria-label="How to fill" className="flex flex-col gap-2">
-          <span className="text-15 font-medium">How to fill</span>
-          {FILL_MODES.map((mode) => {
-            const on = fill === mode.key
-            return (
-              <button
-                key={mode.key}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => setFill(mode.key)}
-                className={cn(
-                  "flex min-h-16 items-center gap-3 rounded-field border-0 px-4 text-left text-fg transition-[background-color,box-shadow] duration-200",
-                  on
-                    ? "bg-accent-soft shadow-[inset_0_0_0_1.5px_var(--accent)]"
-                    : "bg-surface shadow-none",
-                )}
-              >
-                <Icon name={mode.icon} filled size={22} />
-                <span className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-16 font-semibold">{mode.label}</span>
-                  <span className="text-13 text-fg-2">{mode.note}</span>
-                </span>
-              </button>
-            )
-          })}
-        </div>
+        <FillModePicker value={fill} onChange={setFill} />
 
         {create.error && <ErrorNotice message={create.error.message} />}
         <div className="flex gap-2.5">

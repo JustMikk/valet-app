@@ -6,18 +6,15 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 import { Icon, PillTabs } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { useBreakpoint } from "@/hooks/use-breakpoint"
 import { RADII, type VenueDetail as VenueData } from "@/lib/data"
 import { formatRate } from "@/lib/money/format"
 
 import { AdminPage, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useUpdateVenue, useVenue } from "../data/queries"
+import { VenueMap } from "./venue-map"
 
 const RADIUS_ITEMS = RADII.map((r) => ({ value: String(r), label: `${r} m` }))
-// The ring spans 40 px at 0 m up to full map size at 400 m (260 px phone, 380 px wide).
-const ringPx = (radius: number, phone: boolean) =>
-  Math.round((Math.min(radius, 400) / 400) * (phone ? 260 : 380) + 40)
 
 /** One venue: geofence map with live radius preview, radius presets and billing facts. */
 export function VenueDetail() {
@@ -34,28 +31,19 @@ export function VenueDetail() {
 
 function VenueBody({ venue }: { venue: VenueData }) {
   const router = useRouter()
-  const phone = useBreakpoint() === "phone"
   const update = useUpdateVenue()
   const [radius, setRadius] = useState(venue.radiusM)
-  const ring = ringPx(radius, phone)
 
   return (
     <div className={SPLIT}>
       <div className="flex flex-col gap-3.5">
-        <div className="relative h-75 overflow-hidden rounded-r24 [--map-cell:40px] map-grid tablet:h-110">
-          <span
-            aria-hidden="true"
-            className="absolute top-1/2 left-1/2 -translate-1/2 rounded-pill bg-ok-soft shadow-[inset_0_0_0_2px_var(--ok)] transition-[width,height] duration-300 ease-knob"
-            style={{ width: ring, height: ring }}
-          />
-          <span
-            aria-hidden="true"
-            className="absolute top-1/2 left-1/2 -mt-2.25 -ml-2.25 size-4.5 rounded-r4 bg-fg shadow-[0_0_0_4px_var(--bg)]"
-          />
-          <span className="absolute bottom-3.5 left-4 flex h-8 items-center rounded-pill glass px-3 text-13 font-semibold">
-            Drag pin to the valet stand
-          </span>
-        </div>
+        <VenueMap
+          lat={venue.lat}
+          lng={venue.lng}
+          radiusM={radius}
+          label={`Map of ${venue.name} with its clock-in area`}
+          className="h-75 tablet:h-110"
+        />
         <p className="m-0 text-14 leading-x145 text-fg-3">
           Staff can clock in only inside the green area. Outside it, they can request your approval.
         </p>

@@ -5,7 +5,7 @@ import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto"
 const KEY_BYTES = 32
 const SALT_BYTES = 16
 
-export const MIN_PASSWORD_LENGTH = 8
+export const MIN_PASSWORD_LENGTH = 4
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(SALT_BYTES)

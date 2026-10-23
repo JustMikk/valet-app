@@ -291,3 +291,18 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - Sign out: Profile (staff) and Settings (dispatch). The static build has no server, so signing in there just lets the person through.
 
 **Consequences.** Email-only staff sign-in is weak by design (D38). Turn `DEMO_MODE` off anywhere real.
+
+---
+
+## ADR-017 — Venue search and a real map
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: step-by-step Add venue with place search, geocoding and a map; Add venue from New event)
+
+**Decision.**
+
+- `lib/places` is a `PlacesProvider` interface with Photon (komoot, OpenStreetMap data, free, no key) behind it: search as you type (300 ms pause, three characters, cancelled when superseded), results give name, address and coordinates, validated with Zod at the boundary.
+- `VenueMap` (Leaflet, OpenStreetMap tiles, loaded in the browser only) shows the pin and the clock-in circle on Add / Edit venue and the venue page; the pin is draggable on the form. The circle and pin take their colours from design tokens through CSS classes.
+- Add / Edit venue is two steps: (1) search, map, drag the pin, radius; (2) name, address, contact, dress code, billing. Back keeps what was typed. "Use my current location" and typed coordinates remain as fallbacks when search is unavailable.
+- New event's venue list ends with "+ Add a new venue…": it saves the form, runs the steps and returns with the new venue selected and the form as it was.
+
+**Consequences.** Both services are public and rate-limited by fair use (D40). `leaflet` is a new dependency.
