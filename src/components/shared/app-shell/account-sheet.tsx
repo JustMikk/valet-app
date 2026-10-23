@@ -37,10 +37,7 @@ export function AccountSheet({ user, account }: AccountSheetProps) {
           <span className="truncate text-18 font-semibold">{user.name}</span>
           <span className="text-14 text-fg-2">{user.role}</span>
         </span>
-      </div>
-      <div className="flex flex-col gap-2">
-        <span className="text-13 font-semibold tracking-p040 text-fg-3">APPEARANCE</span>
-        <ThemeToggle />
+        <ThemeToggle className="ml-auto" />
       </div>
       <div className="flex flex-col gap-2">
         {user.href && (

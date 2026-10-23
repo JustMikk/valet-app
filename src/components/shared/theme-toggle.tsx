@@ -1,25 +1,34 @@
 "use client"
 
-import { useThemeMode, type ThemePreference } from "@/lib/theme"
+import { useThemeMode } from "@/lib/theme"
+import { cn } from "@/lib/utils"
 
-import { PillTabs } from "./pill-tabs"
+import { Icon } from "./icon"
 
-const ITEMS: { value: ThemePreference; label: string }[] = [
-  { value: "system", label: "Auto" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-]
-
-/** Light, dark, or follow the device: saved on this browser and applied at once. */
+/**
+ * One round button that flips between light and dark: a moon in light mode (go dark), a sun in dark
+ * mode (go light). The icon follows the page's theme in CSS, so it is right on first paint; the
+ * choice is saved on this browser and applied at once.
+ */
 export function ThemeToggle({ className }: { className?: string }) {
-  const { preference, setPreference } = useThemeMode()
+  const { setPreference } = useThemeMode()
+  const flip = () => {
+    const current = document.documentElement.getAttribute("data-theme")
+    setPreference(current === "dark" ? "light" : "dark")
+  }
+
   return (
-    <PillTabs
-      label="Appearance"
-      items={ITEMS}
-      value={preference}
-      onValueChange={setPreference}
-      className={className}
-    />
+    <button
+      type="button"
+      aria-label="Switch between light and dark mode"
+      onClick={flip}
+      className={cn(
+        "grid size-11 flex-none place-items-center rounded-pill border-0 bg-surface text-fg transition-transform duration-160 active:scale-94",
+        className,
+      )}
+    >
+      <Icon name="dark_mode" filled size={22} className="dark:hidden" />
+      <Icon name="light_mode" filled size={22} className="hidden dark:block" />
+    </button>
   )
 }

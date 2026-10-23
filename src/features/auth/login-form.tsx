@@ -48,66 +48,68 @@ export function LoginForm() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-110 flex-col justify-center gap-7 px-5 py-12 bg-ambient">
-      <div className="flex items-center justify-between gap-4">
-        <Link href="/" aria-label="Valet Workforce home">
-          <Image
-            src="/brand/regency-logo.png"
-            alt="Regency"
-            width={72}
-            height={40}
-            className="h-10 w-auto"
-          />
-        </Link>
-        <ThemeToggle />
-      </div>
-      <div className="flex flex-col gap-2">
-        <h1 className="m-0 font-display text-34 leading-x105 font-bold tracking-n030">Sign in</h1>
-        <p className="m-0 text-16 text-fg-2">{COPY[role]}</p>
-      </div>
-      <PillTabs
-        label="Sign in as"
-        items={ROLES}
-        value={role}
-        onValueChange={(next) => {
-          setRole(next)
-          setError(undefined)
-        }}
-      />
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (ready && !busy) void submit()
-        }}
-      >
-        <TextField
-          label="Email"
-          type="email"
-          autoComplete="email"
-          autoFocus
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+    <div className="min-h-dvh bg-ambient">
+      <main className="mx-auto flex min-h-dvh w-full max-w-110 flex-col justify-center gap-7 px-5 py-12">
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/" aria-label="Valet Workforce home">
+            <Image
+              src="/brand/regency-logo.png"
+              alt="Regency"
+              width={72}
+              height={40}
+              className="h-10 w-auto"
+            />
+          </Link>
+          <ThemeToggle />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h1 className="m-0 font-display text-34 leading-x105 font-bold tracking-n030">Sign in</h1>
+          <p className="m-0 text-16 text-fg-2">{COPY[role]}</p>
+        </div>
+        <PillTabs
+          label="Sign in as"
+          items={ROLES}
+          value={role}
+          onValueChange={(next) => {
+            setRole(next)
+            setError(undefined)
+          }}
         />
-        {role === "admin" && (
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (ready && !busy) void submit()
+          }}
+        >
           <TextField
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            label="Email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
           />
-        )}
-        {error && (
-          <p role="alert" className="m-0 text-14 leading-x140 font-semibold text-warn">
-            {error}
-          </p>
-        )}
-        <Button type="submit" variant="accent" className="text-17" disabled={!ready || busy}>
-          {busy ? "Signing in…" : "Sign in"}
-        </Button>
-      </form>
-    </main>
+          {role === "admin" && (
+            <TextField
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          )}
+          {error && (
+            <p role="alert" className="m-0 text-14 leading-x140 font-semibold text-warn">
+              {error}
+            </p>
+          )}
+          <Button type="submit" variant="accent" className="text-17" disabled={!ready || busy}>
+            {busy ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+      </main>
+    </div>
   )
 }
