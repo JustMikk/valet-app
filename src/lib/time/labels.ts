@@ -173,3 +173,16 @@ export function formatStamp(instant: Instant, now: Instant, timeZone: string): s
   const w = wallTime(instant, timeZone)
   return days < 7 ? WEEKDAYS[w.dow] : `${MONTHS[w.month - 1]} ${w.day}`
 }
+
+/** "10 AM", "5:30 PM", "7 PM": the short time used on cards ("Sun 10 AM"). */
+export function formatCompactTime(instant: Instant, timeZone: string): string {
+  const w = wallTime(instant, timeZone)
+  const hour = hour12(w.hour)
+  return `${hour}${w.minute === 0 ? "" : `:${minutes(w.minute)}`} ${meridiem(w.hour)}`
+}
+
+/** Venue-local "HH:mm" (24-hour) for a time input. */
+export function formatClockInput(instant: Instant, timeZone: string): string {
+  const w = wallTime(instant, timeZone)
+  return `${String(w.hour).padStart(2, "0")}:${String(w.minute).padStart(2, "0")}`
+}

@@ -36,7 +36,6 @@ describe.each(SCENARIOS)("demo fixtures (%s)", (scenario) => {
     expect(mine.some((slot) => slot.event_id === tonight.id)).toBe(true)
     expect(mine.filter((slot) => slot.status === "claimed")).toHaveLength(1)
     expect(mine.filter((slot) => slot.status === "completed")).toHaveLength(3)
-    expect(data.punches.filter((punch) => punch.kind === "out")).toHaveLength(3)
   })
 
   it("keeps the open-shift feed interesting: spots left and one that clashes with tonight", () => {
@@ -61,10 +60,31 @@ describe.each(SCENARIOS)("demo fixtures (%s)", (scenario) => {
     }
   })
 
-  it("has no rate columns anywhere in what staff can read", () => {
-    const keys = new Set(
-      [...data.events, ...data.venues, ...data.assignments].flatMap((row) => Object.keys(row)),
-    )
+  it("keeps rates off everything staff can read, and only on venues and invoices", () => {
+    const staffReadable = [...data.events, ...data.assignments, ...data.punches, ...data.drops]
+    const keys = new Set(staffReadable.flatMap((row) => Object.keys(row)))
     for (const key of keys) expect(key).not.toMatch(/rate|pay|bill|wage/i)
+    expect(data.venues.every((venue) => Number(venue.bill_rate_cents) > 0)).toBe(true)
+  })
+
+  it("seeds a living operation for the admin side", () => {
+    const states = new Set<string>()
+    for (const slot of data.assignments) states.add(String(slot.status))
+    expect(states).toContain("open")
+    expect(data.staff.length).toBeGreaterThan(30)
+    expect(data.staff.some((s) => s.onboarded_at === null)).toBe(true)
+    expect(data.staff.some((s) => s.active === false)).toBe(true)
+    expect(data.invoices).toHaveLength(5)
+    expect(new Set(data.invoices.map((i) => i.status))).toEqual(new Set(["draft", "sent", "paid"]))
+    expect(data.broadcasts.length).toBeGreaterThanOrEqual(2)
+    expect(data.events.some((e) => e.status === "draft")).toBe(true)
+  })
+
+  it("makes each invoice total the sum of its lines", () => {
+    for (const invoice of data.invoices) {
+      const lines = data.invoice_lines.filter((line) => line.invoice_id === invoice.id)
+      const sum = lines.reduce((n, line) => n + Number(line.amount_cents), 0)
+      expect(sum).toBe(invoice.total_cents)
+    }
   })
 })

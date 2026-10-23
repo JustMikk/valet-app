@@ -2,7 +2,7 @@
 // mapping, so route files stay a few lines each (handoff §5.3: thin routes).
 import { z } from "zod/mini"
 
-import { verifyToken } from "../auth/token"
+import { verifyToken, type Role } from "../auth/token"
 
 export class ApiError extends Error {
   constructor(
@@ -50,16 +50,27 @@ export function route<P extends Params = Params>(handler: (args: Args<P>) => Pro
   }
 }
 
+function principalOf(req: Request, role: Role): string {
+  const header = req.headers.get("authorization") ?? ""
+  const principal = header.startsWith("Bearer ") ? verifyToken(header.slice(7)) : null
+  if (!principal) throw unauthorized()
+  // A staff token never opens the admin API (and the other way round).
+  if (principal.role !== role) throw new ApiError(403, "forbidden", "That isn't available to you.")
+  return principal.id
+}
+
 /** Authenticated staff route: the Bearer token must be valid; `staffId` comes only from it. */
 export function staffRoute<P extends Params = Params>(
   handler: (args: Args<P> & { staffId: string }) => Promise<Response>,
 ) {
-  return route<P>(async (args) => {
-    const header = args.req.headers.get("authorization") ?? ""
-    const staffId = header.startsWith("Bearer ") ? verifyToken(header.slice(7)) : null
-    if (!staffId) throw unauthorized()
-    return handler({ ...args, staffId })
-  })
+  return route<P>(async (args) => handler({ ...args, staffId: principalOf(args.req, "staff") }))
+}
+
+/** Authenticated admin route: only an admin token passes; `adminId` comes only from it. */
+export function adminRoute<P extends Params = Params>(
+  handler: (args: Args<P> & { adminId: string }) => Promise<Response>,
+) {
+  return route<P>(async (args) => handler({ ...args, adminId: principalOf(args.req, "admin") }))
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -87,6 +98,19 @@ export async function readBody<S extends z.ZodMiniType>(
     throw badRequest(`Invalid request: ${fields}.`, "invalid_request")
   }
   return parsed.data
+}
+
+/**
+ * Like readBody, for requests that may legitimately carry nothing (an empty body counts as {}), so
+ * "do the default" and "do this specific thing" share one endpoint.
+ */
+export async function readOptionalBody<S extends z.ZodMiniType>(
+  req: Request,
+  schema: S,
+): Promise<z.output<S>> {
+  const text = (await req.clone().text()).trim()
+  if (text === "") return schema.parse({})
+  return readBody(req, schema)
 }
 
 /** Reads one query parameter through a schema (for example `?tab=past`). */

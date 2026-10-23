@@ -80,3 +80,8 @@ export async function findActiveStaffId(email: string): Promise<string | null> {
   )
   return row?.id ?? null
 }
+
+/** Finishing onboarding turns an invited person into an active one (it is idempotent). */
+export async function completeOnboarding(staffId: string): Promise<void> {
+  await sql()`update staff set onboarded_at = coalesce(onboarded_at, now()) where id = ${staffId}`
+}
