@@ -145,8 +145,8 @@ export function summarizeEvent(event: LiveEvent): EventSummary {
   }
 }
 
-const first = (name: string) => name.split(" ")[0] ?? name
-const venueName = (venue: string) => venue.split(" ·")[0] ?? venue
+export const first = (name: string) => name.split(" ")[0] ?? name
+export const venueName = (venue: string) => venue.split(" ·")[0] ?? venue
 
 /** Everything the board shows, derived from the events and who has been messaged. */
 export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>) {
@@ -279,5 +279,3 @@ export function boardPeople(events: LiveEvent[], query: string) {
       })),
   )
 }
-
-export { first, venueName }
