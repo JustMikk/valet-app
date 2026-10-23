@@ -32,3 +32,10 @@ export type ShellNotifications = {
   /** The drawer's content: the app's list and its push prompt. */
   children: ReactNode
 }
+
+export type ShellAccount = {
+  /** Ends the session and returns to the landing page. */
+  onSignOut: () => void
+  /** Ends the session and opens the sign-in page, so someone else can sign in. */
+  onSwitch: () => void
+}

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
+import { signOut } from "@/lib/data"
 import { AppShell, type ShellNavItem } from "@/components/shared"
 
 import { useMarkNotificationsRead, useNotifications, useSession } from "../data/queries"
@@ -118,6 +119,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
           if (unread > 0) markRead.mutate()
         },
         children: <NotificationPanel />,
+      }}
+      account={{
+        onSignOut: () => {
+          signOut("admin")
+          router.push("/")
+        },
+        onSwitch: () => {
+          signOut("admin")
+          router.push("/login?role=admin")
+        },
       }}
       onBack={goBack}
     >

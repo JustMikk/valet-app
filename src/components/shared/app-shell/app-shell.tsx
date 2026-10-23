@@ -6,11 +6,12 @@ import { cn } from "@/lib/utils"
 
 import { Icon } from "../icon"
 import { ShellMenuProvider, useShellMenu } from "./menu-context"
+import { AccountSheet } from "./account-sheet"
 import { NotificationDrawer } from "./notification-drawer"
 import { PhoneChrome } from "./phone-chrome"
 import { RouteScreen } from "./route-screen"
 import { Sidebar } from "./sidebar"
-import type { ShellApp, ShellNavItem, ShellNotifications, ShellUser } from "./types"
+import type { ShellAccount, ShellApp, ShellNavItem, ShellNotifications, ShellUser } from "./types"
 
 type AppShellProps = {
   app: ShellApp
@@ -40,6 +41,8 @@ type AppShellProps = {
   contentMax?: string
   /** The bell and its drawer. Left out, the shell draws neither. */
   notifications?: ShellNotifications
+  /** Switch account and sign out, from the avatar. Left out, the avatar keeps its old behaviour. */
+  account?: ShellAccount
   onBack: () => void
   children: ReactNode
 }
@@ -82,6 +85,7 @@ export function AppShell({
   topBar = true,
   contentMax = "max-w-280",
   notifications,
+  account,
   onBack,
   children,
 }: AppShellProps) {
@@ -104,6 +108,7 @@ export function AppShell({
             currentKey={currentKey}
             user={user}
             unread={notifications?.unread}
+            accountMenu={Boolean(account)}
           />
         )}
 
@@ -148,11 +153,13 @@ export function AppShell({
               isRoot={isRoot}
               showTopBar={topBar}
               unread={notifications?.unread}
+              accountMenu={Boolean(account)}
               onBack={onBack}
             />
           )}
         </main>
         {notifications && mode === "app" && <NotificationsLayer notifications={notifications} />}
+        {account && mode === "app" && <AccountSheet user={user} account={account} />}
       </div>
     </ShellMenuProvider>
   )

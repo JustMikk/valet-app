@@ -9,6 +9,9 @@ type ShellMenu = {
   /** The notification drawer. */
   notificationsOpen: boolean
   setNotificationsOpen: (open: boolean) => void
+  /** The account sheet (switch account, sign out). */
+  accountOpen: boolean
+  setAccountOpen: (open: boolean) => void
 }
 
 const ShellMenuContext = createContext<ShellMenu | null>(null)
@@ -20,9 +23,10 @@ const ShellMenuContext = createContext<ShellMenu | null>(null)
 export function ShellMenuProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const value = useMemo(
-    () => ({ open, setOpen, notificationsOpen, setNotificationsOpen }),
-    [open, notificationsOpen],
+    () => ({ open, setOpen, notificationsOpen, setNotificationsOpen, accountOpen, setAccountOpen }),
+    [open, notificationsOpen, accountOpen],
   )
   return <ShellMenuContext.Provider value={value}>{children}</ShellMenuContext.Provider>
 }
