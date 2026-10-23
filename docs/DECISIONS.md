@@ -178,4 +178,34 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 
 **Decision.** `check:task` is now types + lint + secrets + floor + boundaries + static build. Tests, coverage, performance, accessibility runs, visual baselines, PWA/offline, platform providers and the real data layer are deferred to a testing phase that starts when every page in `tasks/build-all.md` exists (CONSTRAINTS.md "Build mode"). The floor, tokens-only, boundaries and secrets checks are unchanged.
 
-**Consequences.** New pages ship without tests until the testing phase; the testing phase must restore the deferred rows as per-task gates. Existing Phase 1 tests keep running in `check:full`. Pages use typed fixtures (`src/mocks`) instead of the data layer; swapping in repositories is a later task.
+**Consequences.** New pages ship without tests until the testing phase; the testing phase must restore the deferred rows as per-task gates. Existing Phase 1 tests keep running in `check:full`. Pages use typed fixtures (`src/mocks`) instead of the data layer; swapping in repositories is a later task. _(Superseded for the staff side by ADR-012.)_
+
+---
+
+## ADR-012 — Demo API on Next.js with a dual-mode build; Neon Postgres; one data layer
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: make the staff features real with Next.js API routes and a Neon Postgres database; "a demo app, nothing serious"; the dual-mode build was chosen from the options offered)
+
+**Context.** Pages ran on typed fixtures (ADR-011). The owner wants real behaviour for the staff side first, then admin. The static-export rule (ADR-001, CONSTRAINTS "Static export") forbids route handlers that read a `Request`, so API routes and the Capacitor-ready export cannot be the same build.
+
+**Decision.**
+
+- **Two targets from one codebase** (`next.config.ts`):
+  - _static_ (default; `pnpm build`, `pnpm dev:static`): `output: 'export'`, exactly as before. CONSTRAINTS is unchanged and still enforced.
+  - _server_ (`VALET_TARGET=server`; `pnpm dev`, `pnpm build:server`, `pnpm start:server` through `scripts/next-server.mjs`): registers the API handlers and builds into `.next-server`, so it never shares a cache with the static build.
+- **API handlers are named `route.api.ts`.** `pageExtensions` adds `api.ts` only in server mode, so the static export does not see them (verified: the export lists no `/api/*`; the server build lists all 19). Checked against `node_modules/next/dist/docs/.../pageExtensions.md` and `static-exports.md`.
+- **Layers.** `src/app/api/**/route.api.ts` (thin) → `src/server/*` (services, Neon access, session tokens; server-only, enforced by dependency-cruiser rules `server-is-private` and `server-has-no-ui`) → `src/lib/*` (pure logic and the shared DTO schemas).
+- **One data layer** (`src/lib/data`, handoff §6). Screens depend on the `StaffRepo` interface. The HTTP implementation calls the API and Zod-validates every response; the mock implementation serves the design fixtures in the static export. The choice is build-time (`NEXT_PUBLIC_DATA_SOURCE`). TanStack Query holds server state.
+- **Wire format** is defined once (`src/lib/data/staff/schemas.ts`, `zod/mini`) and validates requests, the server's own responses, and responses in the client. DTOs are display-ready and venue-local (built by `lib/time`), so the server, the mock and the design agree. No bill or pay rate exists in any staff type or staff query.
+- **Server rules from the product spec.** The geofence is recomputed server-side from the raw sample (`lib/geo`, accuracy-aware). Clock window, one active clock and a required selfie are enforced. Offline punches keep their device time and land flagged rather than rejected. Out-of-fence requests wait for dispatch and clock in at the request time. No drop after clock-in; a drop under 24 h is flagged late. A claim is one atomic statement (`FOR UPDATE SKIP LOCKED`) with overlap detection. Punch writes are idempotent per key.
+- **Database.** Neon Postgres over HTTP (`@neondatabase/serverless`), plain SQL migrations in `db/migrations` applied by `scripts/db-migrate.mjs`, tagged-template queries only (no string-built SQL). Seed data is relative to "now" (`pnpm db:seed [before|due|onshift]` or `POST /api/demo/reset`), with stable ids for people so a browser's session survives a reset.
+- **Auth (demo-grade).** Stateless HMAC-signed Bearer tokens (30 days). "Email me a code" accepts the fixed code from the onboarding design; `POST /api/auth/demo` gives the default worker a session and exists only with `DEMO_MODE=1`. The signature check, expiry and per-worker scoping are real.
+
+**Dependencies (handoff §7: justify each).** `@neondatabase/serverless`: a Postgres client that works over HTTP, so no TCP pool or `ws` is needed. `@tanstack/react-query`: server state, as the handoff specifies. `tsx` (dev): runs the TypeScript seed script with the project's path aliases. Vendor component: shadcn `skeleton` for loading states, edited only to import `cn` from `@/lib/utils` and to honour reduced motion.
+
+**Consequences.**
+
+- `pnpm check:task` still builds the static export. The API is type-checked, linted and boundary-checked by the same commands, and has unit tests for the token, seed invariants, label mapping, geofence and time logic, plus end-to-end runs against Neon (smoke script, four-way claim race, browser walkthrough in both modes).
+- Device APIs (GPS, camera, push) are still simulated (`?sim=`), so `lib/platform` is the next step for the clock flow; the server already judges whatever position it is sent.
+- `route-budgets.json`, Lighthouse and axe still cover only `/` and `/design-system` (build mode, ADR-011).
+- The demo database is shared and `POST /api/demo/reset` is unauthenticated when `DEMO_MODE=1`: acceptable for a demo, and it must be off anywhere else.

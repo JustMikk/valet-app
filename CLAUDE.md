@@ -32,4 +32,5 @@ Read [CONSTRAINTS.md](CONSTRAINTS.md) before writing code. Do not weaken it to m
 - Component sourcing: shadcn registry first → Aceternity (wrapped in `components/shared`) → custom from primitives. Record the source in `docs/DESIGN_INTAKE.md`.
 - Per slice: `/spec` → `/plan` → owner approval → `/build` (TDD, small commits) → `/test` → `/review`.
 - Verify library APIs against bundled docs (`node_modules/next/dist/docs/`) or official docs, not memory.
-- Commands: `pnpm dev` · `pnpm build` (static export to `out/`) · `pnpm lint`.
+- Commands: `pnpm dev` (server build with the demo API) · `pnpm dev:static` · `pnpm build` (static export to `out/`, the CI contract) · `pnpm build:server` · `pnpm db:setup` · `pnpm db:seed [before|due|onshift]` · `pnpm lint`.
+- Demo API (ADR-012): handlers are `src/app/api/**/route.api.ts` (thin), logic is in `src/server/*` (server-only), shared DTO schemas are in `src/lib/data`. Screens use `staffRepo` from `@/lib/data`, never `fetch` or `@/mocks` directly. Needs `.env.local` (see `.env.example`).
