@@ -1,7 +1,7 @@
 // Stand-ins for the device, used by the `?sim=` demo links and the static (fixture) build, where
 // there is no venue to stand at. They behave like the real providers: the reading narrows over
 // time, and the scenario decides whether it ends inside, outside or denied.
-import type { CameraProvider, GeoFix, LocationProvider } from "./types"
+import type { CameraProvider, GeoFix, LocationProvider, PushProvider } from "./types"
 
 const START_ACCURACY_M = 140
 const STEP_MS = 260
@@ -39,4 +39,12 @@ export function simulatedLocation(fix: GeoFix | null): LocationProvider {
 /** A camera with no live stream: the screen shows its placeholder and no image is captured. */
 export const simulatedCamera: CameraProvider = {
   open: async () => ({ ok: true, session: { stream: null, capture: () => null, stop: () => {} } }),
+}
+
+/** The static (fixture) build has no server to push from, so the device reports no push support. */
+export const unsupportedPush: PushProvider = {
+  permission: () => "unsupported",
+  current: async () => null,
+  subscribe: async () => ({ ok: false, reason: "unsupported" }),
+  unsubscribe: async () => null,
 }

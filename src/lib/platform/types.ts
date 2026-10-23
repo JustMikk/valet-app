@@ -44,3 +44,20 @@ export interface CameraProvider {
   /** Opens the front camera, live only: there is no gallery or file picker path (handoff §12). */
   open(): Promise<CameraOutcome>
 }
+
+export type PushPermission = "unsupported" | "denied" | "default" | "granted"
+export type PushFailure = "denied" | "unsupported" | "failed"
+export type PushSubscriptionData = { endpoint: string; keys: { p256dh: string; auth: string } }
+export type PushOutcome =
+  { ok: true; subscription: PushSubscriptionData } | { ok: false; reason: PushFailure }
+
+export interface PushProvider {
+  /** Where this device stands: no push here, blocked by the user, not asked yet, or allowed. */
+  permission(): PushPermission
+  /** The subscription this browser already holds, if any (it can outlive a sign-out). */
+  current(): Promise<PushSubscriptionData | null>
+  /** Asks for permission if needed, registers the worker and subscribes with the server's key. */
+  subscribe(publicKey: string): Promise<PushOutcome>
+  /** Drops this browser's subscription and returns its endpoint so the server can forget it. */
+  unsubscribe(): Promise<string | null>
+}

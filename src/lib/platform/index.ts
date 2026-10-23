@@ -1,6 +1,7 @@
 export { webCamera } from "./camera.web"
 export { webLocation } from "./location.web"
-export { simulatedCamera, simulatedLocation } from "./simulated"
+export { webPush } from "./push.web"
+export { simulatedCamera, simulatedLocation, unsupportedPush } from "./simulated"
 export type {
   AcquireOptions,
   CameraFailure,
@@ -11,4 +12,9 @@ export type {
   LocationFailure,
   LocationOutcome,
   LocationProvider,
+  PushFailure,
+  PushOutcome,
+  PushPermission,
+  PushProvider,
+  PushSubscriptionData,
 } from "./types"

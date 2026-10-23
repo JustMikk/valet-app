@@ -11,6 +11,7 @@ export type { StaffRepo } from "./staff/repo"
 export * from "./admin/schemas"
 export * from "./admin/ops-schemas"
 export * from "./staff/schemas"
+export * from "./push-schemas"
 
 /**
  * The data source is a build-time choice (next.config.ts): the server build talks to the demo

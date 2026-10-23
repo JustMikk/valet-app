@@ -568,3 +568,34 @@ export const AUDIENCES = [
 export type AudienceKey = (typeof AUDIENCES)[number]["key"]
 
 // ── Settings ──────────────────────────────────────────────────────────────────────────────────
+
+// ── Notifications ─────────────────────────────────────────────────────────────────────────────
+export const ADMIN_NOTIFICATIONS = [
+  {
+    id: "an-0",
+    icon: "wrong_location",
+    tone: "warn",
+    title: "Luis T. needs approval",
+    body: "Clock-in request at The Grand Hotel · 420 m away",
+    time: "8 min ago",
+    href: "/admin",
+  },
+  {
+    id: "an-1",
+    icon: "timer",
+    tone: "warn",
+    title: "Ari B. is late",
+    body: "The Grand Hotel · not clocked in 4 min after start",
+    time: "14 min ago",
+    href: "/admin",
+  },
+  {
+    id: "an-2",
+    icon: "chat_bubble",
+    tone: "info",
+    title: "Message from Jordan E.",
+    body: "Garage is full, sending crew to the east lot.",
+    time: "55 min ago",
+    href: "/admin/inbox",
+  },
+] as const

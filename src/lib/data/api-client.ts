@@ -90,7 +90,7 @@ async function currentToken(role: Role): Promise<string> {
 }
 
 type Options = {
-  method?: "GET" | "POST" | "PATCH"
+  method?: "GET" | "POST" | "PATCH" | "DELETE"
   body?: unknown
   auth?: boolean
   /** Which app's session to use (default staff). */
