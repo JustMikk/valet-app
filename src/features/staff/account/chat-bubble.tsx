@@ -27,6 +27,12 @@ export function ChatBubble({ message: m, onClaim }: ChatBubbleProps) {
           BUBBLE[m.from],
         )}
       >
+        {m.from === "broadcast" && (
+          <span className="flex items-center gap-1.5 text-12 font-semibold tracking-p040 text-accent-text">
+            <Icon name="campaign" filled size={15} loose />
+            ANNOUNCEMENT
+          </span>
+        )}
         {m.ref && (
           <span className="flex items-center gap-1.5 text-12 font-semibold opacity-75">
             <Icon name="event" size={15} loose />
