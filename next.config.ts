@@ -7,9 +7,14 @@ import type { NextConfig } from "next"
 //  - server (`VALET_TARGET=server`, see scripts/next-server.mjs): registers `route.api.ts` so the
 //    demo API under `src/app/api` runs on Next.js, and the data layer talks to it over HTTP. It
 //    builds into its own folder so it never collides with a static `next dev` / `next build`.
-const serverTarget = process.env.VALET_TARGET === "server"
-// NEXT_DIST_DIR lets a build run beside a live dev server without sharing its .next cache.
-const distDir = process.env.NEXT_DIST_DIR ?? (serverTarget ? ".next-server" : undefined)
+// On Vercel the app is the server build (it is the deployed product: sign-in and the API need it);
+// `VALET_TARGET=static` there would still give the static export.
+const onVercel = Boolean(process.env.VERCEL)
+const serverTarget = (process.env.VALET_TARGET ?? (onVercel ? "server" : "static")) === "server"
+// NEXT_DIST_DIR lets a build run beside a live dev server without sharing its .next cache. Vercel
+// reads the default .next folder, so the server build only gets its own folder elsewhere.
+const distDir =
+  process.env.NEXT_DIST_DIR ?? (serverTarget && !onVercel ? ".next-server" : undefined)
 
 const nextConfig: NextConfig = {
   ...(distDir ? { distDir } : {}),
