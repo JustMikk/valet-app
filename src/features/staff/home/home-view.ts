@@ -2,6 +2,7 @@
 // are tested without rendering. `now` moves; the facts (opens, starts, ends, clocked in) do not.
 import type { HomeShift } from "@/lib/data"
 import type { StatusSpec } from "@/lib/status/presets"
+import { describeCountdown } from "@/lib/time/countdown"
 import { formatClock } from "@/lib/time/duration"
 import {
   deriveShiftMode,
@@ -86,7 +87,12 @@ export function buildHomeView(shift: HomeShift, now: number, overrides: Override
   return {
     mode,
     status: { tone: "muted", icon: "event", filled: true, label: shift.dayWord },
-    sub: `Clock-in opens ${shift.opensLabel}`,
+    sub: [
+      describeCountdown(shift.startsAt, shift.endsAt, now),
+      `clock-in opens ${shift.opensLabel}`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
     heroValue: shift.startLabel,
     inLine: null,
     progress: 0,

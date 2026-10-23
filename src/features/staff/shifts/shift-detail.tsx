@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 
 import {
   ActionButton,
+  Countdown,
   Icon,
   ListRow,
   ListRowAction,
@@ -42,6 +43,7 @@ function DetailBody({ shift: D }: { shift: ShiftDetailData }) {
             {D.title}
           </span>
           <span className="text-16 text-fg-2">{D.when}</span>
+          <Countdown startsAt={D.startsAt} endsAt={D.endsAt} className="mt-1 text-16" />
         </div>
         {D.clockNotice && (
           <div className="flex items-center gap-2.5 rounded-r18 bg-surface px-4 py-3.5 text-15 leading-x135 font-medium">

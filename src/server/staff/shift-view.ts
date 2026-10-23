@@ -96,6 +96,8 @@ export function toUpNext(row: ShiftRow): UpNext {
     day: formatDayNumber(row.starts_at, tz),
     venue: row.title,
     time: formatRange(row.starts_at, row.ends_at, tz),
+    startsAt: row.starts_at.toISOString(),
+    endsAt: row.ends_at.toISOString(),
   }
 }
 
@@ -122,6 +124,8 @@ export function toUpcomingCard(row: ShiftRow, now: Date): ShiftCard {
     time: formatRange(row.starts_at, row.ends_at, tz),
     right: formatDuration(row.ends_at.getTime() - row.starts_at.getTime()),
     isTonight: tonight,
+    startsAt: row.starts_at.toISOString(),
+    endsAt: row.ends_at.toISOString(),
   }
 }
 
@@ -191,5 +195,7 @@ export function toShiftDetail(row: ShiftRow, now: Date): ShiftDetail {
     // Product spec §7.9: no drop after clocking in; an event already under way goes through dispatch.
     canDrop: !past && !row.clocked_in_at && !started,
     lateDrop: hoursUntilStart(row, now) < LATE_DROP_HOURS,
+    startsAt: row.starts_at.toISOString(),
+    endsAt: row.ends_at.toISOString(),
   }
 }

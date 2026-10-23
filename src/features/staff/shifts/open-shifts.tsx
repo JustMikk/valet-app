@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 
-import { EmptyState, Icon, PageContainer, PageTitle } from "@/components/shared"
+import { Countdown, EmptyState, Icon, PageContainer, PageTitle } from "@/components/shared"
 import { useHydrated } from "@/hooks/use-hydrated"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -82,6 +82,7 @@ export function OpenShifts() {
                         {shift.venue}
                       </span>
                       <span className="text-15 text-fg-2">{shift.time}</span>
+                      <Countdown startsAt={shift.startsAt} endsAt={shift.endsAt} className="mt-1" />
                     </div>
                     {shift.conflict && (
                       <span className="flex items-center gap-1.5 text-14 font-semibold text-warn">

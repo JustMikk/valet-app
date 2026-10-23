@@ -42,7 +42,7 @@ describe("buildHomeView", () => {
     const view = buildHomeView(shift, START - 60 * MIN, none)
     expect(view.mode).toBe("before")
     expect(view.status.label).toBe("Today")
-    expect(view.sub).toBe("Clock-in opens 5:45 PM")
+    expect(view.sub).toBe("Starts in 1h · clock-in opens 5:45 PM")
     expect(view.ctaLabel).toBe("Clock in opens 5:45 PM")
     expect(view.ctaReason).toBe("Available 15 min before your shift starts")
   })

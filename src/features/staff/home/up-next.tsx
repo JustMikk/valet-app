@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 
-import { DateTile, FeatureCard, Icon } from "@/components/shared"
+import { Countdown, DateTile, FeatureCard, Icon } from "@/components/shared"
 import type { Home } from "@/lib/data"
 
 /** Right column of Home: upcoming shifts and the open-shifts promo. */
@@ -33,6 +33,7 @@ export function UpNext({ upNext, open }: { upNext: Home["upNext"]; open: Home["o
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="text-17 font-semibold">{shift.venue}</span>
                 <span className="text-15 text-fg-2">{shift.time}</span>
+                <Countdown startsAt={shift.startsAt} endsAt={shift.endsAt} className="text-13" />
               </div>
               <Icon name="chevron_right" size={24} />
             </button>

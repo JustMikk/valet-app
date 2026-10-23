@@ -65,6 +65,8 @@ export async function listOpenEvents(staffId: string, now: Date): Promise<OpenEv
         venue: event.title,
         time: `${formatRange(event.starts_at, event.ends_at, tz)} · ${formatDuration(event.ends_at.getTime() - event.starts_at.getTime())}`,
         spots,
+        startsAt: event.starts_at.toISOString(),
+        endsAt: event.ends_at.toISOString(),
         ...(clash
           ? {
               conflict: `Overlaps your ${clash.title} shift (${formatCompactRange(clash.starts_at, clash.ends_at, tz)})`,

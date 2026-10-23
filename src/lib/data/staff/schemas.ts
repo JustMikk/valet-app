@@ -98,6 +98,9 @@ export const UpNextDto = z.object({
   day: str,
   venue: str,
   time: str,
+  /** When it starts and ends (ISO): the screens count down from these. */
+  startsAt: z.optional(iso),
+  endsAt: z.optional(iso),
 })
 export type UpNext = z.infer<typeof UpNextDto>
 
@@ -123,6 +126,9 @@ export const ShiftCardDto = z.object({
   right: str,
   /** The current or next shift today: opens Home (where the clock action lives), not the detail. */
   isTonight: bool,
+  /** When it starts and ends (ISO): the screens count down from these. */
+  startsAt: z.optional(iso),
+  endsAt: z.optional(iso),
 })
 export type ShiftCard = z.infer<typeof ShiftCardDto>
 
@@ -141,6 +147,9 @@ export const ShiftDetailDto = z.object({
   dropVenue: str,
   dropWhen: str,
   canDrop: bool,
+  /** When it starts and ends (ISO): the screens count down from these. */
+  startsAt: z.optional(iso),
+  endsAt: z.optional(iso),
   lateDrop: bool,
 })
 export type ShiftDetail = z.infer<typeof ShiftDetailDto>
@@ -167,6 +176,9 @@ export const OpenShiftDto = z.object({
   time: str,
   spots: int,
   conflict: z.optional(str),
+  /** When it starts and ends (ISO): the screens count down from these. */
+  startsAt: z.optional(iso),
+  endsAt: z.optional(iso),
 })
 export type OpenShift = z.infer<typeof OpenShiftDto>
 

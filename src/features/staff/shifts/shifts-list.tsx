@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 
 import {
   ActionButton,
+  Countdown,
   EmptyState,
   PageContainer,
   PageTitle,
@@ -86,6 +87,7 @@ export function ShiftsList() {
                       <span>{shift.time}</span>
                       <span className="font-semibold text-fg">{shift.right}</span>
                     </div>
+                    <Countdown startsAt={shift.startsAt} endsAt={shift.endsAt} />
                   </button>
                 ))}
               </div>
