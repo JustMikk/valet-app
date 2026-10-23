@@ -2,6 +2,7 @@
 // open spots. Every change that touches a worker also tells them.
 import type {
   AssignResult,
+  AvailabilityQuery,
   AvailableStaff,
   EventCard,
   EventPatch,
@@ -226,6 +227,22 @@ export async function getEvent(adminId: string, eventId: string, now: Date): Pro
   }
 }
 
+/** Venue-local date and times as instants; an end before the start runs past midnight. */
+function eventWindow(
+  timezone: string,
+  input: { date: string; start: string; end: string },
+): { starts: Date; ends: Date } {
+  const [y, m, d] = input.date.split("-").map(Number)
+  const [sh, sm] = input.start.split(":").map(Number)
+  const [eh, em] = input.end.split(":").map(Number)
+  const starts = zonedInstant(timezone, { year: y, month: m, day: d, hour: sh, minute: sm })
+  let ends = zonedInstant(timezone, { year: y, month: m, day: d, hour: eh, minute: em })
+  if (ends <= starts) {
+    ends = zonedInstant(timezone, { year: y, month: m, day: d + 1, hour: eh, minute: em })
+  }
+  return { starts, ends }
+}
+
 type VenueFacts = {
   id: string
   name: string
@@ -260,6 +277,18 @@ async function freeStaff(
   )
 }
 
+const NO_EVENT = "00000000-0000-0000-0000-000000000000"
+const AVAILABLE_LIMIT = 60
+
+function describeFree(free: Awaited<ReturnType<typeof freeStaff>>, today: boolean): AvailableStaff {
+  return free.slice(0, AVAILABLE_LIMIT).map((person) => ({
+    id: person.id,
+    initials: initialsOf(person.name),
+    name: person.name,
+    note: `${today ? "Free tonight" : "Free"}${Number(person.here) > 0 ? ` · worked here ${person.here}×` : ""}`,
+  }))
+}
+
 export async function availableStaff(
   adminId: string,
   eventId: string,
@@ -280,12 +309,23 @@ export async function availableStaff(
     event.starts_at,
     event.ends_at,
   )
-  return free.slice(0, 12).map((person) => ({
-    id: person.id,
-    initials: initialsOf(person.name),
-    name: person.name,
-    note: `${today ? "Free tonight" : "Free"}${Number(person.here) > 0 ? ` · worked here ${person.here}×` : ""}`,
-  }))
+  return describeFree(free, today)
+}
+
+/** Who is free for a venue and time that no event exists for yet (the New event crew step). */
+export async function availableForWindow(
+  adminId: string,
+  input: AvailabilityQuery,
+  now: Date,
+): Promise<AvailableStaff> {
+  const ctx = await adminCtx(adminId)
+  const [venue] = await rows<{ timezone: string }>(
+    sql()`select timezone from venues where id = ${input.venueId} and tenant_id = ${ctx.tenantId}`,
+  )
+  if (!venue) throw badRequest("Choose a venue.", "invalid_request")
+  const { starts, ends } = eventWindow(venue.timezone, input)
+  const free = await freeStaff(ctx.tenantId, NO_EVENT, input.venueId, starts, ends)
+  return describeFree(free, calendarDaysBetween(now, starts, venue.timezone) === 0)
 }
 
 /** Put people into open spots (the best-suited free person when none is named) and tell them. */
@@ -357,7 +397,8 @@ export async function assign(
       if (!isUniqueViolation(error)) throw error
     }
   }
-  await notifyStaff(notices)
+  // A draft is not announced: people hear about their spot when the event is published.
+  if (event.status !== "draft") await notifyStaff(notices)
   if (names.length === 0) throw conflict("no_open_spot", "There is no open spot left to fill.")
   return { assigned: names.length, names }
 }
@@ -451,13 +492,7 @@ export async function createEvent(
   )
   if (!venue) throw badRequest("Choose a venue.", "invalid_request")
 
-  const [y, m, d] = input.date.split("-").map(Number)
-  const [sh, sm] = input.start.split(":").map(Number)
-  const [eh, em] = input.end.split(":").map(Number)
-  const starts = zonedInstant(venue.timezone, { year: y, month: m, day: d, hour: sh, minute: sm })
-  let ends = zonedInstant(venue.timezone, { year: y, month: m, day: d, hour: eh, minute: em })
-  if (ends <= starts)
-    ends = zonedInstant(venue.timezone, { year: y, month: m, day: d + 1, hour: eh, minute: em })
+  const { starts, ends } = eventWindow(venue.timezone, input)
   if (input.publish && ends <= now)
     throw badRequest("That event is already over.", "invalid_request")
 

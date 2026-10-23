@@ -72,6 +72,8 @@ export const httpAdminRepo: AdminRepo = {
   cancelEvent: async (id) => {
     await api(`admin/events/${id}/cancel`, Ack, post())
   },
+  availableForWindow: (query) =>
+    api(`admin/events/available?${new URLSearchParams(query)}`, AvailableStaffDto, call),
   availableStaff: (id) => api(`admin/events/${id}/available`, AvailableStaffDto, call),
   assign: (id, staffIds) =>
     api(`admin/events/${id}/assign`, AssignResultDto, post(staffIds ? { staffIds } : undefined)),

@@ -49,7 +49,7 @@ function EventWizard({ defaultRadiusM }: { defaultRadiusM: number }) {
   const [venueId, setVenueId] = useState("")
   const [venueDraft, setVenueDraft] = useState(() => draftFor(undefined, defaultRadiusM))
   const [when, setWhen] = useState<When>({ date: "", start: "10:00", end: "15:00", name: "" })
-  const [crew, setCrew] = useState<Crew>({ need: 8, instructions: "", fill: "open" })
+  const [crew, setCrew] = useState<Crew>({ need: 8, instructions: "", fill: "open", assignIds: [] })
 
   const list = venues.data ?? []
   // With no venues yet, adding one is the only way forward.
@@ -57,6 +57,10 @@ function EventWizard({ defaultRadiusM }: { defaultRadiusM: number }) {
   const venue = venueId || list[0]?.id || ""
   const stages = stagesFor(mode)
   const venueRequest = requestFrom(venueDraft)
+  const window =
+    venue && when.date && when.start && when.end
+      ? { venueId: venue, date: when.date, start: when.start, end: when.end }
+      : null
   const whenReady = Boolean(when.date && when.start && when.end && when.name.trim())
 
   const canContinue =
@@ -100,17 +104,12 @@ function EventWizard({ defaultRadiusM }: { defaultRadiusM: number }) {
         headcount: crew.need,
         instructions: crew.instructions.trim() || undefined,
         fill: crew.fill,
+        assignStaffIds: crew.fill === "assign" ? crew.assignIds : undefined,
         publish: publishNow,
       },
       {
         onSuccess: ({ id }) =>
-          router.push(
-            publishNow && crew.fill === "assign"
-              ? `/admin/events/detail?id=${id}&fill=1`
-              : publishNow
-                ? `/admin/events/detail?id=${id}`
-                : "/admin/events",
-          ),
+          router.push(publishNow ? `/admin/events/detail?id=${id}` : "/admin/events"),
       },
     )
 
@@ -150,7 +149,7 @@ function EventWizard({ defaultRadiusM }: { defaultRadiusM: number }) {
         )}
         {stage === "details" && <VenueDetailsStep draft={venueDraft} onChange={setVenueDraft} />}
         {stage === "when" && <EventWhenStep value={when} onChange={setWhen} />}
-        {stage === "crew" && <EventCrewStep value={crew} onChange={setCrew} />}
+        {stage === "crew" && <EventCrewStep value={crew} onChange={setCrew} window={window} />}
 
         {error && <ErrorNotice message={error.message} />}
         <div className="flex gap-2.5">

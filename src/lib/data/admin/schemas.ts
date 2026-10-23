@@ -215,6 +215,15 @@ export const NewEventRequest = z.object({
 })
 export type NewEventRequest = z.infer<typeof NewEventRequest>
 
+/** Who is free for a venue and time, before the event exists. */
+export const AvailabilityQuery = z.object({
+  venueId: str,
+  date: z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}$/)),
+  start: z.string().check(z.regex(/^\d{2}:\d{2}$/)),
+  end: z.string().check(z.regex(/^\d{2}:\d{2}$/)),
+})
+export type AvailabilityQuery = z.infer<typeof AvailabilityQuery>
+
 export const AvailableStaffDto = z.array(z.object({ id: str, initials: str, name: str, note: str }))
 export type AvailableStaff = z.infer<typeof AvailableStaffDto>
 

@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   adminRepo,
   type AudienceKey,
+  type AvailabilityQuery,
   type EventPatch,
   type EventTab,
   type NewEventRequest,
@@ -147,6 +148,14 @@ export const useAvailable = (eventId: string, enabled: boolean) =>
     queryKey: keys.available(eventId),
     queryFn: () => adminRepo.availableStaff(eventId),
     enabled,
+  })
+
+/** Free staff for a venue and time that has no event yet; waits until `query` is complete. */
+export const useAvailableFor = (query: AvailabilityQuery | null) =>
+  useQuery({
+    queryKey: ["admin", "available-for", query],
+    queryFn: () => adminRepo.availableForWindow(query as AvailabilityQuery),
+    enabled: query !== null,
   })
 
 export function useAssign() {

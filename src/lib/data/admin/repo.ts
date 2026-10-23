@@ -24,6 +24,7 @@ import type {
 import type {
   AdminSession,
   AssignResult,
+  AvailabilityQuery,
   AvailableStaff,
   EventDetail,
   EventList,
@@ -67,6 +68,8 @@ export interface AdminRepo {
   updateEvent(id: string, patch: EventPatch): Promise<EventDetail>
   cancelEvent(id: string): Promise<void>
   availableStaff(eventId: string): Promise<AvailableStaff>
+  /** Who is free for a venue and time, before the event exists. */
+  availableForWindow(query: AvailabilityQuery): Promise<AvailableStaff>
   /** Without `staffIds`, the server picks the best-suited free person. */
   assign(eventId: string, staffIds?: string[]): Promise<AssignResult>
   addSlot(eventId: string): Promise<AddSlotResult>

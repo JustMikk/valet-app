@@ -230,6 +230,15 @@ export const mockAdminRepo: AdminRepo = {
     return eventDetail()
   },
   cancelEvent: async () => {},
+  availableForWindow: () =>
+    wait(
+      AVAILABLE_STAFF.map((p) => ({
+        id: p.initials,
+        initials: p.initials,
+        name: p.name,
+        note: p.note,
+      })),
+    ),
   availableStaff: () =>
     wait(
       AVAILABLE_STAFF.map((p) => ({

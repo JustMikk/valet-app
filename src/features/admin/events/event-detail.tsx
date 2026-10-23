@@ -21,13 +21,12 @@ const SIDE_BUTTON = "h-13.5 gap-2 text-16"
 
 /** One event: coverage stats, crew roster with in-place actions, instructions and shortcuts. */
 export function EventDetail() {
-  const params = useSearchParams()
-  const event = useEvent(params.get("id") ?? undefined)
-  const fill = params.get("fill") === "1"
+  const id = useSearchParams().get("id") ?? undefined
+  const event = useEvent(id)
   return (
     <AdminPage>
       <QueryState query={event} rows={4}>
-        {(data) => <EventBody event={data} fillOnOpen={fill} />}
+        {(data) => <EventBody event={data} />}
       </QueryState>
     </AdminPage>
   )
@@ -47,9 +46,9 @@ function RosterAction({ person }: { person: RosterRow }) {
   )
 }
 
-function EventBody({ event, fillOnOpen }: { event: EventData; fillOnOpen: boolean }) {
+function EventBody({ event }: { event: EventData }) {
   const router = useRouter()
-  const [fillOpen, setFillOpen] = useState(fillOnOpen && event.openSlots.length > 0)
+  const [fillOpen, setFillOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const cancel = useCancelEvent()
