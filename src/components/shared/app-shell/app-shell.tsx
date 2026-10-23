@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Icon } from "../icon"
 import { ShellMenuProvider } from "./menu-context"
 import { PhoneChrome } from "./phone-chrome"
+import { RouteScreen } from "./route-screen"
 import { Sidebar } from "./sidebar"
 import type { ShellApp, ShellNavItem, ShellUser } from "./types"
 
@@ -87,26 +88,29 @@ export function AppShell({
           {layered ? (
             <div className="absolute inset-0 z-50">{children}</div>
           ) : (
-            <div className="no-scrollbar h-full overflow-y-auto">
-              {!isRoot && (
-                <div
-                  className={cn(
-                    "mx-auto box-border hidden w-full px-8 pt-6 tablet:block desktop:px-12 desktop:pt-7",
-                    contentMax,
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={onBack}
-                    className="inline-flex h-11 items-center gap-1 rounded-pill border-0 glass pr-4 pl-2.5 text-15 font-semibold text-fg"
+            <RouteScreen
+              back={
+                !isRoot && (
+                  <div
+                    className={cn(
+                      "mx-auto box-border hidden w-full px-8 pt-6 tablet:block desktop:px-12 desktop:pt-7",
+                      contentMax,
+                    )}
                   >
-                    <Icon name="arrow_back" size={22} />
-                    Back
-                  </button>
-                </div>
-              )}
+                    <button
+                      type="button"
+                      onClick={onBack}
+                      className="inline-flex h-11 items-center gap-1 rounded-pill border-0 glass pr-4 pl-2.5 text-15 font-semibold text-fg"
+                    >
+                      <Icon name="arrow_back" size={22} />
+                      Back
+                    </button>
+                  </div>
+                )
+              }
+            >
               {children}
-            </div>
+            </RouteScreen>
           )}
 
           {mode === "app" && (
