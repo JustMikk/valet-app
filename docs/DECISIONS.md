@@ -303,6 +303,6 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - `lib/places` is a `PlacesProvider` interface with Photon (komoot, OpenStreetMap data, free, no key) behind it: search as you type (300 ms pause, three characters, cancelled when superseded), results give name, address and coordinates, validated with Zod at the boundary.
 - `VenueMap` (Leaflet, OpenStreetMap tiles, loaded in the browser only) shows the pin and the clock-in circle on Add / Edit venue and the venue page; the pin is draggable on the form. The circle and pin take their colours from design tokens through CSS classes.
 - Add / Edit venue is two steps: (1) search, map, drag the pin, radius; (2) name, address, contact, dress code, billing. Back keeps what was typed. "Use my current location" and typed coordinates remain as fallbacks when search is unavailable.
-- New event's venue list ends with "+ Add a new venue…": it saves the form, runs the steps and returns with the new venue selected and the form as it was.
+- New event is its own set of steps (Venue, Venue details when new, When, Crew) and adds a venue in place with the same search, map and radius: nothing redirects to the Venues page, and the new venue is created at the end of its details step and selected. The Venues page keeps its own Add venue flow.
 
 **Consequences.** Both services are public and rate-limited by fair use (D40). `leaflet` is a new dependency.

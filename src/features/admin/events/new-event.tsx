@@ -1,193 +1,177 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 
-import { Icon, TextField } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { useHydrated } from "@/hooks/use-hydrated"
-import type { FillMode } from "@/lib/data"
-import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage, FORM } from "../common/admin-page"
-import { FIELD_CONTROL, FormField } from "../common/form-field"
-import { ErrorNotice, ScreenSkeleton } from "../data/query-state"
-import { useCreateEvent, useVenues } from "../data/queries"
-import { clearDraft, readDraft, saveDraft } from "./event-draft"
-import { FillModePicker } from "./fill-mode-picker"
-import { HeadcountStepper } from "./headcount-stepper"
+import { StepProgress } from "../common/step-progress"
+import { ErrorNotice } from "../data/query-state"
+import { useCreateEvent, useCreateVenue, useSettings, useVenues } from "../data/queries"
+import { VenueDetailsStep } from "../venues/venue-details-step"
+import { detailsReady, draftFor, hasPlace, requestFrom } from "../venues/venue-draft"
+import { EventCrewStep, type Crew } from "./event-crew-step"
+import { EventVenueStep, type VenueMode } from "./event-venue-step"
+import { EventWhenStep, type When } from "./event-when-step"
 
-const NEW_VENUE = "__new__"
+type Stage = "venue" | "details" | "when" | "crew"
 
-/** New event: reads back a draft left while adding a venue, once the browser has hydrated. */
-export function NewEvent() {
-  const hydrated = useHydrated()
-  const fromUrl = useSearchParams().get("venue") ?? ""
-  if (!hydrated) {
-    return (
-      <AdminPage>
-        <ScreenSkeleton rows={3} />
-      </AdminPage>
-    )
-  }
-  return <EventForm newVenueId={fromUrl} />
+const LABELS: Record<Stage, string> = {
+  venue: "Venue",
+  details: "Venue details",
+  when: "When",
+  crew: "Crew",
 }
 
-/** The form: venue, date, time, name, headcount, instructions and how to fill. */
-function EventForm({ newVenueId }: { newVenueId: string }) {
-  const router = useRouter()
-  // Read once, on mount (the form only mounts after hydration, so storage is safe to read here).
-  const [initial] = useState(readDraft)
-  useEffect(() => clearDraft(), [])
-  const venues = useVenues()
-  const create = useCreateEvent()
-  const [venueId, setVenueId] = useState(newVenueId || initial.venueId)
-  const [date, setDate] = useState(initial.date)
-  const [start, setStart] = useState(initial.start)
-  const [end, setEnd] = useState(initial.end)
-  const [name, setName] = useState(initial.name)
-  const [need, setNeed] = useState(initial.need)
-  const [instructions, setInstructions] = useState(initial.instructions)
-  const [fill, setFill] = useState<FillMode>(initial.fill)
+/** A new venue adds one step (its details); an existing one skips it. */
+const stagesFor = (mode: VenueMode): Stage[] =>
+  mode === "new" ? ["venue", "details", "when", "crew"] : ["venue", "when", "crew"]
 
-  /** Leaves for the Add venue steps, keeping what was typed; the new venue comes back selected. */
-  const addVenue = () => {
-    saveDraft({ venueId: "", date, start, end, name, need, instructions, fill })
-    router.push("/admin/venues/new?return=/admin/events/new")
+/**
+ * New event in steps: the venue (pick one, or find and add a new one on the map without leaving),
+ * its details when new, when it happens, then the crew. Back keeps everything typed.
+ */
+export function NewEvent() {
+  const defaultRadiusM = useSettings().data?.rules.radiusM ?? 150
+  // The default radius arrives with settings: remount once so a new venue starts from it.
+  return <EventWizard key={defaultRadiusM} defaultRadiusM={defaultRadiusM} />
+}
+
+function EventWizard({ defaultRadiusM }: { defaultRadiusM: number }) {
+  const router = useRouter()
+  const venues = useVenues()
+  const createVenue = useCreateVenue()
+  const createEvent = useCreateEvent()
+
+  const [stage, setStage] = useState<Stage>("venue")
+  const [chosenMode, setMode] = useState<VenueMode>("existing")
+  const [venueId, setVenueId] = useState("")
+  const [venueDraft, setVenueDraft] = useState(() => draftFor(undefined, defaultRadiusM))
+  const [when, setWhen] = useState<When>({ date: "", start: "10:00", end: "15:00", name: "" })
+  const [crew, setCrew] = useState<Crew>({ need: 8, instructions: "", fill: "open" })
+
+  const list = venues.data ?? []
+  // With no venues yet, adding one is the only way forward.
+  const mode: VenueMode = venues.data && list.length === 0 ? "new" : chosenMode
+  const venue = venueId || list[0]?.id || ""
+  const stages = stagesFor(mode)
+  const venueRequest = requestFrom(venueDraft)
+  const whenReady = Boolean(when.date && when.start && when.end && when.name.trim())
+
+  const canContinue =
+    stage === "venue"
+      ? mode === "new"
+        ? hasPlace(venueDraft)
+        : Boolean(venue)
+      : stage === "details"
+        ? detailsReady(venueDraft) && !createVenue.isPending
+        : stage === "when"
+          ? whenReady
+          : whenReady && Boolean(venue) && !createEvent.isPending
+
+  const goBack = () => {
+    if (stage === "details") setStage("venue")
+    else if (stage === "when") setStage(mode === "new" ? "details" : "venue")
+    else if (stage === "crew") setStage("when")
   }
 
-  const venue = venueId || venues.data?.[0]?.id || ""
-  const ready = Boolean(venue && date && start && end && name.trim())
+  const addVenue = () => {
+    if (!venueRequest) return
+    createVenue.mutate(venueRequest, {
+      onSuccess: (created) => {
+        // From here on the new venue is a venue like any other: selected, on the map, in the list.
+        setVenueId(created.id)
+        setMode("existing")
+        setVenueDraft(draftFor(undefined, defaultRadiusM))
+        setStage("when")
+      },
+    })
+  }
 
-  const submit = (publish: boolean) =>
-    create.mutate(
+  const publish = (publishNow: boolean) =>
+    createEvent.mutate(
       {
         venueId: venue,
-        date,
-        start,
-        end,
-        name: name.trim(),
-        headcount: need,
-        instructions: instructions.trim() || undefined,
-        fill,
-        publish,
+        date: when.date,
+        start: when.start,
+        end: when.end,
+        name: when.name.trim(),
+        headcount: crew.need,
+        instructions: crew.instructions.trim() || undefined,
+        fill: crew.fill,
+        publish: publishNow,
       },
       {
         onSuccess: ({ id }) =>
           router.push(
-            publish && fill === "assign"
+            publishNow && crew.fill === "assign"
               ? `/admin/events/detail?id=${id}&fill=1`
-              : publish
+              : publishNow
                 ? `/admin/events/detail?id=${id}`
                 : "/admin/events",
           ),
       },
     )
 
+  const next = () => {
+    if (!canContinue) return
+    if (stage === "venue") setStage(mode === "new" ? "details" : "when")
+    else if (stage === "details") addVenue()
+    else if (stage === "when") setStage("crew")
+    else publish(true)
+  }
+
+  const error =
+    stage === "details" ? createVenue.error : stage === "crew" ? createEvent.error : null
+
   return (
     <AdminPage>
       <AdminHead title="New event" sub="Spots you don’t assign are posted as open shifts" />
       <form
-        className={FORM}
+        className={`${FORM} gap-6`}
         onSubmit={(e) => {
           e.preventDefault()
-          if (ready) submit(true)
+          next()
         }}
       >
-        <FormField label="Venue" icon="location_on" htmlFor="f-venue">
-          <select
-            id="f-venue"
-            value={venue}
-            onChange={(e) =>
-              e.target.value === NEW_VENUE ? addVenue() : setVenueId(e.target.value)
-            }
-            className={FIELD_CONTROL}
-          >
-            {(venues.data ?? []).map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.name}
-              </option>
-            ))}
-            <option value={NEW_VENUE}>+ Add a new venue…</option>
-          </select>
-          <Icon name="expand_more" size={22} className="text-fg-2" />
-        </FormField>
-        <FormField label="Date" icon="calendar_month" htmlFor="f-date">
-          <input
-            id="f-date"
-            type="date"
-            required
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className={FIELD_CONTROL}
+        <StepProgress steps={stages.map((s) => LABELS[s])} current={stages.indexOf(stage)} />
+
+        {stage === "venue" && (
+          <EventVenueStep
+            mode={mode}
+            onMode={setMode}
+            venues={list}
+            venueId={venue}
+            onVenueId={setVenueId}
+            draft={venueDraft}
+            onDraft={setVenueDraft}
           />
-        </FormField>
+        )}
+        {stage === "details" && <VenueDetailsStep draft={venueDraft} onChange={setVenueDraft} />}
+        {stage === "when" && <EventWhenStep value={when} onChange={setWhen} />}
+        {stage === "crew" && <EventCrewStep value={crew} onChange={setCrew} />}
+
+        {error && <ErrorNotice message={error.message} />}
         <div className="flex gap-2.5">
-          <FormField label="Starts" icon="schedule" htmlFor="f-start">
-            <input
-              id="f-start"
-              type="time"
-              required
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              className={FIELD_CONTROL}
-            />
-          </FormField>
-          <FormField label="Ends" icon="schedule" htmlFor="f-end">
-            <input
-              id="f-end"
-              type="time"
-              required
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              className={FIELD_CONTROL}
-            />
-          </FormField>
-        </div>
-        <FormField label="Event name" icon="edit" htmlFor="f-name">
-          <input
-            id="f-name"
-            required
-            maxLength={80}
-            value={name}
-            placeholder="Sunday brunch"
-            onChange={(e) => setName(e.target.value)}
-            className={cn(FIELD_CONTROL, "placeholder:text-fg-3")}
-          />
-        </FormField>
-
-        <HeadcountStepper value={need} onChange={setNeed} />
-
-        <TextField
-          label="Instructions"
-          multiline
-          rows={3}
-          maxLength={1000}
-          value={instructions}
-          onChange={(e) => setInstructions(e.target.value)}
-          placeholder="Dress code, who to report to, where staff park"
-        />
-
-        <FillModePicker value={fill} onChange={setFill} />
-
-        {create.error && <ErrorNotice message={create.error.message} />}
-        <div className="flex gap-2.5">
-          <Button
-            type="button"
-            variant="secondary"
-            className="flex-1 text-17"
-            disabled={!ready || create.isPending}
-            onClick={() => submit(false)}
-          >
-            Save draft
-          </Button>
-          <Button
-            type="submit"
-            variant="accent"
-            className="flex-2 text-17"
-            disabled={!ready || create.isPending}
-          >
-            Publish event
+          {stage !== "venue" && (
+            <Button type="button" variant="secondary" className="flex-1 text-17" onClick={goBack}>
+              Back
+            </Button>
+          )}
+          {stage === "crew" && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1 text-17"
+              disabled={!canContinue}
+              onClick={() => publish(false)}
+            >
+              Save draft
+            </Button>
+          )}
+          <Button type="submit" variant="accent" className="flex-2 text-17" disabled={!canContinue}>
+            {stage === "crew" ? "Publish event" : stage === "details" ? "Add venue" : "Continue"}
           </Button>
         </div>
       </form>
