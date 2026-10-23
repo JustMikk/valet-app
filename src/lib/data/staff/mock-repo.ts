@@ -42,6 +42,7 @@ const profile: StaffProfile = {
   role: STAFF_USER.role,
   email: STAFF_USER.email,
   company: STAFF_USER.company,
+  accent: "#C9A24A",
   phone: STAFF_USER.phone,
   preferences: { open: true, remind: true, msg: true },
   permissions: { push: true, location: true, camera: true, installed: true },

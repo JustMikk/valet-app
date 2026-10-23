@@ -10,6 +10,7 @@ type ProfileRow = {
   phone: string
   role_label: string
   company: string
+  accent: string
   push_enabled: boolean
   location_enabled: boolean
   camera_enabled: boolean
@@ -35,6 +36,7 @@ function toProfile(row: ProfileRow): StaffProfile {
     role: row.role_label,
     email: row.email,
     company: row.company,
+    accent: row.accent,
     phone: row.phone,
     preferences: { open: row.notify_open, remind: row.notify_remind, msg: row.notify_msg },
     permissions: {
@@ -48,7 +50,7 @@ function toProfile(row: ProfileRow): StaffProfile {
 
 export async function getProfile(staffId: string): Promise<StaffProfile> {
   const [row] = await rows<ProfileRow>(
-    sql()`select s.id, s.name, s.email, s.phone, s.role_label, t.name as company,
+    sql()`select s.id, s.name, s.email, s.phone, s.role_label, t.name as company, t.accent,
             s.push_enabled, s.location_enabled, s.camera_enabled, s.installed,
             s.notify_open, s.notify_remind, s.notify_msg
           from staff s join tenants t on t.id = s.tenant_id

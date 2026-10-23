@@ -1,9 +1,8 @@
 import { Icon, StatusBadge } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import type { LiveSlot, SlotState } from "@/mocks/admin-live"
-
-import { SEGMENT_FILL, SLOT_STATUS, type ActionId, type AttentionItem } from "./live-model"
+import type { LiveSlot, SlotState } from "@/lib/data"
+import { SEGMENT_FILL, slotStatus, type ActionId, type AttentionItem } from "@/lib/live/model"
 
 export const HEALTH_TEXT = {
   ok: "text-ok",
@@ -97,7 +96,7 @@ export function SlotRow({ slot, onAssign, compact = false }: SlotRowProps) {
           Assign
         </Button>
       ) : (
-        <StatusBadge status={SLOT_STATUS[slot.state]} size="sm" />
+        <StatusBadge status={slotStatus(slot)} size="sm" />
       )}
     </li>
   )

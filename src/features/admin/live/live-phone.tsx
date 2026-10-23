@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 import { EventSheet } from "./event-sheet"
 import { attentionActions, LiveDot, SlotBar } from "./live-parts"
 import { People, Timeline } from "./live-phone-tabs"
-import type { EventSummary } from "./live-model"
+import type { EventSummary } from "@/lib/live/model"
 import type { LiveBoard } from "./use-live-board"
 
 type Tab = "events" | "timeline" | "people"

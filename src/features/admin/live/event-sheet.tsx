@@ -3,7 +3,7 @@
 import { Icon, ResponsiveSheet } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 
-import { sheetSlots, type EventSummary } from "./live-model"
+import { sheetSlots, type EventSummary } from "@/lib/live/model"
 import { SlotBar, SlotRow } from "./live-parts"
 
 type EventSheetProps = {
@@ -60,8 +60,8 @@ export function EventSheet({
             <span className="font-semibold text-fg">{event.filledOf}</span>
           </div>
           <ul className="m-0 no-scrollbar flex max-h-[45dvh] list-none flex-col overflow-y-auto p-0">
-            {sheetSlots(event).map(({ slot, index }) => (
-              <SlotRow key={index} slot={slot} onAssign={() => onAssign(event.id)} />
+            {sheetSlots(event).map(({ slot }) => (
+              <SlotRow key={slot.id} slot={slot} onAssign={() => onAssign(event.id)} />
             ))}
           </ul>
           <div className="flex gap-2 border-t border-line pt-3">

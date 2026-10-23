@@ -225,16 +225,18 @@ const reachLine = (people: Recipient[]): string => {
 }
 
 /** The three audiences with who each would reach (before anything is sent). */
+/** The crew an announcement defaults to: the soonest published event that has not ended. */
+async function defaultEventId(ctx: AdminCtx): Promise<string | undefined> {
+  const [soonest] = await rows<{ id: string }>(
+    sql()`select e.id from events e where e.tenant_id = ${ctx.tenantId} and e.status = 'published'
+            and e.ends_at > now() order by e.starts_at limit 1`,
+  )
+  return soonest?.id
+}
+
 export async function audiences(adminId: string, eventId: string | undefined): Promise<Audience[]> {
   const ctx = await adminCtx(adminId)
-  let event = eventId
-  if (!event) {
-    const [soonest] = await rows<{ id: string }>(
-      sql()`select e.id from events e where e.tenant_id = ${ctx.tenantId} and e.status = 'published'
-              and e.ends_at > now() order by e.starts_at limit 1`,
-    )
-    event = soonest?.id
-  }
+  const event = eventId ?? (await defaultEventId(ctx))
   const [crew, tonight, all] = await Promise.all([
     event ? recipientsFor(ctx, "event", event) : Promise.resolve([]),
     recipientsFor(ctx, "tonight"),
@@ -261,10 +263,12 @@ export async function announce(
   now: Date,
 ): Promise<{ delivered: number }> {
   const ctx = await adminCtx(adminId)
-  const people = await recipientsFor(ctx, input.audience, input.eventId)
+  const eventId =
+    input.eventId ?? (input.audience === "event" ? await defaultEventId(ctx) : undefined)
+  const people = await recipientsFor(ctx, input.audience, eventId)
   if (people.length === 0) throw conflict("no_recipients", "No one would receive that.")
   const label =
-    (await audiences(adminId, input.eventId)).find((a) => a.key === input.audience)?.label ?? ""
+    (await audiences(adminId, eventId)).find((a) => a.key === input.audience)?.label ?? ""
   const heading =
     input.audience === "all"
       ? "Announcement to all staff"
@@ -276,7 +280,7 @@ export async function announce(
     sql()`insert into broadcasts (tenant_id, admin_id, audience, audience_label, event_id, body, recipients, created_at)
           values (${ctx.tenantId}, ${ctx.adminId}, ${input.audience},
                   ${input.audience === "all" ? "All staff" : input.audience === "tonight" ? "Everyone working tonight" : label},
-                  ${input.eventId ?? null}, ${input.text}, ${people.length}, ${now.toISOString()})
+                  ${eventId ?? null}, ${input.text}, ${people.length}, ${now.toISOString()})
           returning id`,
   )
   const payload = JSON.stringify(people.map((p) => p.id))

@@ -1,3 +1,4 @@
+export { AdminSessionProvider } from "./session/admin-session"
 export { AdminShell } from "./shell/admin-shell"
 export { LiveBoard } from "./live/live-board"
 export { EventsList } from "./events/events-list"

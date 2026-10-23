@@ -1,5 +1,6 @@
 export { StaffHome } from "./home/staff-home"
 export { StaffSessionProvider } from "./session/staff-session"
+export { StaffAccent } from "./shell/staff-accent"
 export { StaffShell } from "./shell/staff-shell"
 export { OpenShifts } from "./shifts/open-shifts"
 export { ShiftDetail } from "./shifts/shift-detail"

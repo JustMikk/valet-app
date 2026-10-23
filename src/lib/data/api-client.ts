@@ -1,11 +1,13 @@
 // HTTP client for the demo API. Every response is validated against its shared schema; a missing
 // session is established silently with the demo sign-in (the real sign-in method is an owner
-// decision, OPEN_QUESTIONS P1/H3), and one expired-token retry is attempted.
+// decision, OPEN_QUESTIONS P1/H3), and one expired-token retry is attempted. The staff and admin
+// apps keep separate sessions, so one browser can use both.
 import { z } from "zod/mini"
 
 import { SessionDto, type Session } from "./staff/schemas"
 
-const TOKEN_KEY = "vw-staff-token"
+export type Role = "staff" | "admin"
+const TOKEN_KEYS: Record<Role, string> = { staff: "vw-staff-token", admin: "vw-admin-token" }
 
 export class ApiError extends Error {
   constructor(
@@ -17,25 +19,25 @@ export class ApiError extends Error {
   }
 }
 
-export function readToken(): string | null {
+export function readToken(role: Role = "staff"): string | null {
   try {
-    return localStorage.getItem(TOKEN_KEY)
+    return localStorage.getItem(TOKEN_KEYS[role])
   } catch {
     return null
   }
 }
 
-export function writeToken(session: Session | null): void {
+export function writeToken(session: Session | null, role: Role = "staff"): void {
   try {
-    if (session) localStorage.setItem(TOKEN_KEY, session.token)
-    else localStorage.removeItem(TOKEN_KEY)
+    if (session) localStorage.setItem(TOKEN_KEYS[role], session.token)
+    else localStorage.removeItem(TOKEN_KEYS[role])
   } catch {
     // Storage unavailable: the session lives for this page load only.
   }
 }
 
-let memoryToken: string | null = null
-let pendingSession: Promise<string> | null = null
+const memoryTokens: Record<Role, string | null> = { staff: null, admin: null }
+const pendingSessions: Record<Role, Promise<string> | null> = { staff: null, admin: null }
 
 const ErrorBody = z.object({ error: z.object({ code: z.string(), message: z.string() }) })
 
@@ -55,40 +57,50 @@ async function fail(res: Response): Promise<never> {
 }
 
 /** Stores a session from sign-in (or the demo shortcut) for later requests. */
-export function setSession(session: Session): void {
-  memoryToken = session.token
-  writeToken(session)
+export function setSession(session: Session, role: Role = "staff"): void {
+  memoryTokens[role] = session.token
+  writeToken(session, role)
 }
 
-export function clearSession(): void {
-  memoryToken = null
-  writeToken(null)
+export function clearSession(role: Role = "staff"): void {
+  memoryTokens[role] = null
+  writeToken(null, role)
 }
 
-async function demoSession(): Promise<string> {
-  pendingSession ??= (async () => {
-    const res = await send("auth/demo", { method: "POST" })
+async function demoSession(role: Role): Promise<string> {
+  pendingSessions[role] ??= (async () => {
+    const res = await send("auth/demo", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ role }),
+    })
     if (!res.ok) await fail(res)
     const session = SessionDto.parse(await res.json())
-    setSession(session)
+    setSession(session, role)
     return session.token
   })().finally(() => {
-    pendingSession = null
+    pendingSessions[role] = null
   })
-  return pendingSession
+  return pendingSessions[role]
 }
 
-async function currentToken(): Promise<string> {
-  memoryToken ??= readToken()
-  return memoryToken ?? demoSession()
+async function currentToken(role: Role): Promise<string> {
+  memoryTokens[role] ??= readToken(role)
+  return memoryTokens[role] ?? demoSession(role)
 }
 
-type Options = { method?: "GET" | "POST" | "PATCH"; body?: unknown; auth?: boolean }
+type Options = {
+  method?: "GET" | "POST" | "PATCH"
+  body?: unknown
+  auth?: boolean
+  /** Which app's session to use (default staff). */
+  as?: Role
+}
 
 export async function api<S extends z.ZodMiniType>(
   path: string,
   schema: S,
-  { method = "GET", body, auth = true }: Options = {},
+  { method = "GET", body, auth = true, as = "staff" }: Options = {},
 ): Promise<z.output<S>> {
   const request = async (token: string | null) =>
     send(path, {
@@ -100,10 +112,10 @@ export async function api<S extends z.ZodMiniType>(
       body: body === undefined ? undefined : JSON.stringify(body),
     })
 
-  let res = await request(auth ? await currentToken() : null)
+  let res = await request(auth ? await currentToken(as) : null)
   if (res.status === 401 && auth) {
-    clearSession()
-    res = await request(await demoSession())
+    clearSession(as)
+    res = await request(await demoSession(as))
   }
   if (!res.ok) await fail(res)
   return schema.parse(await res.json())

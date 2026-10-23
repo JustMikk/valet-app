@@ -69,6 +69,8 @@ export type LiveEvent = z.infer<typeof LiveEventDto>
 export const LiveDto = z.object({
   events: z.array(LiveEventDto),
   timeline: z.object({ from: z.number(), span: z.number(), now: z.number(), ticks: z.array(int) }),
+  /** Short zone name of the venues' clock: "PT". */
+  zone: str,
   serverNow: str,
 })
 export type Live = z.infer<typeof LiveDto>

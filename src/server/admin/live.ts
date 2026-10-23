@@ -8,7 +8,14 @@ import type {
   RemoveResult,
 } from "@/lib/data/admin/ops-schemas"
 import { deriveBoard, spanLabel } from "@/lib/live/model"
-import { formatDate, formatRange, formatTime, wallTime, zonedInstant } from "@/lib/time/labels"
+import {
+  formatDate,
+  formatRange,
+  formatTime,
+  formatZoneShort,
+  wallTime,
+  zonedInstant,
+} from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
 import { conflict, notFound } from "../http/handler"
@@ -83,6 +90,7 @@ export function buildLive(slots: SlotRow[], now: Date): Live {
   return {
     events,
     timeline: { from, span, now: hoursFrom(base, now), ticks },
+    zone: formatZoneShort(now, tz),
     serverNow: now.toISOString(),
   }
 }

@@ -43,6 +43,8 @@ export const StaffProfileDto = z.object({
   email: str,
   company: str,
   phone: str,
+  /** The tenant's brand color: set by the admin, applied across the staff app. */
+  accent: str,
   preferences: z.object({ open: bool, remind: bool, msg: bool }),
   permissions: z.object({ push: bool, location: bool, camera: bool, installed: bool }),
 })

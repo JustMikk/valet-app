@@ -124,13 +124,6 @@ export const EVENT_DAYS: { label: string; items: EventCard[] }[] = [
   },
 ]
 
-export const EVENT_TABS: { value: EventTab; label: string; count?: number }[] = [
-  { value: "upcoming", label: "Upcoming" },
-  { value: "short", label: "Short-staffed", count: 4 },
-  { value: "draft", label: "Drafts", count: 1 },
-  { value: "past", label: "Past" },
-]
-
 export type RosterRow = {
   initials: string
   name: string
@@ -192,13 +185,6 @@ export const AVAILABLE_STAFF = [
   { initials: "KM", name: "Kai Morgan", note: "Free tonight · worked here 3×" },
   { initials: "NO", name: "Nia Okafor", note: "Free tonight" },
   { initials: "RC", name: "Rob Chen", note: "Free · last shift 3 weeks ago" },
-] as const
-
-export const NEW_EVENT_FIELDS = [
-  { label: "Venue", icon: "location_on", value: "Harbor Pavilion", chevron: true },
-  { label: "Date", icon: "calendar_month", value: "Sun Nov 8, 2026", chevron: true },
-  { label: "Time (venue, PT)", icon: "schedule", value: "10:00 AM – 3:00 PM", chevron: false },
-  { label: "Event name", icon: "edit", value: "Sunday brunch", chevron: false },
 ] as const
 
 export const FILL_MODES = [
@@ -300,13 +286,6 @@ export const STAFF_ROWS: StaffRow[] = [
 ]
 
 export type StaffTab = "all" | "active" | "invited" | "alerts"
-export const STAFF_TABS: { value: StaffTab; label: string; count?: number }[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "invited", label: "Invited", count: 1 },
-  { value: "alerts", label: "Alerts off", count: 1 },
-]
-
 export const PERSON = {
   initials: "JE",
   name: "Jordan Ellis",
@@ -588,23 +567,4 @@ export const AUDIENCES = [
 ] as const
 export type AudienceKey = (typeof AUDIENCES)[number]["key"]
 
-export const BROADCAST_DEFAULT =
-  "Front drive is closed until 6:30. Use the Mission St side entrance and stage keys at the side podium."
-
 // ── Settings ──────────────────────────────────────────────────────────────────────────────────
-export type ClockRuleKey = "selfie" | "early"
-export type ClockRule =
-  | { label: string; note: string; value: string; toggle?: undefined }
-  | { label: string; note: string; toggle: ClockRuleKey; value?: undefined }
-
-export const CLOCK_RULES: ClockRule[] = [
-  { label: "Clock-in window", note: "How early staff can clock in", value: "15 min before" },
-  { label: "Default geofence", note: "New venues start with this radius", value: "150 m" },
-  { label: "Location accuracy needed", note: "Readings looser than this retry", value: "±75 m" },
-  { label: "Selfie at clock-in", note: "Front camera photo with each clock-in", toggle: "selfie" },
-  {
-    label: "Flag early clock-outs",
-    note: "More than 30 min before scheduled end",
-    toggle: "early",
-  },
-]
