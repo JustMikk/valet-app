@@ -5,6 +5,7 @@ import type {
   InvoiceRow,
   NewInvoiceRequest,
   Payroll,
+  PayrollLine,
 } from "@/lib/data/admin/ops-schemas"
 import { amountCents, formatHoursDecimal } from "@/lib/money/format"
 import { ADMIN_STATUS } from "@/lib/status/admin"
@@ -13,7 +14,7 @@ import { formatDate } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
 import { badRequest, conflict, notFound } from "../http/handler"
-import { adminCtx } from "./common"
+import { adminCtx, messageStaff } from "./common"
 import { syncRecentInvoices } from "./event-invoice"
 import { nextInvoiceNumber, totalsOf, writeLines, type InvoiceLineInput } from "./invoice-store"
 
@@ -258,55 +259,99 @@ export async function createInvoice(
 type PayrollDbRow = {
   staff_id: string
   name: string
+  email: string
   shifts: string
   minutes: string
   amount_cents: string
 }
 
+type PayrollLineDbRow = {
+  staff_id: string
+  event: string
+  date: string
+  minutes: string
+  amount_cents: string
+}
+
+function payrollPeriod(now: Date): { start: string; end: string; label: string } {
+  const second = now.getDate() >= 16
+  const y = now.getFullYear()
+  const m = now.getMonth() + 1
+  const pad = (n: number) => String(n).padStart(2, "0")
+  const lastDay = new Date(y, m, 0).getDate()
+  const start = `${y}-${pad(m)}-${pad(second ? 16 : 1)}`
+  const end = `${y}-${pad(m)}-${pad(second ? lastDay : 15)}`
+  return { start, end, label: periodLabel(start, end) }
+}
+
 /**
- * Payroll summary: approved hours per staff member in the current billing half-month.
- * Uses the venue's bill rate as the rate per hour (admin-side only, never shown to staff).
+ * Payroll summary: approved hours per staff member in the current billing half-month,
+ * with per-event breakdown lines. Uses the venue's bill rate as the rate proxy.
  */
 export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
   const ctx = await adminCtx(adminId)
-  const d = now
-  const second = d.getDate() >= 16
-  const y = d.getFullYear()
-  const m = d.getMonth() + 1
-  const padN = (n: number) => String(n).padStart(2, "0")
-  const lastDay = new Date(y, m, 0).getDate()
-  const period = {
-    start: `${y}-${padN(m)}-${padN(second ? 16 : 1)}`,
-    end: `${y}-${padN(m)}-${padN(second ? lastDay : 15)}`,
-  }
+  const period = payrollPeriod(now)
 
-  const staffRows = await rows<PayrollDbRow>(
-    sql()`select s.id as staff_id, s.name,
-            count(distinct a.id)::text as shifts,
-            coalesce(sum(
-              round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
-            ), 0)::text as minutes,
-            coalesce(sum(
+  const [staffRows, lineRows] = await Promise.all([
+    rows<PayrollDbRow>(
+      sql()`select s.id as staff_id, s.name, s.email,
+              count(distinct a.id)::text as shifts,
+              coalesce(sum(
+                round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
+              ), 0)::text as minutes,
+              coalesce(sum(
+                round(round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
+                      * v.bill_rate_cents / 60)
+              ), 0)::text as amount_cents
+            from staff s
+            join assignments a on a.staff_id = s.id
+            join events e on e.id = a.event_id
+            join venues v on v.id = e.venue_id
+            where s.tenant_id = ${ctx.tenantId}
+              and a.hours_status = 'approved'
+              and a.clocked_in_at is not null and a.clocked_out_at is not null
+              and (e.starts_at at time zone ${ctx.tz})::date
+                  between ${period.start}::date and ${period.end}::date
+            group by s.id, s.name, s.email
+            order by s.name`,
+    ),
+    rows<PayrollLineDbRow>(
+      sql()`select a.staff_id,
+              coalesce(nullif(e.kind, ''), e.title) as event,
+              to_char(e.starts_at at time zone ${ctx.tz}, 'Mon DD') as date,
+              round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)::text as minutes,
               round(round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
-                    * v.bill_rate_cents / 60)
-            ), 0)::text as amount_cents
-          from staff s
-          join assignments a on a.staff_id = s.id
-          join events e on e.id = a.event_id
-          join venues v on v.id = e.venue_id
-          where s.tenant_id = ${ctx.tenantId}
-            and a.hours_status = 'approved'
-            and a.clocked_in_at is not null and a.clocked_out_at is not null
-            and (e.starts_at at time zone ${ctx.tz})::date
-                between ${period.start}::date and ${period.end}::date
-          group by s.id, s.name
-          order by s.name`,
-  )
+                    * v.bill_rate_cents / 60)::text as amount_cents
+            from assignments a
+            join events e on e.id = a.event_id
+            join venues v on v.id = e.venue_id
+            join staff s on s.id = a.staff_id
+            where s.tenant_id = ${ctx.tenantId}
+              and a.hours_status = 'approved'
+              and a.clocked_in_at is not null and a.clocked_out_at is not null
+              and (e.starts_at at time zone ${ctx.tz})::date
+                  between ${period.start}::date and ${period.end}::date
+            order by a.staff_id, e.starts_at`,
+    ),
+  ])
+
+  // Group lines by staff_id
+  const linesByStaff = new Map<string, PayrollLine[]>()
+  for (const lr of lineRows) {
+    const arr = linesByStaff.get(lr.staff_id) ?? []
+    arr.push({
+      event: lr.event,
+      date: lr.date,
+      hours: formatHoursDecimal(Number(lr.minutes)),
+      amountCents: Number(lr.amount_cents),
+    })
+    linesByStaff.set(lr.staff_id, arr)
+  }
 
   const totalCents = staffRows.reduce((sum, r) => sum + Number(r.amount_cents), 0)
 
   return {
-    period: periodLabel(period.start, period.end),
+    period: period.label,
     rows: staffRows.map((r) => ({
       staffId: r.staff_id,
       initials: r.name
@@ -316,10 +361,38 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
         .join("")
         .toUpperCase(),
       name: r.name,
+      email: r.email,
       shifts: Number(r.shifts),
       hours: formatHoursDecimal(Number(r.minutes)),
       amountCents: Number(r.amount_cents),
+      lines: linesByStaff.get(r.staff_id) ?? [],
     })),
     totalCents,
   }
+}
+
+/**
+ * Send each staff member their pay stub for the current period as an inbox message.
+ * Returns the number of messages sent.
+ */
+export async function sendPayroll(adminId: string, now: Date): Promise<{ sent: number }> {
+  const ctx = await adminCtx(adminId)
+  const data = await getPayroll(adminId, now)
+  if (data.rows.length === 0) return { sent: 0 }
+
+  await Promise.all(
+    data.rows.map((row) => {
+      const lines = row.lines
+        .map((l) => `  ${l.date}  ${l.event}  ${l.hours}h  $${(l.amountCents / 100).toFixed(2)}`)
+        .join("\n")
+      const body =
+        `Pay summary for ${data.period}\n\n` +
+        `Shifts: ${row.shifts}  |  Hours: ${row.hours}  |  Est. pay: $${(row.amountCents / 100).toFixed(2)}\n\n` +
+        (lines ? `Breakdown:\n${lines}\n\n` : "") +
+        `Rates are estimated from the venue rate — your actual pay may differ.`
+      return messageStaff(ctx, row.staffId, body)
+    }),
+  )
+
+  return { sent: data.rows.length }
 }

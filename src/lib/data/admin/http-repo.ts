@@ -20,6 +20,7 @@ import {
   PayrollDto,
   RemoveResultDto,
   SendInvoiceResultDto,
+  SendPayrollResultDto,
   ThreadDetailDto,
   ThreadMessageDto,
 } from "./ops-schemas"
@@ -105,6 +106,7 @@ export const httpAdminRepo: AdminRepo = {
   createInvoice: (request) => api("admin/invoices", IdDto, post(request)),
   sendInvoice: (id) => api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post()),
   payroll: () => api("admin/payroll", PayrollDto, call),
+  sendPayroll: () => api("admin/payroll/send", SendPayrollResultDto, post()),
 
   inbox: () => api("admin/inbox", InboxDto, call),
   thread: (id) => needsId(id, (v) => api(`admin/inbox/threads/${v}`, ThreadDetailDto, call)),

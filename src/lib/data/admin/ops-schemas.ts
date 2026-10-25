@@ -175,13 +175,23 @@ export type NewInvoiceRequest = z.infer<typeof NewInvoiceRequest>
 
 export const SendInvoiceResultDto = z.object({ billedTo: str })
 
+export const PayrollLineDto = z.object({
+  event: str,
+  date: str,
+  hours: str,
+  amountCents: int,
+})
+export type PayrollLine = z.infer<typeof PayrollLineDto>
+
 export const PayrollRowDto = z.object({
   staffId: str,
   initials: str,
   name: str,
+  email: str,
   shifts: int,
   hours: str,
   amountCents: int,
+  lines: z.array(PayrollLineDto),
 })
 export type PayrollRow = z.infer<typeof PayrollRowDto>
 
@@ -191,6 +201,8 @@ export const PayrollDto = z.object({
   totalCents: int,
 })
 export type Payroll = z.infer<typeof PayrollDto>
+
+export const SendPayrollResultDto = z.object({ sent: int })
 
 // ---- Inbox -----------------------------------------------------------------------------------
 

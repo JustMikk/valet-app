@@ -94,6 +94,8 @@ export interface AdminRepo {
   sendInvoice(id: string): Promise<{ billedTo: string }>
   /** Payroll summary: hours worked per staff member over the current billing period. */
   payroll(): Promise<Payroll>
+  /** Send each staff member their pay stub as an inbox message. */
+  sendPayroll(): Promise<{ sent: number }>
 
   inbox(): Promise<Inbox>
   thread(id: string | undefined): Promise<ThreadDetail>

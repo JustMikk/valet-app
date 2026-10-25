@@ -194,6 +194,14 @@ export const useInvoices = () =>
 export const usePayroll = () =>
   useQuery({ queryKey: ["admin", "payroll"], queryFn: () => adminRepo.payroll() })
 
+export function useSendPayroll() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => adminRepo.sendPayroll(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "payroll"] }),
+  })
+}
+
 export const useInvoice = (id: string | undefined) =>
   useQuery({ queryKey: keys.invoice(id), queryFn: () => adminRepo.invoice(id) })
 

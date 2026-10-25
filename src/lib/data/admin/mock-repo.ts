@@ -437,21 +437,33 @@ export const mockAdminRepo: AdminRepo = {
         staffId: "s1",
         initials: "AR",
         name: "Ana Ruiz",
+        email: "ana.ruiz@example.com",
         shifts: 3,
         hours: "14.5",
         amountCents: 82650,
+        lines: [
+          { event: "Grand Gala", date: "Oct 17", hours: "5.0", amountCents: 28500 },
+          { event: "Corporate Dinner", date: "Oct 21", hours: "4.5", amountCents: 25650 },
+          { event: "Wedding Reception", date: "Oct 28", hours: "5.0", amountCents: 28500 },
+        ],
       },
       {
         staffId: "s2",
         initials: "CB",
         name: "Cole Bennett",
+        email: "cole.bennett@example.com",
         shifts: 2,
         hours: "9.8",
         amountCents: 55860,
+        lines: [
+          { event: "Grand Gala", date: "Oct 17", hours: "5.0", amountCents: 28500 },
+          { event: "Corporate Dinner", date: "Oct 21", hours: "4.8", amountCents: 27360 },
+        ],
       },
     ],
     totalCents: 138510,
   }),
+  sendPayroll: async () => ({ sent: 2 }),
 
   inbox: () =>
     wait({
