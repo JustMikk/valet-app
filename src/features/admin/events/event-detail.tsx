@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useCancelEvent, useEvent } from "../data/queries"
+import { EditEventSheet } from "./edit-event-sheet"
 import { EditInstructionsSheet } from "./edit-instructions-sheet"
 import { FillSheet } from "./fill-sheet"
 
@@ -51,6 +52,7 @@ function EventBody({ event }: { event: EventData }) {
   const [fillOpen, setFillOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [editDetailsOpen, setEditDetailsOpen] = useState(false)
   const cancel = useCancelEvent()
   const openSpots = event.openSlots.length
 
@@ -164,6 +166,16 @@ function EventBody({ event }: { event: EventData }) {
             <Icon name="location_on" filled size={22} />
             Venue &amp; geofence
           </Button>
+          {event.editable && !event.cancelled && (
+            <Button
+              variant="secondary"
+              className={SIDE_BUTTON}
+              onClick={() => setEditDetailsOpen(true)}
+            >
+              <Icon name="edit_calendar" filled size={22} />
+              Edit date &amp; time
+            </Button>
+          )}
           {cancel.error && <ErrorNotice message={cancel.error.message} />}
           {!event.cancelled && (
             <Button
@@ -189,6 +201,14 @@ function EventBody({ event }: { event: EventData }) {
         open={editOpen}
         onOpenChange={setEditOpen}
       />
+      {event.editable && (
+        <EditEventSheet
+          eventId={event.id}
+          initial={event.editable}
+          open={editDetailsOpen}
+          onOpenChange={setEditDetailsOpen}
+        />
+      )}
       <ConfirmSheet
         open={cancelOpen}
         onOpenChange={setCancelOpen}

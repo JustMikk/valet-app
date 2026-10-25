@@ -43,6 +43,8 @@ type AppShellProps = {
   notifications?: ShellNotifications
   /** Switch account and sign out, from the avatar. Left out, the avatar keeps its old behaviour. */
   account?: ShellAccount
+  /** Optional banner rendered above the scrollable content area (e.g. PWA install prompt). */
+  banner?: ReactNode
   onBack: () => void
   children: ReactNode
 }
@@ -86,6 +88,7 @@ export function AppShell({
   contentMax = "max-w-280",
   notifications,
   account,
+  banner,
   onBack,
   children,
 }: AppShellProps) {
@@ -112,7 +115,8 @@ export function AppShell({
           />
         )}
 
-        <main className="relative h-full min-w-0 flex-1">
+        <main className="relative flex h-full min-w-0 flex-1 flex-col">
+          {banner && mode === "app" && banner}
           {layered ? (
             <div className="absolute inset-0 z-50">{children}</div>
           ) : (

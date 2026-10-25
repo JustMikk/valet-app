@@ -17,6 +17,7 @@ import {
   InvoiceRowDto,
   LiveDto,
   NudgeResultDto,
+  PayrollDto,
   RemoveResultDto,
   SendInvoiceResultDto,
   ThreadDetailDto,
@@ -103,6 +104,7 @@ export const httpAdminRepo: AdminRepo = {
   invoice: (id) => api(`admin/invoices/${id ?? "first"}`, InvoiceDetailDto, call),
   createInvoice: (request) => api("admin/invoices", IdDto, post(request)),
   sendInvoice: (id) => api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post()),
+  payroll: () => api("admin/payroll", PayrollDto, call),
 
   inbox: () => api("admin/inbox", InboxDto, call),
   thread: (id) => needsId(id, (v) => api(`admin/inbox/threads/${v}`, ThreadDetailDto, call)),

@@ -89,12 +89,19 @@ const eventCards: EventCard[] = EVENT_DAYS.flatMap((day) => day.items)
 
 function eventList(tab: EventTab): EventList {
   const keep = (e: EventCard) =>
-    tab === "short" ? e.state === "short" : tab === "draft" ? e.state === "draft" : tab !== "past"
+    tab === "live"
+      ? e.state === "live"
+      : tab === "short"
+        ? e.state === "short"
+        : tab === "draft"
+          ? e.state === "draft"
+          : tab !== "past"
   return {
     days: EVENT_DAYS.map((day) => ({ label: day.label, items: day.items.filter(keep) })).filter(
       (day) => day.items.length > 0,
     ),
     upcoming: eventCards.length,
+    live: eventCards.filter((e) => e.state === "live").length,
     short: eventCards.filter((e) => e.state === "short").length,
     drafts: eventCards.filter((e) => e.state === "draft").length,
   }
@@ -120,6 +127,12 @@ function eventDetail(): EventDetail {
     openSlots: [...EVENT_DETAIL.openSlots],
     confirmedCount: 6,
     cancelled: false,
+    editable: {
+      date: "2026-11-07",
+      start: "18:00",
+      end: "23:00",
+      name: "Wedding",
+    },
   }
 }
 
@@ -226,7 +239,7 @@ export const mockAdminRepo: AdminRepo = {
   event: async () => eventDetail(),
   createEvent: async () => ({ id: "new-event" }),
   updateEvent: async (_id, patch) => {
-    instructions = patch.instructions
+    if (patch.instructions !== undefined) instructions = patch.instructions
     return eventDetail()
   },
   cancelEvent: async () => {},
@@ -417,6 +430,28 @@ export const mockAdminRepo: AdminRepo = {
     sentInvoice = true
     return { billedTo: INVOICE_DETAIL.sentTo }
   },
+  payroll: async () => ({
+    period: "Oct 16 – 31",
+    rows: [
+      {
+        staffId: "s1",
+        initials: "AR",
+        name: "Ana Ruiz",
+        shifts: 3,
+        hours: "14.5",
+        amountCents: 82650,
+      },
+      {
+        staffId: "s2",
+        initials: "CB",
+        name: "Cole Bennett",
+        shifts: 2,
+        hours: "9.8",
+        amountCents: 55860,
+      },
+    ],
+    totalCents: 138510,
+  }),
 
   inbox: () =>
     wait({

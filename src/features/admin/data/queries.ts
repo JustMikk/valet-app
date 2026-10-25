@@ -191,6 +191,9 @@ export function useHoursActions() {
 export const useInvoices = () =>
   useQuery({ queryKey: keys.invoices, queryFn: () => adminRepo.invoices() })
 
+export const usePayroll = () =>
+  useQuery({ queryKey: ["admin", "payroll"], queryFn: () => adminRepo.payroll() })
+
 export const useInvoice = (id: string | undefined) =>
   useQuery({ queryKey: keys.invoice(id), queryFn: () => adminRepo.invoice(id) })
 

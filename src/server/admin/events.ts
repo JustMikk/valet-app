@@ -23,6 +23,7 @@ import {
   formatRange,
   formatTime,
   formatWeekday,
+  wallTime,
   zonedInstant,
 } from "@/lib/time/labels"
 
@@ -93,11 +94,13 @@ export async function listEvents(adminId: string, tab: EventTab, now: Date): Pro
   const chosen =
     tab === "past"
       ? past
-      : tab === "short"
-        ? upcoming.filter((e) => states.get(e.id) === "short")
-        : tab === "draft"
-          ? upcoming.filter((e) => e.status === "draft")
-          : upcoming
+      : tab === "live"
+        ? upcoming.filter((e) => states.get(e.id) === "live")
+        : tab === "short"
+          ? upcoming.filter((e) => states.get(e.id) === "short")
+          : tab === "draft"
+            ? upcoming.filter((e) => e.status === "draft")
+            : upcoming
 
   const days: EventList["days"] = []
   for (const row of chosen) {
@@ -120,6 +123,7 @@ export async function listEvents(adminId: string, tab: EventTab, now: Date): Pro
   return {
     days,
     upcoming: upcoming.length,
+    live: upcoming.filter((e) => states.get(e.id) === "live").length,
     short: upcoming.filter((e) => states.get(e.id) === "short").length,
     drafts: upcoming.filter((e) => e.status === "draft").length,
   }
@@ -208,6 +212,10 @@ export async function getEvent(adminId: string, eventId: string, now: Date): Pro
             ? { label: `Past · ${date}`, live: false }
             : { label: `Upcoming · ${date}`, live: false }
 
+  const ws = wallTime(event.starts_at, tz)
+  const we = wallTime(event.ends_at, tz)
+  const pad = (n: number) => String(n).padStart(2, "0")
+
   return {
     id: event.id,
     venue: event.venue,
@@ -224,6 +232,15 @@ export async function getEvent(adminId: string, eventId: string, now: Date): Pro
     openSlots,
     confirmedCount: slots.filter(({ slot }) => slot.staffId).length,
     cancelled: event.status === "cancelled",
+    editable:
+      event.status !== "cancelled"
+        ? {
+            date: `${ws.year}-${pad(ws.month)}-${pad(ws.day)}`,
+            start: `${pad(ws.hour)}:${pad(ws.minute)}`,
+            end: `${pad(we.hour)}:${pad(we.minute)}`,
+            name: event.kind || event.title,
+          }
+        : undefined,
   }
 }
 
@@ -528,7 +545,7 @@ export async function createEvent(
   return { id: created.id }
 }
 
-/** Edits what the crew is told (dress, where to park, who to ask for) and tells the crew it changed. */
+/** Edits event details (instructions, date/time, name) and notifies the crew of changes. */
 export async function updateEvent(
   adminId: string,
   eventId: string,
@@ -536,31 +553,91 @@ export async function updateEvent(
   now: Date,
 ): Promise<EventDetail> {
   const ctx = await adminCtx(adminId)
-  const [current] = await rows<{ instructions: string; title: string }>(
-    sql()`select instructions, title from events
-          where id = ${eventId} and tenant_id = ${ctx.tenantId}
-            and status <> 'cancelled' and ends_at > ${now.toISOString()}`,
+  const [current] = await rows<{
+    instructions: string
+    title: string
+    kind: string
+    starts_at: Date
+    ends_at: Date
+    timezone: string
+    status: string
+  }>(
+    sql()`select e.instructions, e.title, e.kind, e.starts_at, e.ends_at, v.timezone, e.status
+          from events e join venues v on v.id = e.venue_id
+          where e.id = ${eventId} and e.tenant_id = ${ctx.tenantId}
+            and e.status <> 'cancelled' and e.ends_at > ${now.toISOString()}`,
   )
   if (!current) throw notFound("Event not found, cancelled or already over.")
-  if (current.instructions === patch.instructions) return getEvent(adminId, eventId, now)
-  await sql()`update events set instructions = ${patch.instructions} where id = ${eventId}`
+
+  const updates: string[] = []
+  let newStarts: Date | null = null
+  let newEnds: Date | null = null
+
+  if (patch.instructions !== undefined && patch.instructions !== current.instructions) {
+    updates.push("instructions")
+  }
+  if (patch.name !== undefined && patch.name !== current.kind) {
+    updates.push("name")
+  }
+
+  const hasWindow = patch.date || patch.start || patch.end
+  if (hasWindow) {
+    const ws = wallTime(current.starts_at, current.timezone)
+    const we = wallTime(current.ends_at, current.timezone)
+    const pad = (n: number) => String(n).padStart(2, "0")
+    const dateStr = patch.date ?? `${ws.year}-${pad(ws.month)}-${pad(ws.day)}`
+    const startStr = patch.start ?? `${pad(ws.hour)}:${pad(ws.minute)}`
+    const endStr = patch.end ?? `${pad(we.hour)}:${pad(we.minute)}`
+    const { starts, ends } = eventWindow(current.timezone, {
+      date: dateStr,
+      start: startStr,
+      end: endStr,
+    })
+    if (
+      starts.getTime() !== current.starts_at.getTime() ||
+      ends.getTime() !== current.ends_at.getTime()
+    ) {
+      newStarts = starts
+      newEnds = ends
+      updates.push("window")
+    }
+  }
+
+  if (updates.length === 0) return getEvent(adminId, eventId, now)
+
+  if (patch.instructions !== undefined && updates.includes("instructions")) {
+    await sql()`update events set instructions = ${patch.instructions} where id = ${eventId}`
+  }
+  if (patch.name !== undefined && updates.includes("name")) {
+    await sql()`update events set kind = ${patch.name} where id = ${eventId}`
+  }
+  if (updates.includes("window") && newStarts && newEnds) {
+    await sql()`update events set starts_at = ${newStarts.toISOString()}, ends_at = ${newEnds.toISOString()} where id = ${eventId}`
+  }
+
   const tellCrew = async () => {
     const crew = await rows<{ staff_id: string; assignment_id: string }>(
       sql()`select staff_id, id as assignment_id from assignments
             where event_id = ${eventId} and staff_id is not null`,
     )
+    const body =
+      updates.includes("window") && newStarts && newEnds
+        ? `${current.title}: rescheduled to ${formatRange(newStarts, newEnds, current.timezone)}`
+        : updates.includes("instructions")
+          ? `${current.title}: instructions updated`
+          : `${current.title}: details updated`
     await notifyStaff(
       crew.map((row) => ({
         staffId: row.staff_id,
         icon: "edit_calendar",
         tone: "warn" as const,
-        title: "Instructions updated",
-        body: `${current.title}: ${patch.instructions.length > 70 ? `${patch.instructions.slice(0, 69)}…` : patch.instructions || "cleared"}`,
+        title: updates.includes("window") ? "Shift rescheduled" : "Event updated",
+        body,
         href: `/staff/shifts/detail?id=${row.assignment_id}`,
       })),
     )
   }
-  // The crew is told while the screen's answer is being built: neither waits on the other.
+
   const [detail] = await Promise.all([getEvent(adminId, eventId, now), tellCrew()])
   return detail
 }

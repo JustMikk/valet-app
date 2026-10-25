@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import { signOut } from "@/lib/data"
-import { AppShell, type ShellNavItem } from "@/components/shared"
+import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shared"
 
 import { useHome, useMarkNotificationsRead, useNotifications, useProfile } from "../data/queries"
 import { NotificationPanel } from "./notification-panel"
@@ -87,6 +87,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
           router.push("/login?role=staff")
         },
       }}
+      banner={<PwaInstallBanner />}
       onBack={goBack}
     >
       {children}

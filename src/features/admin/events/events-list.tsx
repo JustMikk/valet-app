@@ -97,6 +97,7 @@ export function EventsList() {
   const data = events.data
 
   const tabs = [
+    { value: "live" as const, label: "Live now", count: data?.live || undefined },
     { value: "upcoming" as const, label: "Upcoming" },
     { value: "short" as const, label: "Short-staffed", count: data?.short || undefined },
     { value: "draft" as const, label: "Drafts", count: data?.drafts || undefined },
@@ -107,7 +108,9 @@ export function EventsList() {
     <AdminPage>
       <AdminHead
         title="Events"
-        sub={data ? `${data.upcoming} upcoming · ${data.short} short-staffed` : "…"}
+        sub={
+          data ? `${data.live} live · ${data.upcoming} upcoming · ${data.short} short-staffed` : "…"
+        }
         cta={{ label: "New event", icon: "add", onClick: () => router.push("/admin/events/new") }}
       />
       <PillTabs label="Show" items={tabs} value={tab} onValueChange={setTab} />

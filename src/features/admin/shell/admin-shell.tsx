@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import { signOut } from "@/lib/data"
-import { AppShell, type ShellNavItem } from "@/components/shared"
+import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shared"
 
 import { useMarkNotificationsRead, useNotifications, useSession } from "../data/queries"
 import { NotificationPanel } from "./notification-panel"
@@ -130,6 +130,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           router.push("/login?role=admin")
         },
       }}
+      banner={<PwaInstallBanner />}
       onBack={goBack}
     >
       {children}
