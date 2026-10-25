@@ -53,6 +53,7 @@ export const ICON_NAMES = [
   "location_city",
   "location_disabled",
   "light_mode",
+  "location_off",
   "location_on",
   "lock_clock",
   "login",

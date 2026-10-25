@@ -33,6 +33,9 @@ export type SlotRow = {
   punch_flag: string | null
   punch_offline: boolean | null
   selfie: boolean | null
+  selfie_image: string | null
+  lat: number | null
+  lng: number | null
   device_at: Date | null
   server_at: Date | null
   decided_by_name: string | null
@@ -54,7 +57,7 @@ export async function loadSlots(tenantId: string, eventId?: string): Promise<Slo
             e.clock_in_window_min as window_min, v.timezone, v.radius_m,
             p.id as punch_id, p.status as punch_status, p.distance_m, p.accuracy_m,
             p.note as punch_note, p.flag_reason as punch_flag, p.offline as punch_offline,
-            p.selfie, p.device_at, p.server_at, ad.name as decided_by_name,
+            p.selfie, p.selfie_image, p.lat, p.lng, p.device_at, p.server_at, ad.name as decided_by_name,
             d.name as drop_name, d.created_at as drop_at, d.removed as drop_removed,
             n.created_at as nudge_at
           from events e
@@ -120,12 +123,18 @@ export function classifySlot(row: SlotRow, now: Date): LiveSlot {
   const dist = row.distance_m ?? 0
   const acc = Math.round(row.accuracy_m ?? 0)
   const facts: LiveSlot["facts"] = { tel }
+  const selfieUrl = row.selfie_image ?? undefined
+  const lat = row.lat ?? undefined
+  const lng = row.lng ?? undefined
   const done = (state: SlotState, meta: string, extra: LiveSlot["facts"] = {}): LiveSlot => ({
     ...base,
     name,
     state,
     meta,
     facts: { ...facts, ...extra },
+    selfieUrl,
+    lat,
+    lng,
   })
 
   if (row.punch_status === "pending_approval") {

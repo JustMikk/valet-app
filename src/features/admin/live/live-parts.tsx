@@ -56,23 +56,29 @@ type SlotRowProps = {
   onAssign: () => void
   /** Desktop roster: 64 px rows, 15 px names, 36 px Assign. */
   compact?: boolean
+  /** Called when a non-open slot is tapped to view the staff member's photo + location. */
+  onView?: (slot: LiveSlot) => void
 }
 
+const VIEWABLE: import("@/lib/data/admin/ops-schemas").SlotState[] = [
+  "onsite",
+  "flagged",
+  "override",
+  "waiting",
+]
+
 /** One slot in an event roster: avatar, name and evidence, then its status or Assign. */
-export function SlotRow({ slot, onAssign, compact = false }: SlotRowProps) {
+export function SlotRow({ slot, onAssign, compact = false, onView }: SlotRowProps) {
   const open = slot.state === "open"
+  const viewable = onView && VIEWABLE.includes(slot.state)
   const initials = slot.name
     .split(" ")
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
-  return (
-    <li
-      className={cn(
-        "box-content flex items-center gap-3 border-b border-line",
-        compact ? "min-h-16" : "min-h-17.5",
-      )}
-    >
+
+  const inner = (
+    <>
       <span
         aria-hidden="true"
         className={cn(
@@ -97,6 +103,29 @@ export function SlotRow({ slot, onAssign, compact = false }: SlotRowProps) {
         </Button>
       ) : (
         <StatusBadge status={slotStatus(slot)} size="sm" />
+      )}
+      {viewable && <Icon name="chevron_right" size={18} className="shrink-0 text-fg-3" />}
+    </>
+  )
+
+  return (
+    <li
+      className={cn(
+        "box-content flex items-center gap-3 border-b border-line",
+        compact ? "min-h-16" : "min-h-17.5",
+        viewable && "cursor-pointer",
+      )}
+    >
+      {viewable ? (
+        <button
+          type="button"
+          className="flex w-full items-center gap-3 text-left"
+          onClick={() => onView(slot)}
+        >
+          {inner}
+        </button>
+      ) : (
+        inner
       )}
     </li>
   )

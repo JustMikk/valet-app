@@ -6,9 +6,11 @@ import Link from "next/link"
 import { AttentionCard, ChipGroup, Icon, StatusBadge, ToastPill } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { LiveSlot } from "@/lib/data/admin/ops-schemas"
 
 import { sheetSlots, type EventSummary } from "@/lib/live/model"
 import { attentionActions, LiveDot, SlotBar, SlotRow } from "./live-parts"
+import { StaffLocationModal } from "./staff-location-modal"
 import type { LiveBoard } from "./use-live-board"
 
 type Day = "today" | "tomorrow" | "pick"
@@ -93,6 +95,7 @@ const ACTION = "h-10 px-3.5 text-14 whitespace-nowrap"
 export function LiveDesktop({ board }: { board: LiveBoard }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [day, setDay] = useState<Day>("today")
+  const [viewSlot, setViewSlot] = useState<LiveSlot | null>(null)
   const { pulse } = board
   const selected = board.summaries.find((e) => e.id === selectedId) ?? board.summaries[0]
 
@@ -203,6 +206,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
                   compact
                   slot={slot}
                   onAssign={() => board.assign(selected.id)}
+                  onView={setViewSlot}
                 />
               ))}
             </ul>
@@ -226,6 +230,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
                 title={item.title}
                 meta={item.sub}
                 selfie={item.selfie}
+                selfieUrl={item.selfieUrl}
                 actions={attentionActions(item, board.run)}
               />
             </div>
@@ -237,6 +242,11 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
       </div>
 
       <ToastPill message={board.toast} placement="bottom" />
+      <StaffLocationModal
+        slot={viewSlot}
+        open={viewSlot !== null}
+        onClose={() => setViewSlot(null)}
+      />
     </div>
   )
 }

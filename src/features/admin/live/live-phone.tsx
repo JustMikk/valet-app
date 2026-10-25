@@ -149,6 +149,7 @@ export function LivePhone({ board }: { board: LiveBoard }) {
                       title={item.title}
                       meta={item.sub}
                       selfie={item.selfie}
+                      selfieUrl={item.selfieUrl}
                       actions={attentionActions(item, board.run)}
                       className="gap-3.5 p-4"
                     />

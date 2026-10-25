@@ -97,6 +97,8 @@ export type AttentionItem = {
   /** One-line version for the timeline tab. */
   short: string
   selfie: boolean
+  /** Actual selfie image URL from the clock-in punch, when present. */
+  selfieUrl?: string | null
   eventId: string
   slotIndex: number
   /** The slot this is about (a person), when there is one. */
@@ -258,9 +260,10 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
           tone: "info",
           icon: "front_hand",
           title: `${slot.name} asks to clock in`,
-          sub: `${event.venue} · ${f.outsideM ?? 0} m outside fence, ±${f.accuracyM ?? 0} m${f.note ? ` · “${f.note}”` : ""} · waiting ${f.waitedMin ?? 0} min`,
+          sub: `${event.venue} · ${f.outsideM ?? 0} m outside fence, ±${f.accuracyM ?? 0} m${f.note ? ` · "${f.note}"` : ""} · waiting ${f.waitedMin ?? 0} min`,
           short: `${event.venue} · waiting ${f.waitedMin ?? 0} min`,
           selfie: true,
+          selfieUrl: slot.selfieUrl,
           eventId: event.id,
           slotIndex: i,
           slotId: slot.id,

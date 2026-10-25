@@ -47,6 +47,12 @@ export const LiveSlotDto = z.object({
   state: SlotState,
   meta: str,
   facts: SlotFactsDto,
+  /** Selfie JPEG data URL captured at clock-in (present when the punch had one). */
+  selfieUrl: z.optional(z.nullable(str)),
+  /** Last punch latitude (present for clocked-in staff). */
+  lat: z.optional(z.nullable(z.number())),
+  /** Last punch longitude (present for clocked-in staff). */
+  lng: z.optional(z.nullable(z.number())),
 })
 export type LiveSlot = z.infer<typeof LiveSlotDto>
 

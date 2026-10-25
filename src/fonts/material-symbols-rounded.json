@@ -51,6 +51,7 @@
     "light_mode",
     "location_city",
     "location_disabled",
+    "location_off",
     "location_on",
     "lock_clock",
     "login",
