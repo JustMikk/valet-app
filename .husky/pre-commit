@@ -1,3 +1,4 @@
+export PATH="$LOCALAPPDATA/Temp/shim:$PATH"
 pnpm exec lint-staged
 pnpm typecheck
 pnpm secrets

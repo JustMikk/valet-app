@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation"
 
-import { DateTile, FeatureCard, Icon } from "@/components/shared"
-import { UP_NEXT } from "@/mocks/staff"
+import { Countdown, DateTile, FeatureCard, Icon } from "@/components/shared"
+import type { Home } from "@/lib/data"
 
 /** Right column of Home: upcoming shifts and the open-shifts promo. */
-export function UpNext() {
+export function UpNext({ upNext, open }: { upNext: Home["upNext"]; open: Home["open"] }) {
   const router = useRouter()
   return (
     <div className="flex flex-col gap-7">
@@ -22,17 +22,18 @@ export function UpNext() {
           </button>
         </div>
         <div className="flex flex-col border-t border-line">
-          {UP_NEXT.map((shift) => (
+          {upNext.map((shift) => (
             <button
-              key={shift.day}
+              key={shift.assignmentId}
               type="button"
-              onClick={() => router.push("/staff/shifts/detail")}
+              onClick={() => router.push(`/staff/shifts/detail?id=${shift.assignmentId}`)}
               className="flex min-h-18 items-center gap-3.5 border-0 border-b border-line bg-transparent p-0 text-left text-fg"
             >
               <DateTile dow={shift.dow} day={shift.day} />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="text-17 font-semibold">{shift.venue}</span>
                 <span className="text-15 text-fg-2">{shift.time}</span>
+                <Countdown startsAt={shift.startsAt} endsAt={shift.endsAt} className="text-13" />
               </div>
               <Icon name="chevron_right" size={24} />
             </button>
@@ -40,13 +41,15 @@ export function UpNext() {
         </div>
       </div>
 
-      <FeatureCard
-        overline="OPEN SHIFTS"
-        title="4 shifts you can claim this week"
-        body="Harbor Pavilion brunch, Maison Blanc Halloween gala and more. First to claim gets it."
-        cta="See open shifts"
-        onClick={() => router.push("/staff/open")}
-      />
+      {open.count > 0 && (
+        <FeatureCard
+          overline="OPEN SHIFTS"
+          title={`${open.count} shift${open.count === 1 ? "" : "s"} you can claim this week`}
+          body={`${open.titles.length > 1 ? `${open.titles.join(", ")} and more` : open.titles.join("")}. First to claim gets it.`}
+          cta="See open shifts"
+          onClick={() => router.push("/staff/open")}
+        />
+      )}
     </div>
   )
 }

@@ -1,15 +1,17 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useEffect, useRef, type ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
 import { Icon } from "../icon"
-import { ShellMenuProvider } from "./menu-context"
+import { ShellMenuProvider, useShellMenu } from "./menu-context"
+import { AccountSheet } from "./account-sheet"
+import { NotificationDrawer } from "./notification-drawer"
 import { PhoneChrome } from "./phone-chrome"
 import { RouteScreen } from "./route-screen"
 import { Sidebar } from "./sidebar"
-import type { ShellApp, ShellNavItem, ShellUser } from "./types"
+import type { ShellAccount, ShellApp, ShellNavItem, ShellNotifications, ShellUser } from "./types"
 
 type AppShellProps = {
   app: ShellApp
@@ -37,8 +39,32 @@ type AppShellProps = {
   topBar?: boolean
   /** Width class of the wide-screen Back row, matching the page's content width. */
   contentMax?: string
+  /** The bell and its drawer. Left out, the shell draws neither. */
+  notifications?: ShellNotifications
+  /** Switch account and sign out, from the avatar. Left out, the avatar keeps its old behaviour. */
+  account?: ShellAccount
+  /** Optional banner rendered above the scrollable content area (e.g. PWA install prompt). */
+  banner?: ReactNode
   onBack: () => void
   children: ReactNode
+}
+
+/** The drawer, wired to the shell's open state; tells the app each time it closes. */
+function NotificationsLayer({ notifications }: { notifications: ShellNotifications }) {
+  const { notificationsOpen, setNotificationsOpen } = useShellMenu()
+  const wasOpen = useRef(false)
+  const { onClose } = notifications
+
+  useEffect(() => {
+    if (wasOpen.current && !notificationsOpen) onClose?.()
+    wasOpen.current = notificationsOpen
+  }, [notificationsOpen, onClose])
+
+  return (
+    <NotificationDrawer open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+      {notifications.children}
+    </NotificationDrawer>
+  )
 }
 
 /**
@@ -60,6 +86,9 @@ export function AppShell({
   mode = "app",
   topBar = true,
   contentMax = "max-w-280",
+  notifications,
+  account,
+  banner,
   onBack,
   children,
 }: AppShellProps) {
@@ -81,10 +110,17 @@ export function AppShell({
             items={sidebarItems}
             currentKey={currentKey}
             user={user}
+            unread={notifications?.unread}
+            accountMenu={Boolean(account)}
           />
         )}
 
-        <main className="relative h-full min-w-0 flex-1">
+        <main className="relative flex h-full min-w-0 flex-1 flex-col">
+          {banner && mode === "app" && (
+            // On phone the floating top bar covers the very top of <main>, so push the banner
+            // down to clear it. Tablet+ has a sidebar; the floating chrome is hidden, so no pad.
+            <div className="pt-[calc(var(--safe-top)+72px)] tablet:pt-0">{banner}</div>
+          )}
           {layered ? (
             <div className="absolute inset-0 z-50">{children}</div>
           ) : (
@@ -124,10 +160,14 @@ export function AppShell({
               currentKey={currentKey}
               isRoot={isRoot}
               showTopBar={topBar}
+              unread={notifications?.unread}
+              accountMenu={Boolean(account)}
               onBack={onBack}
             />
           )}
         </main>
+        {notifications && mode === "app" && <NotificationsLayer notifications={notifications} />}
+        {account && mode === "app" && <AccountSheet user={user} account={account} />}
       </div>
     </ShellMenuProvider>
   )

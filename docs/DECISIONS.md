@@ -178,4 +178,159 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 
 **Decision.** `check:task` is now types + lint + secrets + floor + boundaries + static build. Tests, coverage, performance, accessibility runs, visual baselines, PWA/offline, platform providers and the real data layer are deferred to a testing phase that starts when every page in `tasks/build-all.md` exists (CONSTRAINTS.md "Build mode"). The floor, tokens-only, boundaries and secrets checks are unchanged.
 
-**Consequences.** New pages ship without tests until the testing phase; the testing phase must restore the deferred rows as per-task gates. Existing Phase 1 tests keep running in `check:full`. Pages use typed fixtures (`src/mocks`) instead of the data layer; swapping in repositories is a later task.
+**Consequences.** New pages ship without tests until the testing phase; the testing phase must restore the deferred rows as per-task gates. Existing Phase 1 tests keep running in `check:full`. Pages use typed fixtures (`src/mocks`) instead of the data layer; swapping in repositories is a later task. _(Superseded for the staff side by ADR-012.)_
+
+---
+
+## ADR-012 — Demo API on Next.js with a dual-mode build; Neon Postgres; one data layer
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: make the staff features real with Next.js API routes and a Neon Postgres database; "a demo app, nothing serious"; the dual-mode build was chosen from the options offered)
+
+**Context.** Pages ran on typed fixtures (ADR-011). The owner wants real behaviour for the staff side first, then admin. The static-export rule (ADR-001, CONSTRAINTS "Static export") forbids route handlers that read a `Request`, so API routes and the Capacitor-ready export cannot be the same build.
+
+**Decision.**
+
+- **Two targets from one codebase** (`next.config.ts`):
+  - _static_ (default; `pnpm build`, `pnpm dev:static`): `output: 'export'`, exactly as before. CONSTRAINTS is unchanged and still enforced.
+  - _server_ (`VALET_TARGET=server`; `pnpm dev`, `pnpm build:server`, `pnpm start:server` through `scripts/next-server.mjs`): registers the API handlers and builds into `.next-server`, so it never shares a cache with the static build.
+- **API handlers are named `route.api.ts`.** `pageExtensions` adds `api.ts` only in server mode, so the static export does not see them (verified: the export lists no `/api/*`; the server build lists all 19). Checked against `node_modules/next/dist/docs/.../pageExtensions.md` and `static-exports.md`.
+- **Layers.** `src/app/api/**/route.api.ts` (thin) → `src/server/*` (services, Neon access, session tokens; server-only, enforced by dependency-cruiser rules `server-is-private` and `server-has-no-ui`) → `src/lib/*` (pure logic and the shared DTO schemas).
+- **One data layer** (`src/lib/data`, handoff §6). Screens depend on the `StaffRepo` interface. The HTTP implementation calls the API and Zod-validates every response; the mock implementation serves the design fixtures in the static export. The choice is build-time (`NEXT_PUBLIC_DATA_SOURCE`). TanStack Query holds server state.
+- **Wire format** is defined once (`src/lib/data/staff/schemas.ts`, `zod/mini`) and validates requests, the server's own responses, and responses in the client. DTOs are display-ready and venue-local (built by `lib/time`), so the server, the mock and the design agree. No bill or pay rate exists in any staff type or staff query.
+- **Server rules from the product spec.** The geofence is recomputed server-side from the raw sample (`lib/geo`, accuracy-aware). Clock window, one active clock and a required selfie are enforced. Offline punches keep their device time and land flagged rather than rejected. Out-of-fence requests wait for dispatch and clock in at the request time. No drop after clock-in; a drop under 24 h is flagged late. A claim is one atomic statement (`FOR UPDATE SKIP LOCKED`) with overlap detection. Punch writes are idempotent per key.
+- **Database.** Neon Postgres over HTTP (`@neondatabase/serverless`), plain SQL migrations in `db/migrations` applied by `scripts/db-migrate.mjs`, tagged-template queries only (no string-built SQL). Seed data is relative to "now" (`pnpm db:seed [before|due|onshift]` or `POST /api/demo/reset`), with stable ids for people so a browser's session survives a reset.
+- **Auth (demo-grade).** Stateless HMAC-signed Bearer tokens (30 days). "Email me a code" accepts the fixed code from the onboarding design; `POST /api/auth/demo` gives the default worker a session and exists only with `DEMO_MODE=1`. The signature check, expiry and per-worker scoping are real.
+
+**Dependencies (handoff §7: justify each).** `@neondatabase/serverless`: a Postgres client that works over HTTP, so no TCP pool or `ws` is needed. `@tanstack/react-query`: server state, as the handoff specifies. `tsx` (dev): runs the TypeScript seed script with the project's path aliases. Vendor component: shadcn `skeleton` for loading states, edited only to import `cn` from `@/lib/utils` and to honour reduced motion.
+
+**Consequences.**
+
+- `pnpm check:task` still builds the static export. The API is type-checked, linted and boundary-checked by the same commands, and has unit tests for the token, seed invariants, label mapping, geofence and time logic, plus end-to-end runs against Neon (smoke script, four-way claim race, browser walkthrough in both modes).
+- Device APIs (GPS, camera, push) are still simulated (`?sim=`), so `lib/platform` is the next step for the clock flow; the server already judges whatever position it is sent.
+- `route-budgets.json`, Lighthouse and axe still cover only `/` and `/design-system` (build mode, ADR-011).
+- The demo database is shared and `POST /api/demo/reset` is unauthenticated when `DEMO_MODE=1`: acceptable for a demo, and it must be off anywhere else.
+
+---
+
+## ADR-013 — Platform providers: real GPS and camera behind `lib/platform`
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: when staff clock in, detect their location and turn the camera on to take a photo)
+
+**Context.** The clock flow simulated the reading and the selfie (`?sim=`). Handoff §5.1 requires every device capability behind an interface so Capacitor plugins can replace the web ones, and CONSTRAINTS "Device APIs" lets only `src/lib/platform/**` touch `navigator.geolocation` and `mediaDevices`.
+
+**Decision.**
+
+- `LocationProvider.acquire` (web: `watchPosition`, high accuracy, no cached position) refines for up to 20 s, stops at the first fix as accurate as the venue needs, and returns the best fix on timeout. It is acquisition for one punch, not tracking: the watch is cleared on every exit path, including abort. Distinct failures: denied, unsupported, unavailable, timeout.
+- `CameraProvider.open` (web: `getUserMedia`, front camera, video only) returns a session that previews live in a `<video>` and captures one frame as a JPEG (longest side 640 px, quality 0.72, about 25–60 KB). There is no file picker or gallery path. The camera is released when the step ends, the screen unmounts or the photo is taken.
+- Simulated providers implement the same interfaces for `?sim=` links and for the fixture-only static build (no venue to stand at). With the demo API and no `?sim=`, the real devices are used.
+- The selfie travels with the punch (`selfieImage`, validated as a JPEG data URL under 600 KB) and is stored in `punches.selfie_image` (migration 003). The server still judges the position and requires the selfie flag; a clock-out with no location lands flagged rather than blocked.
+- `DEMO_VENUE_LAT` / `DEMO_VENUE_LNG` (optional) move the demo's Grand Hotel to a real coordinate, so a real GPS fix can be inside its fence when testing in person.
+
+**Consequences.**
+
+- Geolocation and camera need a secure context: `localhost` works; a phone reaching the dev server over plain `http://<lan-ip>` will not get either permission, so on-device testing needs HTTPS (a tunnel or a deployed preview).
+- Push was built next (ADR-015).
+- Selfie retention is still the owner's decision (product spec §13, OPEN_QUESTIONS P9); photos accumulate in the demo database until reset.
+- Verified in Edge with a fake camera device and a controlled position against the live API: inside (38 m, judged by the server), outside (420 m), location denied, camera refused, camera released after capture, photo stored.
+
+---
+
+## ADR-014 — Admin API and one admin data layer
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: do the admin side API and integration and make it real)
+
+**Context.** The admin app (Live Board, Events, Staff, Venues, Hours, Invoices, Inbox, Settings) ran on fixtures. The staff side already runs on `StaffRepo` with HTTP and mock implementations (ADR-012).
+
+**Decision.**
+
+- `AdminRepo` is the admin app's data boundary, with an HTTP implementation (32 endpoints under `/api/admin/**`, thin `route.api.ts` handlers, logic in `src/server/admin/*`) and a mock implementation for the static export. Screens use TanStack Query hooks in `features/admin/data`.
+- Tokens carry a role (`staff` or `admin`). `adminRoute` answers 403 to a staff token, `staffRoute` the reverse. Legacy tokens read as staff. The demo sign-in (`POST /api/auth/demo`, only with `DEMO_MODE=1`) takes `{role}`.
+- The Live Board model (slot status, summaries, board derivation) is pure and lives in `lib/live/model.ts`, shared by the server, the mock repo and the screens. Wording is built from structured `facts`, never stored as prose.
+- Rules stay on the server: approving or declining an out-of-fence request, nudging, removing from a slot, assigning (one person per spot, never double-booked), hours adjustment with a reason, invoice send. Money is integer cents; bill rates exist only in venue and invoice types.
+- The seed is a living operation relative to "now": events today in every state, past hours with flags, invoices, threads. `POST /api/demo/reset` rebuilds it, and ids are stable so tokens survive.
+- The tenant accent follows the saved setting (staff read it from their profile), so changing it in Settings recolours both apps.
+
+**Consequences.**
+
+- Cross-app effects are real: a staff member's decline, reply or clock-in shows on the admin screens, and an approval, removal or hours adjustment shows on the staff app.
+- Push delivery is still not built; notifications are rows the staff inbox reads.
+- Screens that have no design (Add venue, New invoice, invoice PDF, editing instructions) are logged in OPEN_QUESTIONS D29–D33.
+
+---
+
+## ADR-015 — Notification drawer, Web Push, photo retention, and the admin screens the design lacks
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: build the missing admin screens, real push notifications, keep punch photos 30 days, a notification icon on every page that opens as a side drawer)
+
+**Decision.**
+
+- **Bell and drawer.** `AppShell` takes `notifications` and draws the bell (phone top bar, tablet rail, desktop sidebar, and the Live Board’s own phone bar) plus a right-hand drawer over the current page; choosing a row navigates and closes it. Closing the drawer marks everything read. Staff and admin have the same shape (`Notifications` DTO), served by `/api/staff/notifications` and `/api/admin/notifications`, polled every 15 s. The full-screen clock-in and onboarding flows have no chrome and so no bell.
+- **Admin notifications** (`admin_notifications`, one row per dispatcher): a clock-in request needing approval, a dropped shift, a staff message, and "late" (derived on the Live Board, once per shift via a dedupe key).
+- **Web Push.** `PushProvider` in `lib/platform` (web: service worker `/sw.js` + `PushManager`; fixture build: unsupported). The server (`src/server/notify`) writes the center row and pushes to every device the person allowed, using VAPID keys from the environment (`VAPID_*`; without them push is off and the UI hides it). Delivery is best effort and capped at 3 s; endpoints the push service reports gone are deleted. Staff respect their push setting. Turning alerts on is in the drawer, the onboarding step and the profile. One browser endpoint belongs to one person at a time, so staff and admin in the same browser take it over from each other.
+- **Retention (P9).** A punch photo is deleted 30 days after the punch; the punch and the `selfie` fact stay. It runs hourly as a side effect of a punch or a Live Board load, and from `GET /api/cron/retention` with `CRON_SECRET` for a real scheduler.
+- **Admin screens added** (D29, D30): Add venue, Edit venue, New invoice, invoice PDF (a small dependency-free writer in `lib/pdf`), Edit event instructions.
+
+**Consequences.**
+
+- Verified end to end in Edge: a staff message produced a displayed push notification on an admin device through the real push service.
+- iOS delivers push only to an installed home-screen app, which needs the manifest’s icon set (D37).
+- `web-push` is a new server dependency.
+
+---
+
+## ADR-016 — Real sign-in; the demo launcher moves to /demo
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction)
+
+**Decision.**
+
+- `/` is a short public landing page with two sign-in buttons; `/login` signs in (`?role=staff|admin`, `?next=` to return to where the person was headed, kept inside their own app); the old demo launcher is `/demo`.
+- **Staff** sign in with their email alone: an active staff row with that email is enough (invited people included, so they can finish onboarding). **Dispatchers** sign in with email and password (`admins.password_hash`, scrypt, constant-time compare, one message for either being wrong). Accounts are created by hand: `pnpm admin:create <email> <password> ["Name"]` (it also resets a password).
+- The client no longer creates a demo session silently. No session, or an expired one, sends the person to `/login`; `/`, `/login`, `/demo` and `/staff/onboarding` are reachable signed out. The demo shortcuts (`/api/auth/demo`, reset) still need `DEMO_MODE=1` and are used from `/demo`.
+- A demo reset keeps dispatchers that have a password; the seeded demo dispatcher has none.
+- Sign out: Profile (staff) and Settings (dispatch). The static build has no server, so signing in there just lets the person through.
+
+**Consequences.** Email-only staff sign-in is weak by design (D38). Turn `DEMO_MODE` off anywhere real.
+
+---
+
+## ADR-017 — Venue search and a real map
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: step-by-step Add venue with place search, geocoding and a map; Add venue from New event)
+
+**Decision.**
+
+- `lib/places` is a `PlacesProvider` interface with Photon (komoot, OpenStreetMap data, free, no key) behind it: search as you type (300 ms pause, three characters, cancelled when superseded), results give name, address and coordinates, validated with Zod at the boundary.
+- `VenueMap` (Leaflet, OpenStreetMap tiles, loaded in the browser only) shows the pin and the clock-in circle on Add / Edit venue and the venue page; the pin is draggable on the form. The circle and pin take their colours from design tokens through CSS classes.
+- Add / Edit venue is two steps: (1) search, map, drag the pin, radius; (2) name, address, contact, dress code, billing. Back keeps what was typed. Typed coordinates remain as a fallback when search is unavailable ("Use my current location" was removed: it was unreliable).
+- New event is its own set of steps (Venue, Venue details when new, When, Crew) and adds a venue in place with the same search, map and radius: nothing redirects to the Venues page, and the new venue is created at the end of its details step and selected. The Venues page keeps its own Add venue flow.
+
+**Consequences.** Both services are public and rate-limited by fair use (D40). `leaflet` is a new dependency.
+
+---
+
+## ADR-018 — Vercel deploys the server build
+
+**Date:** 2026-10-23 · **Status:** accepted
+
+**Context.** The first Vercel deploy ran the default static export: no API, fixture data, and a sign-in that let anyone in as the demo worker.
+
+**Decision.** `next.config.ts` treats `VERCEL` as the server target (the API runs, `NEXT_PUBLIC_DATA_SOURCE=api`) and builds into the default `.next` folder Vercel reads. `VALET_TARGET=static` still forces the export. Local `pnpm build` and CI remain the static export.
+
+**Needed on Vercel (Project → Settings → Environment Variables):** `DATABASE_URL`, `SESSION_SECRET` (32+ random bytes), `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; optional `CRON_SECRET`. Leave `DEMO_MODE` unset. The database needs `pnpm db:setup` once (migrations, seed) and `pnpm admin:create` for the first dispatcher.
+
+---
+
+## ADR-019 — Invoices are drafted automatically per event
+
+**Date:** 2026-10-23 · **Status:** accepted (owner direction: invoices created automatically from the event's time and the people who worked it; spec §10.3 "one per event in MVP")
+
+**Decision.**
+
+- When the last of an event's hours is approved (Hours screen: one entry, "approve all clean", or an adjusted time), the system drafts that event's invoice: one line per worker who clocked in, showing their in and out times, hours, the venue's bill rate and the amount. The header line says what the event was, when it ran and how many of the requested crew worked ("Wedding · Sat Nov 7 · 6:00 – 11:00 PM · 4 of 5 staff"). Dispatchers get a notification ("Invoice drafted") that opens it.
+- Billable time is each worker's approved clock-in to clock-out. The event must be over, and nobody who clocked in may still be waiting for approval. Someone who never clocked in has no hours: no line, and they do not hold the invoice back.
+- Sending stays manual: it emails the venue and locks the hours (§10.3 step 5), so the dispatcher previews and sends it.
+- A draft follows its event: it is rebuilt if the crew's hours change and withdrawn if the event is no longer ready; once sent it never changes. Opening the invoice list also drafts any event whose hours were approved before this existed (quietly, last 60 days).
+- The hand-made period invoice (venue and dates) still works as a fallback. It records the events it billed (`invoice_events`), and those are never drafted again; events with their own invoice are left out of it.
+
+**Consequences.** Migrations 008–009. Lines are a snapshot like before. Early arrival still counts (the Hours screen shows the same total): D43.

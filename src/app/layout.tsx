@@ -36,6 +36,8 @@ const materialSymbols = localFont({
 
 export const metadata: Metadata = {
   title: "Valet Workforce",
+  // Installing to the home screen is what lets iOS deliver push (ADR-015).
+  manifest: "/manifest.webmanifest",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

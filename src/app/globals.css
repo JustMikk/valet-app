@@ -563,6 +563,27 @@
     var(--surface);
 }
 
+/* Real venue map (Leaflet): the geofence circle and the pin take the design tokens. Leaflet sets its
+   own colours as SVG attributes; these rules win over them. */
+.venue-geofence {
+  stroke: var(--ok);
+  stroke-width: 2;
+  fill: var(--ok);
+  fill-opacity: 0.18;
+}
+.venue-pin {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--fg);
+  box-shadow: 0 0 0 4px var(--bg);
+}
+.leaflet-container {
+  font-family: inherit;
+  background: var(--surface);
+}
+
 /* Route changes fade through: the old page leaves quickly, then the new one fades in, so two
    different layouts are never overlaid (React <ViewTransition>, see RouteScreen). */
 ::view-transition-old(.route-out) {

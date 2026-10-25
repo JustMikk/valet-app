@@ -53,6 +53,22 @@ module.exports = {
       to: { path: "^src/app/" },
     },
     {
+      name: "server-is-private",
+      severity: "error",
+      comment:
+        "src/server is the demo API's server-only layer (ADR-012): only route handlers under src/app/api reach it, never UI, hooks or lib code that ships to the browser.",
+      from: { pathNot: "^src/(server|app/api)/" },
+      to: { path: "^src/server/" },
+    },
+    {
+      name: "server-has-no-ui",
+      severity: "error",
+      comment:
+        "The server layer depends on lib/ (shared schemas, pure logic) only, never on the UI.",
+      from: { path: "^src/server/" },
+      to: { path: "^src/(components|features|hooks|app|mocks)/" },
+    },
+    {
       name: "no-orphans",
       severity: "error",
       comment: "Dead modules are dead code (handoff §7).",

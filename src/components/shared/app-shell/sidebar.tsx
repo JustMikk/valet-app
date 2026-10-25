@@ -4,6 +4,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 import { Icon } from "../icon"
+import { useShellMenu } from "./menu-context"
+import { NotificationBell } from "./notification-bell"
 import type { ShellApp, ShellBadge, ShellNavItem, ShellUser } from "./types"
 
 // The two apps differ slightly (Staff PWA.dc.html vs Admin.dc.html): item height, side padding,
@@ -43,11 +45,26 @@ type SidebarProps = {
   items: ShellNavItem[]
   currentKey: string | null
   user: ShellUser
+  /** Unread notifications; undefined draws no bell. */
+  unread?: number
+  /** The user block opens the account sheet instead of linking to Profile. */
+  accountMenu?: boolean
   className?: string
 }
 
 /** 84 px icon rail on tablet, 240–248 px labelled sidebar on desktop. Hidden on phone. */
-export function Sidebar({ app, logo, brand, items, currentKey, user, className }: SidebarProps) {
+export function Sidebar({
+  app,
+  logo,
+  brand,
+  items,
+  currentKey,
+  user,
+  unread,
+  accountMenu,
+  className,
+}: SidebarProps) {
+  const { setAccountOpen } = useShellMenu()
   const d = DENSITY[app]
   const avatar = (
     <>
@@ -60,7 +77,7 @@ export function Sidebar({ app, logo, brand, items, currentKey, user, className }
       </span>
     </>
   )
-  const userBlock = "mt-auto flex items-center gap-2.5 p-2"
+  const userBlock = cn("flex items-center gap-2.5 p-2", unread === undefined ? "mt-auto" : "mt-1")
 
   return (
     <aside
@@ -108,7 +125,21 @@ export function Sidebar({ app, logo, brand, items, currentKey, user, className }
         )
       })}
 
-      {user.href ? (
+      {unread !== undefined && (
+        <NotificationBell unread={unread} variant="rail" className="mt-auto" />
+      )}
+
+      {accountMenu ? (
+        <button
+          type="button"
+          aria-label={`Account: ${user.name}`}
+          aria-haspopup="dialog"
+          onClick={() => setAccountOpen(true)}
+          className={cn(userBlock, "w-full rounded-r14 border-0 bg-transparent text-fg")}
+        >
+          {avatar}
+        </button>
+      ) : user.href ? (
         <Link href={user.href} className={cn(userBlock, "rounded-r14")}>
           {avatar}
         </Link>

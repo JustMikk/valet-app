@@ -1,13 +1,18 @@
 import { StatusBadge } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { CLOCK_VENUE } from "@/mocks/clock"
 
 import { ClockScreen, ClockTopBar } from "../clock-frame"
+import type { ClockVenueView } from "../clock-view"
 
-type OutsideStepProps = { onClose: () => void; onRetry: () => void; onRequestApproval: () => void }
+type OutsideStepProps = {
+  venue: ClockVenueView
+  onClose: () => void
+  onRetry: () => void
+  onRequestApproval: () => void
+}
 
 /** Outside the geofence: distance, a "not live" snapshot map, retry or request approval. */
-export function OutsideStep({ onClose, onRetry, onRequestApproval }: OutsideStepProps) {
+export function OutsideStep({ venue, onClose, onRetry, onRequestApproval }: OutsideStepProps) {
   return (
     <ClockScreen>
       <ClockTopBar leading="close" onLeading={onClose} title="Step 1 of 2 · Location" />
@@ -21,9 +26,11 @@ export function OutsideStep({ onClose, onRetry, onRequestApproval }: OutsideStep
             label: "Outside the venue area",
           }}
         />
-        <span className="font-display text-60 leading-x100 font-bold tracking-n045">420 m</span>
+        <span className="font-display text-60 leading-x100 font-bold tracking-n045">
+          {venue.distanceM} m
+        </span>
         <span className="text-18 leading-x140 text-pretty text-fg-2">
-          from {CLOCK_VENUE.name}. You need to be within {CLOCK_VENUE.radiusM} m to clock in.
+          from {venue.name}. You need to be within {venue.radiusM} m to clock in.
         </span>
       </div>
       <div
@@ -34,7 +41,9 @@ export function OutsideStep({ onClose, onRetry, onRequestApproval }: OutsideStep
         <div className="absolute top-7.5 left-[18%] size-35 rounded-pill bg-ok-soft shadow-[inset_0_0_0_2px_var(--ok)]" />
         <div className="absolute top-23 left-[calc(18%+62px)] size-4 rounded-r4 bg-fg" />
         <div className="absolute top-11.5 right-[16%] size-5.5 rounded-pill bg-warn shadow-[0_0_0_6px_var(--warn-soft)]" />
-        <span className="absolute top-20 right-[10%] text-12 font-semibold">You · 5:49 PM</span>
+        <span className="absolute top-20 right-[10%] text-12 font-semibold">
+          You · {venue.requestTime}
+        </span>
         <span className="absolute bottom-3 left-4 text-12 font-medium text-fg-3">
           Snapshot at this moment · ±18 m · not live
         </span>

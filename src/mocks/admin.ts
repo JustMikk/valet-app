@@ -1,4 +1,7 @@
+import { ADMIN_STATUS } from "@/lib/status/admin"
 import type { StatusSpec } from "@/lib/status/presets"
+
+export { ADMIN_STATUS }
 
 // Illustrative admin fixtures from the design export (Admin Pages.dc.html). Not the real API.
 export const ADMIN_USER = {
@@ -7,36 +10,6 @@ export const ADMIN_USER = {
   role: "Owner · Admin",
   company: "Regency Valet Parking",
 } as const
-
-/** Chip statuses used in the admin tables: tone + glyph + words (never colour alone). */
-export const ADMIN_STATUS = {
-  live: { tone: "ok", icon: "sensors", filled: true, label: "Live" },
-  short: (open: number): StatusSpec => ({
-    tone: "warn",
-    icon: "error",
-    filled: true,
-    label: `${open} open`,
-  }),
-  full: { tone: "neutral", icon: "check_circle", filled: true, label: "Full" },
-  draft: { tone: "neutral", icon: "edit", filled: true, label: "Draft" },
-  onShift: { tone: "ok", icon: "verified", filled: true, label: "On shift" },
-  onSite: { tone: "ok", icon: "verified", filled: true, label: "On site" },
-  approval: { tone: "warn", icon: "front_hand", filled: true, label: "Approval" },
-  late: (min: number): StatusSpec => ({
-    tone: "bad",
-    icon: "running_with_errors",
-    filled: true,
-    label: `Late ${min}m`,
-  }),
-  expected: { tone: "neutral", icon: "schedule", filled: true, label: "Expected" },
-  active: { tone: "neutral", icon: "check_circle", filled: true, label: "Active" },
-  alertsOff: { tone: "warn", icon: "notifications_off", filled: true, label: "Alerts off" },
-  invited: { tone: "info", icon: "person_add", filled: true, label: "Invited" },
-  inactive: { tone: "neutral", icon: "block", filled: true, label: "Inactive" },
-  overdue: { tone: "bad", icon: "error", filled: true, label: "Overdue 6d" },
-  paid: { tone: "ok", icon: "check_circle", filled: true, label: "Paid" },
-  sent: { tone: "info", icon: "north_east", filled: true, label: "Sent" },
-} as const satisfies Record<string, StatusSpec | ((n: number) => StatusSpec)>
 
 // ── Events ────────────────────────────────────────────────────────────────────────────────────
 export type EventState = "live" | "short" | "full" | "draft"
@@ -151,13 +124,6 @@ export const EVENT_DAYS: { label: string; items: EventCard[] }[] = [
   },
 ]
 
-export const EVENT_TABS: { value: EventTab; label: string; count?: number }[] = [
-  { value: "upcoming", label: "Upcoming" },
-  { value: "short", label: "Short-staffed", count: 4 },
-  { value: "draft", label: "Drafts", count: 1 },
-  { value: "past", label: "Past" },
-]
-
 export type RosterRow = {
   initials: string
   name: string
@@ -219,13 +185,6 @@ export const AVAILABLE_STAFF = [
   { initials: "KM", name: "Kai Morgan", note: "Free tonight · worked here 3×" },
   { initials: "NO", name: "Nia Okafor", note: "Free tonight" },
   { initials: "RC", name: "Rob Chen", note: "Free · last shift 3 weeks ago" },
-] as const
-
-export const NEW_EVENT_FIELDS = [
-  { label: "Venue", icon: "location_on", value: "Harbor Pavilion", chevron: true },
-  { label: "Date", icon: "calendar_month", value: "Sun Nov 8, 2026", chevron: true },
-  { label: "Time (venue, PT)", icon: "schedule", value: "10:00 AM – 3:00 PM", chevron: false },
-  { label: "Event name", icon: "edit", value: "Sunday brunch", chevron: false },
 ] as const
 
 export const FILL_MODES = [
@@ -327,13 +286,6 @@ export const STAFF_ROWS: StaffRow[] = [
 ]
 
 export type StaffTab = "all" | "active" | "invited" | "alerts"
-export const STAFF_TABS: { value: StaffTab; label: string; count?: number }[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "invited", label: "Invited", count: 1 },
-  { value: "alerts", label: "Alerts off", count: 1 },
-]
-
 export const PERSON = {
   initials: "JE",
   name: "Jordan Ellis",
@@ -510,7 +462,7 @@ export const INVOICES: {
   {
     venue: "Maison Blanc",
     period: "Oct 1 – 15",
-    status: ADMIN_STATUS.overdue,
+    status: ADMIN_STATUS.overdue(6),
     hours: "72.0 h",
     amount: "$2,736.00",
   },
@@ -615,23 +567,35 @@ export const AUDIENCES = [
 ] as const
 export type AudienceKey = (typeof AUDIENCES)[number]["key"]
 
-export const BROADCAST_DEFAULT =
-  "Front drive is closed until 6:30. Use the Mission St side entrance and stage keys at the side podium."
-
 // ── Settings ──────────────────────────────────────────────────────────────────────────────────
-export type ClockRuleKey = "selfie" | "early"
-export type ClockRule =
-  | { label: string; note: string; value: string; toggle?: undefined }
-  | { label: string; note: string; toggle: ClockRuleKey; value?: undefined }
 
-export const CLOCK_RULES: ClockRule[] = [
-  { label: "Clock-in window", note: "How early staff can clock in", value: "15 min before" },
-  { label: "Default geofence", note: "New venues start with this radius", value: "150 m" },
-  { label: "Location accuracy needed", note: "Readings looser than this retry", value: "±75 m" },
-  { label: "Selfie at clock-in", note: "Front camera photo with each clock-in", toggle: "selfie" },
+// ── Notifications ─────────────────────────────────────────────────────────────────────────────
+export const ADMIN_NOTIFICATIONS = [
   {
-    label: "Flag early clock-outs",
-    note: "More than 30 min before scheduled end",
-    toggle: "early",
+    id: "an-0",
+    icon: "wrong_location",
+    tone: "warn",
+    title: "Luis T. needs approval",
+    body: "Clock-in request at The Grand Hotel · 420 m away",
+    time: "8 min ago",
+    href: "/admin",
   },
-]
+  {
+    id: "an-1",
+    icon: "timer",
+    tone: "warn",
+    title: "Ari B. is late",
+    body: "The Grand Hotel · not clocked in 4 min after start",
+    time: "14 min ago",
+    href: "/admin",
+  },
+  {
+    id: "an-2",
+    icon: "chat_bubble",
+    tone: "info",
+    title: "Message from Jordan E.",
+    body: "Garage is full, sending crew to the east lot.",
+    time: "55 min ago",
+    href: "/admin/inbox",
+  },
+] as const

@@ -1,19 +1,18 @@
 import { Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { doneContent, type ClockStep } from "@/mocks/clock"
+import type { ClockStep } from "@/mocks/clock"
 
 import { ClockResultBadge, ClockScreen } from "../clock-frame"
+import type { DoneContent } from "../clock-view"
 
 type DoneStepProps = {
   step: Extract<ClockStep, "success" | "offline" | "outdone">
-  /** "2h 14m" worked, for the clock-out summary. */
-  workedLabel: string
+  content: DoneContent
   onDone: () => void
 }
 
 /** Result of clock-in (online or saved offline) or clock-out. */
-export function DoneStep({ step, workedLabel, onDone }: DoneStepProps) {
-  const done = doneContent(step, workedLabel)
+export function DoneStep({ step, content: done, onDone }: DoneStepProps) {
   return (
     <ClockScreen>
       <div className="flex flex-1 flex-col justify-center gap-6.5">

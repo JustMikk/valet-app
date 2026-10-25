@@ -1,5 +1,11 @@
+import { Suspense } from "react"
+
 import { Announcement } from "@/features/admin"
 
 export default function Page() {
-  return <Announcement />
+  return (
+    <Suspense>
+      <Announcement />
+    </Suspense>
+  )
 }

@@ -2,122 +2,172 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useMutation } from "@tanstack/react-query"
 
 import { ActionButton, HeroStat, Icon, PageContainer, StatusBadge } from "@/components/shared"
-import { useTicker } from "@/hooks/use-ticker"
-import type { StatusSpec } from "@/lib/status/presets"
-import { formatClock } from "@/lib/time/duration"
-import { TONIGHT } from "@/mocks/staff"
+import { useNow } from "@/hooks/use-now"
+import { staffRepo, type Home, type HomeShift } from "@/lib/data"
+import { formatTime } from "@/lib/time/labels"
+import type { ShiftMode } from "@/lib/time/shift-mode"
 
-import { useStaffSession, type StaffMode } from "../session/staff-session"
+import { punchRequest } from "../clock/punch"
+import { useDevice } from "../clock/use-device"
+import { QueryState } from "../data/query-state"
+import { useAfterPunch, useHome, useProfile } from "../data/queries"
+import { useStaffSession } from "../session/staff-session"
 import { useDemoParam } from "../session/use-demo-param"
 import { ClockOutSheet } from "./clock-out-sheet"
+import { EmptyHome } from "./empty-home"
 import { BANNER_KEYS, HomeBanner } from "./home-banner"
+import { buildHomeView } from "./home-view"
 import { ShiftInfoRows } from "./shift-info-rows"
 import { UpNext } from "./up-next"
 
-const MODES = ["before", "due", "onshift"] as const satisfies readonly StaffMode[]
+const MODES = ["before", "due", "onshift"] as const satisfies readonly ShiftMode[]
+/** Seconds already worked in the ?mode=onshift demo state (2:14:07). */
+const DEMO_ELAPSED_SECS = 8047
+/** How long to wait for a position at clock-out before sending the punch without one. */
+const CLOCK_OUT_FIX_MS = 8000
 
-type HeroState = { status: StatusSpec; sub: string; when: string }
-
-const HERO: Record<StaffMode, HeroState> = {
-  due: {
-    status: { tone: "strong", icon: "timer", filled: true, label: "Clock-in open" },
-    sub: "Starts in 12 min",
-    when: "Today, Fri Oct 23 · 6:00 – 11:00 PM · venue time (PT)",
-  },
-  before: {
-    status: { tone: "muted", icon: "event", filled: true, label: "Today" },
-    sub: "Clock-in opens 5:45 PM",
-    when: TONIGHT.when,
-  },
-  onshift: {
-    status: { tone: "ok", icon: "verified", filled: true, label: "On the clock" },
-    sub: "Verified · 38 m from venue",
-    when: "400 Market St · Fri Oct 23",
-  },
+/** Staff Home: the shift that matters now, the clock-in / clock-out CTA, what's next, open shifts. */
+export function StaffHome() {
+  const home = useHome()
+  return (
+    <PageContainer bottom="dock" className="max-w-190 desktop:max-w-280">
+      <QueryState query={home}>
+        {(data) =>
+          data.shift ? (
+            <HomeContent shift={data.shift} upNext={data.upNext} open={data.open} />
+          ) : data.upNext.length === 0 ? (
+            <EmptyHome open={data.open} />
+          ) : (
+            <UpNext upNext={data.upNext} open={data.open} />
+          )
+        }
+      </QueryState>
+    </PageContainer>
+  )
 }
 
-/** Staff Home: tonight's shift, the clock-in / clock-out CTA, what's next and open shifts. */
-export function StaffHome() {
+type ContentProps = { shift: HomeShift; upNext: Home["upNext"]; open: Home["open"] }
+
+function HomeContent({ shift, upNext, open }: ContentProps) {
   const router = useRouter()
   const session = useStaffSession()
+  const profile = useProfile().data
+  const afterPunch = useAfterPunch()
   const demoMode = useDemoParam("mode", MODES)
   const demoBanner = useDemoParam("banner", BANNER_KEYS)
+  const device = useDevice(shift.venueGeo, "out")
   const [clockOutOpen, setClockOutOpen] = useState(false)
+  const [demoClockedInAt] = useState(() => Date.now() - DEMO_ELAPSED_SECS * 1000)
+  const now = useNow(1000)
 
-  const mode = demoMode ?? session.mode
-  const banner = demoBanner ?? session.banner ?? (session.pushOn ? null : "push")
-  const demoSecs = useTicker(demoMode === "onshift", TONIGHT.demoElapsedSecs)
-  const secs = demoMode === "onshift" ? demoSecs : session.secs
+  const view = buildHomeView(shift, now, {
+    demoMode,
+    pendingClockInAt: session.pendingClockInAt,
+    demoClockedInAt,
+  })
 
-  const hero = HERO[mode]
-  const progress = Math.min(100, (secs / TONIGHT.scheduledSecs) * 100)
+  const clockOut = useMutation({
+    mutationFn: async () => {
+      // One reading as the worker leaves. No fix never blocks leaving: it lands flagged instead.
+      const outcome = await device.location.acquire({
+        targetAccuracyM: shift.neededAccuracyM,
+        timeoutMs: CLOCK_OUT_FIX_MS,
+      })
+      return staffRepo.clockOut(
+        punchRequest({
+          assignmentId: shift.assignmentId,
+          location: outcome.ok ? outcome.fix : undefined,
+          selfie: false,
+        }),
+      )
+    },
+    onSuccess: async (punch) => {
+      await afterPunch(punch)
+      setClockOutOpen(false)
+      router.push("/staff/clock?step=outdone")
+    },
+  })
+
+  const banner =
+    demoBanner ??
+    (session.syncPending
+      ? "sync"
+      : profile && !profile.permissions.push
+        ? "push"
+        : profile && !profile.permissions.installed
+          ? "install"
+          : null)
+  const syncTime = formatTime(session.pendingClockInAt ?? now, shift.timezone)
 
   const cta =
-    mode === "before" ? (
+    view.mode === "before" ? (
       <ActionButton
         size="cta"
         icon="lock_clock"
         disabled
-        reason="Available 15 min before your shift starts"
+        reason={view.ctaReason ?? undefined}
         className="w-full"
       >
-        Clock in opens 5:45 PM
+        {view.ctaLabel}
       </ActionButton>
     ) : (
       <ActionButton
         variant="accent"
         size="cta"
-        icon={mode === "due" ? "login" : "logout"}
+        icon={view.mode === "due" ? "login" : "logout"}
         shine
         className="w-full shadow-cta"
-        onClick={() => (mode === "due" ? router.push("/staff/clock") : setClockOutOpen(true))}
+        onClick={() => (view.mode === "due" ? router.push("/staff/clock") : setClockOutOpen(true))}
       >
-        {mode === "due" ? "Clock in" : "Clock out"}
+        {view.ctaLabel}
       </ActionButton>
     )
 
   return (
-    <PageContainer bottom="dock" className="max-w-190 desktop:max-w-280">
-      {banner && <HomeBanner banner={banner} onOpen={(to) => router.push(to)} />}
+    <>
+      {banner && (
+        <HomeBanner banner={banner} syncTime={syncTime} onOpen={(to) => router.push(to)} />
+      )}
 
       <div className="grid items-start gap-8 desktop:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-6 tablet:rounded-hero tablet:glass-card tablet:p-7">
           <div className="flex animate-rise flex-col gap-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge status={hero.status} className="self-start" />
-              <span className="text-14 font-medium text-fg-2">{hero.sub}</span>
+              <StatusBadge status={view.status} className="self-start" />
+              <span className="text-14 font-medium text-fg-2">{view.sub}</span>
             </div>
-            <HeroStat value={mode === "onshift" ? formatClock(secs) : "6:00 PM"} size={60} />
-            {mode === "onshift" && (
+            <HeroStat value={view.heroValue} size={60} />
+            {view.inLine && (
               <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-1.5 text-16 text-fg-2">
                   <Icon name="north_east" size={20} className="text-ok" />
-                  In 5:51 PM · scheduled until 11:00 PM
+                  {view.inLine}
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-r9 bg-surface-2">
                   <div
                     className="h-full rounded-r9 bg-fg transition-[width] duration-1000 ease-linear"
                     // Progress is a live percentage of the scheduled shift.
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${view.progress}%` }}
                   />
                 </div>
               </div>
             )}
             <div className="flex flex-col gap-1">
               <span className="font-display text-26 leading-x115 font-semibold tracking-n020">
-                {TONIGHT.venue}
+                {shift.venue}
               </span>
-              <span className="text-16 leading-x140 text-fg-2">{hero.when}</span>
+              <span className="text-16 leading-x140 text-fg-2">{view.when}</span>
             </div>
           </div>
 
           <div className="hidden flex-col gap-2 tablet:flex">{cta}</div>
-          <ShiftInfoRows />
+          <ShiftInfoRows shift={shift} />
         </div>
 
-        <UpNext />
+        <UpNext upNext={upNext} open={open} />
       </div>
 
       <div className="absolute inset-x-5 bottom-28 z-15 flex flex-col gap-1.5 tablet:hidden">
@@ -127,12 +177,12 @@ export function StaffHome() {
       <ClockOutSheet
         open={clockOutOpen}
         onOpenChange={setClockOutOpen}
-        secs={secs}
-        onConfirm={() => {
-          setClockOutOpen(false)
-          router.push(`/staff/clock?step=outdone&secs=${secs}`)
-        }}
+        secs={view.secs}
+        endLabel={shift.endLabel}
+        busy={clockOut.isPending}
+        error={clockOut.error?.message ?? null}
+        onConfirm={() => clockOut.mutate()}
       />
-    </PageContainer>
+    </>
   )
 }

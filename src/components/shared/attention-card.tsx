@@ -28,6 +28,8 @@ type AttentionCardProps = {
   density?: "default" | "compact"
   /** Shows the clock-in selfie thumbnail (approval requests). */
   selfie?: boolean
+  /** Actual selfie data URL — renders as a photo; falls back to the face icon when absent. */
+  selfieUrl?: string | null
   className?: string
 }
 
@@ -41,6 +43,7 @@ export function AttentionCard({
   variant = "solid",
   density = "default",
   selfie = false,
+  selfieUrl,
   className,
 }: AttentionCardProps) {
   const compact = density === "compact"
@@ -77,12 +80,14 @@ export function AttentionCard({
           <span
             role="img"
             aria-label="Clock-in selfie"
+            style={selfieUrl ? { backgroundImage: `url(${selfieUrl})` } : undefined}
             className={cn(
-              "grid flex-none place-items-center text-white/60 selfie-thumb",
+              "flex-none overflow-hidden bg-cover bg-center",
               compact ? "h-14 w-11 rounded-r10" : "h-15 w-12 rounded-r12",
+              !selfieUrl && "grid place-items-center text-white/60 selfie-thumb",
             )}
           >
-            <Icon name="face" filled size={compact ? 20 : 22} />
+            {!selfieUrl && <Icon name="face" filled size={compact ? 20 : 22} />}
           </span>
         )}
       </div>

@@ -1,5 +1,11 @@
+import { Suspense } from "react"
+
 import { ShiftDetail } from "@/features/staff"
 
 export default function ShiftDetailPage() {
-  return <ShiftDetail />
+  return (
+    <Suspense>
+      <ShiftDetail />
+    </Suspense>
+  )
 }
