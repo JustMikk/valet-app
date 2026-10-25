@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "@/lib/data"
 import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shared"
 
+import { useNotificationChime } from "@/lib/platform/use-notification-chime"
+
 import { useMarkNotificationsRead, useNotifications, useSession } from "../data/queries"
 import { NotificationPanel } from "./notification-panel"
 
@@ -81,6 +83,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter()
   const session = useSession().data
   const unread = useNotifications().data?.unread ?? 0
+  useNotificationChime(unread)
   const markRead = useMarkNotificationsRead()
   const nav = navItems(session?.badges ?? { live: 0, hours: 0, inbox: 0 })
   const roots = nav.sidebar.map((item) => item.href)

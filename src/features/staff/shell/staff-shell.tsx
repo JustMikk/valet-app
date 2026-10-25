@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "@/lib/data"
 import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shared"
 
+import { useNotificationChime } from "@/lib/platform/use-notification-chime"
+
 import { useHome, useMarkNotificationsRead, useNotifications, useProfile } from "../data/queries"
 import { NotificationPanel } from "./notification-panel"
 
@@ -41,6 +43,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
   const profile = useProfile().data
   const nav = navItems(useHome().data?.open.count ?? 0)
   const unread = useNotifications().data?.unread ?? 0
+  useNotificationChime(unread)
   const markRead = useMarkNotificationsRead()
 
   const mode =
