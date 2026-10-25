@@ -98,6 +98,8 @@ export interface AdminRepo {
   payroll(): Promise<Payroll>
   /** Send each staff member their pay stub as an inbox message. */
   sendPayroll(): Promise<{ sent: number }>
+  /** Send one staff member their pay stub. */
+  sendPayrollTo(staffId: string): Promise<{ sent: number }>
 
   inbox(): Promise<Inbox>
   thread(id: string | undefined): Promise<ThreadDetail>

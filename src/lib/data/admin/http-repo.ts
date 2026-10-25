@@ -110,6 +110,8 @@ export const httpAdminRepo: AdminRepo = {
   sendInvoice: (id) => api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post()),
   payroll: () => api("admin/payroll", PayrollDto, call),
   sendPayroll: () => api("admin/payroll/send", SendPayrollResultDto, post()),
+  sendPayrollTo: (staffId: string) =>
+    api("admin/payroll/send-to", SendPayrollResultDto, post({ staffId })),
 
   inbox: () => api("admin/inbox", InboxDto, call),
   thread: (id) => needsId(id, (v) => api(`admin/inbox/threads/${v}`, ThreadDetailDto, call)),

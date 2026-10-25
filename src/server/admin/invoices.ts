@@ -396,3 +396,26 @@ export async function sendPayroll(adminId: string, now: Date): Promise<{ sent: n
 
   return { sent: data.rows.length }
 }
+
+/** Send one staff member their pay stub. */
+export async function sendPayrollTo(
+  adminId: string,
+  staffId: string,
+  now: Date,
+): Promise<{ sent: number }> {
+  const ctx = await adminCtx(adminId)
+  const data = await getPayroll(adminId, now)
+  const row = data.rows.find((r) => r.staffId === staffId)
+  if (!row) return { sent: 0 }
+
+  const lines = row.lines
+    .map((l) => `  ${l.date}  ${l.event}  ${l.hours}h  $${(l.amountCents / 100).toFixed(2)}`)
+    .join("\n")
+  const body =
+    `Pay summary for ${data.period}\n\n` +
+    `Shifts: ${row.shifts}  |  Hours: ${row.hours}  |  Est. pay: $${(row.amountCents / 100).toFixed(2)}\n\n` +
+    (lines ? `Breakdown:\n${lines}\n\n` : "") +
+    `Rates are estimated from the venue rate — your actual pay may differ.`
+  await messageStaff(ctx, staffId, body)
+  return { sent: 1 }
+}

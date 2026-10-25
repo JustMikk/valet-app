@@ -210,6 +210,10 @@ export function useSendPayroll() {
   })
 }
 
+export function useSendPayrollTo() {
+  return useMutation({ mutationFn: (staffId: string) => adminRepo.sendPayrollTo(staffId) })
+}
+
 export const useInvoice = (id: string | undefined) =>
   useQuery({ queryKey: keys.invoice(id), queryFn: () => adminRepo.invoice(id) })
 

@@ -465,6 +465,7 @@ export const mockAdminRepo: AdminRepo = {
     totalCents: 138510,
   }),
   sendPayroll: async () => ({ sent: 2 }),
+  sendPayrollTo: async () => ({ sent: 1 }),
 
   inbox: () =>
     wait({
