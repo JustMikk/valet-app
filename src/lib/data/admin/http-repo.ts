@@ -65,6 +65,9 @@ export const httpAdminRepo: AdminRepo = {
   deactivate: async (id) => {
     await api(`admin/staff/${id}/deactivate`, Ack, post())
   },
+  deleteStaff: async (id) => {
+    await api(`admin/staff/${id}/delete`, Ack, post())
+  },
 
   events: (tab) => api(`admin/events?tab=${tab}`, EventListDto, call),
   event: (id) => needsId(id, (v) => api(`admin/events/${v}`, EventDetailDto, call)),

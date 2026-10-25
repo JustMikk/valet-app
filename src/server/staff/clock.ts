@@ -46,6 +46,9 @@ const fenceOf = (row: ShiftRow) => ({
   maxAccuracyM: row.min_accuracy_m,
 })
 
+/** True when the venue has no real GPS coordinates set (created without geocoding). */
+const venueUnconfigured = (row: ShiftRow) => row.lat === 0 && row.lng === 0
+
 const VERDICT_LABEL = {
   inside: "Inside",
   outside: "Outside",
@@ -59,7 +62,10 @@ function locationLabel(geofence: PunchRow["geofence"], distance: number | null):
 
 export async function checkLocation(staffId: string, req: ClockCheckRequest): Promise<ClockCheck> {
   const row = await loadOwn(staffId, req.assignmentId)
-  const result = classifyFix(req.location, fenceOf(row))
+  // Venue has no GPS set: skip geofence and report as inside so staff aren't blocked.
+  const result = venueUnconfigured(row)
+    ? { verdict: "inside" as const, distanceM: 0 }
+    : classifyFix(req.location, fenceOf(row))
   return {
     verdict: result.verdict,
     distanceM: result.distanceM,
@@ -109,6 +115,7 @@ function effectiveTime(req: ClockPunchRequest, now: Date): Date {
 
 function evaluate(req: ClockPunchRequest, row: ShiftRow) {
   if (!req.location) return { verdict: "unknown" as const, distanceM: null }
+  if (venueUnconfigured(row)) return { verdict: "inside" as const, distanceM: 0 }
   return classifyFix(req.location, fenceOf(row))
 }
 

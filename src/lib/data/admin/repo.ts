@@ -61,6 +61,8 @@ export interface AdminRepo {
   person(id: string | undefined): Promise<Person>
   invite(emails: string[]): Promise<InviteResult>
   deactivate(id: string): Promise<void>
+  /** Hard-delete an inactive staff record (deactivate first). */
+  deleteStaff(id: string): Promise<void>
 
   events(tab: EventTab): Promise<EventList>
   event(id: string | undefined): Promise<EventDetail>

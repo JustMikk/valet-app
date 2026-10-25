@@ -234,6 +234,7 @@ export const mockAdminRepo: AdminRepo = {
     return { invited: emails.length, skipped: [] }
   },
   deactivate: async () => {},
+  deleteStaff: async () => {},
 
   events: (tab) => wait(eventList(tab)),
   event: async () => eventDetail(),

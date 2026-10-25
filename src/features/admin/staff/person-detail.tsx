@@ -10,7 +10,7 @@ import type { Person } from "@/lib/data"
 
 import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
-import { useDeactivate, usePerson } from "../data/queries"
+import { useDeactivate, useDeleteStaff, usePerson } from "../data/queries"
 
 const CONTACT = "h-13 flex-1 gap-2 text-16"
 
@@ -30,7 +30,9 @@ export function PersonDetail() {
 function PersonBody({ person }: { person: Person }) {
   const router = useRouter()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const deactivate = useDeactivate()
+  const deleteStaff = useDeleteStaff()
   const first = person.name.split(" ")[0]
 
   return (
@@ -103,6 +105,7 @@ function PersonBody({ person }: { person: Person }) {
             )}
           </ul>
           {deactivate.error && <ErrorNotice message={deactivate.error.message} />}
+          {deleteStaff.error && <ErrorNotice message={deleteStaff.error.message} />}
           {person.active && (
             <Button
               variant="ghost"
@@ -111,6 +114,16 @@ function PersonBody({ person }: { person: Person }) {
               onClick={() => setConfirmOpen(true)}
             >
               Deactivate
+            </Button>
+          )}
+          {!person.active && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2 h-13 text-16 text-bad shadow-[inset_0_0_0_1.5px_var(--line)]"
+              onClick={() => setDeleteOpen(true)}
+            >
+              Delete permanently
             </Button>
           )}
         </div>
@@ -124,6 +137,17 @@ function PersonBody({ person }: { person: Person }) {
         tone="destructive"
         onConfirm={() =>
           deactivate.mutate(person.id, { onSuccess: () => router.push("/admin/staff") })
+        }
+      />
+      <ConfirmSheet
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={`Delete ${person.name}?`}
+        consequence={`This permanently removes ${first}'s record, including past shifts and messages. This cannot be undone.`}
+        confirmLabel="Delete permanently"
+        tone="destructive"
+        onConfirm={() =>
+          deleteStaff.mutate(person.id, { onSuccess: () => router.push("/admin/staff") })
         }
       />
     </>

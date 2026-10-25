@@ -218,6 +218,22 @@ export async function inviteStaff(adminId: string, emails: string[]): Promise<In
   return { invited: invited.length, skipped }
 }
 
+/**
+ * Permanently delete a staff record. The person must be inactive (deactivated first).
+ * Past hours, punches and message threads are deleted by CASCADE on the FK.
+ */
+export async function deleteStaff(adminId: string, staffId: string): Promise<void> {
+  const ctx = await adminCtx(adminId)
+  const [person] = await rows<{ id: string; active: boolean }>(
+    sql()`select id, active from staff where id = ${staffId} and tenant_id = ${ctx.tenantId}`,
+  )
+  if (!person) throw notFound("Person not found.")
+  if (person.active) {
+    throw notFound("Deactivate this person before deleting them.")
+  }
+  await sql()`delete from staff where id = ${staffId} and tenant_id = ${ctx.tenantId}`
+}
+
 /** Deactivate: they leave their upcoming shifts (reopened for others) and can no longer sign in. */
 export async function deactivateStaff(adminId: string, staffId: string, now: Date): Promise<void> {
   const ctx = await adminCtx(adminId)

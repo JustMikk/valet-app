@@ -4,7 +4,7 @@ import { TextField } from "@/components/shared"
 import type { AvailabilityQuery, FillMode } from "@/lib/data"
 
 import { ErrorNotice } from "../data/query-state"
-import { useAvailableFor } from "../data/queries"
+import { useAvailableFor, useStaff } from "../data/queries"
 import { FillModePicker } from "./fill-mode-picker"
 import { HeadcountStepper } from "./headcount-stepper"
 import { StaffPicker } from "./staff-picker"
@@ -22,7 +22,16 @@ type EventCrewStepProps = {
 export function EventCrewStep({ value, onChange, window }: EventCrewStepProps) {
   const assigning = value.fill === "assign"
   const available = useAvailableFor(assigning ? window : null)
+  // Fallback: all active+onboarded staff when the availability window isn't ready.
+  const staffList = useStaff()
   const open = value.need - value.assignIds.length
+
+  // Build the fallback list from the full staff directory (active, onboarded only).
+  const fallbackPeople = (staffList.data?.rows ?? [])
+    .filter((r) => r.bucket === "active" || r.bucket === "alerts")
+    .map((r) => ({ id: r.id, initials: r.initials, name: r.name, note: "Active staff" }))
+
+  const people = available.data ?? (window === null ? fallbackPeople : null)
 
   return (
     <div className="flex flex-col gap-5">
@@ -44,19 +53,19 @@ export function EventCrewStep({ value, onChange, window }: EventCrewStepProps) {
       {assigning && (
         <div className="flex flex-col gap-2.5">
           <div className="flex items-baseline justify-between gap-3">
-            <span className="text-15 font-medium">Who&rsquo;s free</span>
+            <span className="text-15 font-medium">{available.data ? "Who’s free" : "Staff"}</span>
             <span role="status" className="text-13 text-fg-2">
               {value.assignIds.length} of {value.need} chosen
               {open > 0 && value.assignIds.length > 0 ? ` · ${open} post as open shifts` : ""}
             </span>
           </div>
-          {available.isPending && (
+          {available.isPending && window !== null && (
             <p className="m-0 text-14 text-fg-2">Finding who&rsquo;s free…</p>
           )}
           {available.error && <ErrorNotice message={available.error.message} />}
-          {available.data && (
+          {people && (
             <StaffPicker
-              people={available.data}
+              people={people}
               selected={value.assignIds}
               onChange={(assignIds) => onChange({ ...value, assignIds })}
               max={value.need}

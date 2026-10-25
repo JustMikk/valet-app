@@ -115,6 +115,14 @@ export function useDeactivate() {
   return useMutation({ mutationFn: (id: string) => adminRepo.deactivate(id), onSuccess: refresh })
 }
 
+export function useDeleteStaff() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: (id: string) => adminRepo.deleteStaff(id),
+    onSuccess: refresh,
+  })
+}
+
 export const useEvents = (tab: EventTab) =>
   useQuery({ queryKey: keys.events(tab), queryFn: () => adminRepo.events(tab) })
 
