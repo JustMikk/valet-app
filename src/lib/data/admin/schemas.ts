@@ -176,6 +176,10 @@ export const RosterRowDto = z.object({
   status: StatusSpecDto,
   action: z.optional(z.enum(["Review", "Call"])),
   tel: z.optional(str),
+  /** Selfie JPEG data URL from the clock-in punch (live / clocked-in staff only). */
+  selfieUrl: z.optional(z.nullable(str)),
+  lat: z.optional(z.nullable(z.number())),
+  lng: z.optional(z.nullable(z.number())),
 })
 export type RosterRow = z.infer<typeof RosterRowDto>
 

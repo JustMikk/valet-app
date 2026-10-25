@@ -168,9 +168,15 @@ export async function getEvent(adminId: string, eventId: string, now: Date): Pro
     const at = (d: Date | null) => (d ? formatTime(d, tz) : "")
     const f = slot.facts
     const base = { id: slot.id, initials: initialsOf(slot.name), name: slot.name, tel: f.tel }
+    const loc = {
+      selfieUrl: slot.selfieUrl ?? null,
+      lat: slot.lat ?? null,
+      lng: slot.lng ?? null,
+    }
     if (slot.state === "waiting") {
       roster.push({
         ...base,
+        ...loc,
         detail: `Requested ${at(row.server_at)} · ${row.distance_m ?? 0} m${f.note ? `, ${f.note}` : ""}`,
         status: ADMIN_STATUS.approval,
         action: "Review",
@@ -192,6 +198,7 @@ export async function getEvent(adminId: string, eventId: string, now: Date): Pro
     } else {
       roster.push({
         ...base,
+        ...loc,
         detail: `In ${at(row.device_at)} · ${row.distance_m ?? 0} m${row.selfie ? " · selfie ok" : ""}${slot.state === "override" ? " · approved override" : ""}`,
         status: row.clocked_out_at ? ADMIN_STATUS.clockedOut : ADMIN_STATUS.onSite,
       })

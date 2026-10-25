@@ -8,14 +8,30 @@ import { ConfirmSheet, GlassCard, Icon, PersonAvatar, StatusBadge } from "@/comp
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { EventDetail as EventData, RosterRow } from "@/lib/data"
+import type { LiveSlot } from "@/lib/data/admin/ops-schemas"
 import { cn } from "@/lib/utils"
 
 import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useCancelEvent, useEvent } from "../data/queries"
+import { StaffLocationModal } from "../live/staff-location-modal"
 import { EditEventSheet } from "./edit-event-sheet"
 import { EditInstructionsSheet } from "./edit-instructions-sheet"
 import { FillSheet } from "./fill-sheet"
+
+function toModalSlot(person: RosterRow): LiveSlot {
+  return {
+    id: person.id,
+    staffId: person.id,
+    name: person.name,
+    meta: person.detail,
+    selfieUrl: person.selfieUrl,
+    lat: person.lat,
+    lng: person.lng,
+    state: "onsite",
+    facts: {},
+  }
+}
 
 const STAT_TONE = { ok: "text-ok", warn: "text-warn", fg: "text-fg" } as const
 const SIDE_BUTTON = "h-13.5 gap-2 text-16"
@@ -53,6 +69,7 @@ function EventBody({ event }: { event: EventData }) {
   const [cancelOpen, setCancelOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editDetailsOpen, setEditDetailsOpen] = useState(false)
+  const [viewPerson, setViewPerson] = useState<RosterRow | null>(null)
   const cancel = useCancelEvent()
   const openSpots = event.openSlots.length
 
@@ -101,20 +118,31 @@ function EventBody({ event }: { event: EventData }) {
               )}
             </div>
             <ul className="m-0 flex list-none flex-col border-t border-line p-0">
-              {event.roster.map((person) => (
-                <li
-                  key={person.id}
-                  className="box-content flex min-h-17 items-center gap-3 border-b border-line py-1.5"
-                >
-                  <PersonAvatar name={person.name} />
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="text-16 font-semibold">{person.name}</span>
-                    <span className="text-14 text-fg-2">{person.detail}</span>
-                  </div>
-                  <StatusBadge status={person.status} size="sm" />
-                  <RosterAction person={person} />
-                </li>
-              ))}
+              {event.roster.map((person) => {
+                const viewable = person.lat != null || person.selfieUrl != null
+                return (
+                  <li
+                    key={person.id}
+                    className={cn(
+                      "box-content flex min-h-17 items-center gap-3 border-b border-line py-1.5",
+                      viewable && "cursor-pointer hover:bg-surface-2",
+                    )}
+                    onClick={viewable ? () => setViewPerson(person) : undefined}
+                  >
+                    <PersonAvatar name={person.name} />
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="text-16 font-semibold">{person.name}</span>
+                      <span className="text-14 text-fg-2">{person.detail}</span>
+                    </div>
+                    <StatusBadge status={person.status} size="sm" />
+                    {viewable ? (
+                      <Icon name="chevron_right" size={20} className="text-fg-3" />
+                    ) : (
+                      <RosterAction person={person} />
+                    )}
+                  </li>
+                )
+              })}
               {event.openSlots.map((posted, i) => (
                 <li
                   key={i}
@@ -218,6 +246,11 @@ function EventBody({ event }: { event: EventData }) {
         cancelLabel="Keep event"
         tone="destructive"
         onConfirm={() => cancel.mutate(event.id, { onSuccess: () => router.push("/admin/events") })}
+      />
+      <StaffLocationModal
+        slot={viewPerson ? toModalSlot(viewPerson) : null}
+        open={viewPerson !== null}
+        onClose={() => setViewPerson(null)}
       />
     </>
   )
