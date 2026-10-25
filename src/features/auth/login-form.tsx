@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import { PillTabs, TextField, ThemeToggle } from "@/components/shared"
+import { PillTabs, PwaInstallBanner, TextField, ThemeToggle } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { signInAdmin, signInStaff } from "@/lib/data"
 import type { Role } from "@/lib/data/api-client"
@@ -49,6 +49,7 @@ export function LoginForm() {
 
   return (
     <div className="min-h-dvh bg-ambient">
+      <PwaInstallBanner className="fixed inset-x-0 top-0 z-30" />
       <main className="mx-auto flex min-h-dvh w-full max-w-110 flex-col justify-center gap-7 px-5 py-12">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" aria-label="Valet Workforce home">
