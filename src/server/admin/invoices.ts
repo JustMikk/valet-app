@@ -1,6 +1,11 @@
 // Invoices (product spec §10.3-10.5): one per venue per period, built from approved hours. Lines
 // are a snapshot; the notice about hours still in review is live, so it clears as hours are approved.
-import type { InvoiceDetail, InvoiceRow, NewInvoiceRequest } from "@/lib/data/admin/ops-schemas"
+import type {
+  InvoiceDetail,
+  InvoiceRow,
+  NewInvoiceRequest,
+  Payroll,
+} from "@/lib/data/admin/ops-schemas"
 import { amountCents, formatHoursDecimal } from "@/lib/money/format"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import type { StatusSpec } from "@/lib/status/presets"
@@ -248,4 +253,73 @@ export async function createInvoice(
               select ${created.id}, x::uuid
               from jsonb_array_elements_text(${JSON.stringify(events.map((e) => e.id))}::jsonb) as x`
   return { id: created.id }
+}
+
+type PayrollDbRow = {
+  staff_id: string
+  name: string
+  shifts: string
+  minutes: string
+  amount_cents: string
+}
+
+/**
+ * Payroll summary: approved hours per staff member in the current billing half-month.
+ * Uses the venue's bill rate as the rate per hour (admin-side only, never shown to staff).
+ */
+export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
+  const ctx = await adminCtx(adminId)
+  const d = now
+  const second = d.getDate() >= 16
+  const y = d.getFullYear()
+  const m = d.getMonth() + 1
+  const padN = (n: number) => String(n).padStart(2, "0")
+  const lastDay = new Date(y, m, 0).getDate()
+  const period = {
+    start: `${y}-${padN(m)}-${padN(second ? 16 : 1)}`,
+    end: `${y}-${padN(m)}-${padN(second ? lastDay : 15)}`,
+  }
+
+  const staffRows = await rows<PayrollDbRow>(
+    sql()`select s.id as staff_id, s.name,
+            count(distinct a.id)::text as shifts,
+            coalesce(sum(
+              round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
+            ), 0)::text as minutes,
+            coalesce(sum(
+              round(round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
+                    * v.bill_rate_cents / 60)
+            ), 0)::text as amount_cents
+          from staff s
+          join assignments a on a.staff_id = s.id
+          join events e on e.id = a.event_id
+          join venues v on v.id = e.venue_id
+          where s.tenant_id = ${ctx.tenantId}
+            and a.hours_status = 'approved'
+            and a.clocked_in_at is not null and a.clocked_out_at is not null
+            and (e.starts_at at time zone ${ctx.tz})::date
+                between ${period.start}::date and ${period.end}::date
+          group by s.id, s.name
+          order by s.name`,
+  )
+
+  const totalCents = staffRows.reduce((sum, r) => sum + Number(r.amount_cents), 0)
+
+  return {
+    period: periodLabel(period.start, period.end),
+    rows: staffRows.map((r) => ({
+      staffId: r.staff_id,
+      initials: r.name
+        .split(" ")
+        .map((w) => w[0] ?? "")
+        .slice(0, 2)
+        .join("")
+        .toUpperCase(),
+      name: r.name,
+      shifts: Number(r.shifts),
+      hours: formatHoursDecimal(Number(r.minutes)),
+      amountCents: Number(r.amount_cents),
+    })),
+    totalCents,
+  }
 }

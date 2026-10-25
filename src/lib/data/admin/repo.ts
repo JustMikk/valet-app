@@ -16,6 +16,7 @@ import type {
   Live,
   NewInvoiceRequest,
   NudgeResult,
+  Payroll,
   RemoveResult,
   ThreadDetail,
   ThreadMessage,
@@ -91,6 +92,8 @@ export interface AdminRepo {
   /** A draft for one venue and period, from the hours approved so far. */
   createInvoice(request: NewInvoiceRequest): Promise<{ id: string }>
   sendInvoice(id: string): Promise<{ billedTo: string }>
+  /** Payroll summary: hours worked per staff member over the current billing period. */
+  payroll(): Promise<Payroll>
 
   inbox(): Promise<Inbox>
   thread(id: string | undefined): Promise<ThreadDetail>

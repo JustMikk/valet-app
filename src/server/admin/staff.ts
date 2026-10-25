@@ -14,6 +14,7 @@ import {
 
 import { rows, sql } from "../db/client"
 import { notFound } from "../http/handler"
+import { demoEnabled } from "../env"
 import { adminCtx, initialsOf } from "./common"
 
 type ListRow = {
@@ -196,12 +197,20 @@ export async function inviteStaff(adminId: string, emails: string[]): Promise<In
   const unique = [...new Set(emails.map((email) => email.trim().toLowerCase()))]
   const invited: string[] = []
   const skipped: string[] = []
+  // In demo mode, immediately mark the new staff as onboarded so they appear in the
+  // available-staff picker and can be assigned to events without waiting for sign-up.
+  const demo = demoEnabled()
   for (const email of unique) {
     const [created] = await rows<{ id: string }>(
-      sql()`insert into staff (tenant_id, name, email, invited_at, installed)
-            values (${ctx.tenantId}, ${nameFromEmail(email)}, ${email}, now(), false)
-            on conflict (lower(email)) do nothing
-            returning id`,
+      demo
+        ? sql()`insert into staff (tenant_id, name, email, invited_at, onboarded_at, installed)
+                values (${ctx.tenantId}, ${nameFromEmail(email)}, ${email}, now(), now(), false)
+                on conflict (lower(email)) do nothing
+                returning id`
+        : sql()`insert into staff (tenant_id, name, email, invited_at, installed)
+                values (${ctx.tenantId}, ${nameFromEmail(email)}, ${email}, now(), false)
+                on conflict (lower(email)) do nothing
+                returning id`,
     )
     if (created) invited.push(email)
     else skipped.push(email)

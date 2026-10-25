@@ -144,7 +144,7 @@ export type InviteResult = z.infer<typeof InviteResultDto>
 
 export const EventState = z.enum(["live", "short", "full", "draft"])
 export type EventState = z.infer<typeof EventState>
-export const EventTab = z.enum(["upcoming", "short", "draft", "past"])
+export const EventTab = z.enum(["live", "upcoming", "short", "draft", "past"])
 export type EventTab = z.infer<typeof EventTab>
 
 export const EventCardDto = z.object({
@@ -162,6 +162,7 @@ export type EventCard = z.infer<typeof EventCardDto>
 export const EventListDto = z.object({
   days: z.array(z.object({ label: str, items: z.array(EventCardDto) })),
   upcoming: int,
+  live: int,
   short: int,
   drafts: int,
 })
@@ -190,10 +191,25 @@ export const EventDetailDto = z.object({
   openSlots: z.array(str),
   confirmedCount: int,
   cancelled: bool,
+  /** Editable fields returned so the edit sheet can pre-fill them. */
+  editable: z.optional(
+    z.object({
+      date: str,
+      start: str,
+      end: str,
+      name: str,
+    }),
+  ),
 })
 export type EventDetail = z.infer<typeof EventDetailDto>
 
-export const EventPatch = z.object({ instructions: z.string().check(z.trim(), z.maxLength(1000)) })
+export const EventPatch = z.object({
+  instructions: z.optional(z.string().check(z.trim(), z.maxLength(1000))),
+  date: z.optional(z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}$/))),
+  start: z.optional(z.string().check(z.regex(/^\d{2}:\d{2}$/))),
+  end: z.optional(z.string().check(z.regex(/^\d{2}:\d{2}$/))),
+  name: z.optional(z.string().check(z.trim(), z.minLength(1), z.maxLength(80))),
+})
 export type EventPatch = z.infer<typeof EventPatch>
 
 export const FillMode = z.enum(["open", "assign"])

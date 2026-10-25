@@ -17,7 +17,7 @@ export function RouteScreen({ back, children }: { back: ReactNode; children: Rea
   }, [pathname])
 
   return (
-    <div ref={pane} className="no-scrollbar flex h-full flex-col overflow-y-auto">
+    <div ref={pane} className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto">
       {back}
       {/* Keyed so each route is a new transition root; the Back row stays put. */}
       <ViewTransition key={pathname} enter="route-in" exit="route-out" default="none">
