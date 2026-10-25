@@ -1,13 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { ThemeToggle } from "@/components/shared"
+import { PwaInstallBanner, ThemeToggle } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 
 /** Public landing page: who this is for and where to sign in. */
 export default function Home() {
   return (
     <div className="min-h-dvh bg-ambient">
+      <PwaInstallBanner className="fixed inset-x-0 top-0 z-30" />
       <main className="mx-auto flex min-h-dvh w-full max-w-130 flex-col justify-center gap-9 px-5 py-12">
         <div className="flex items-center justify-between gap-4">
           <Image

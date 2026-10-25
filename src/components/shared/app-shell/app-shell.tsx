@@ -116,7 +116,11 @@ export function AppShell({
         )}
 
         <main className="relative flex h-full min-w-0 flex-1 flex-col">
-          {banner && mode === "app" && banner}
+          {banner && mode === "app" && (
+            // On phone the floating top bar covers the very top of <main>, so push the banner
+            // down to clear it. Tablet+ has a sidebar; the floating chrome is hidden, so no pad.
+            <div className="pt-[calc(var(--safe-top)+72px)] tablet:pt-0">{banner}</div>
+          )}
           {layered ? (
             <div className="absolute inset-0 z-50">{children}</div>
           ) : (
