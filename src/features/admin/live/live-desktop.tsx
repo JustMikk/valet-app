@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 
-import { ChipGroup, Icon, ToastPill } from "@/components/shared"
+import { ChipGroup, Icon, PillTabs, ToastPill } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import type { LiveSlot } from "@/lib/data/admin/ops-schemas"
 import type { Pulse } from "@/lib/live/model"
@@ -14,6 +14,8 @@ import { CARD, EventsColumn, RosterColumn } from "./live-columns"
 import { LiveDot, Trend } from "./live-parts"
 import { StaffLocationModal } from "./staff-location-modal"
 import type { LiveBoard } from "./use-live-board"
+
+type View = "events" | "roster" | "attention"
 
 type Day = "today" | "tomorrow" | "pick"
 const DAYS: { value: Day; label: string }[] = [
@@ -62,7 +64,20 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
   const [day, setDay] = useState<Day>("today")
   const [viewSlot, setViewSlot] = useState<LiveSlot | null>(null)
   const { pulse } = board
+  const [view, setView] = useState<View>("events")
   const selected = board.summaries.find((e) => e.id === selectedId) ?? board.summaries[0]
+  const nav = (
+    <PillTabs
+      label="Show"
+      value={view}
+      onValueChange={setView}
+      items={[
+        { value: "events", label: "Events", count: board.summaries.length },
+        ...(selected ? [{ value: "roster" as const, label: selected.venue }] : []),
+        { value: "attention", label: "Attention", count: pulse.need },
+      ]}
+    />
+  )
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
@@ -110,10 +125,22 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
         <Kpi value={pulse.open} label="Open slots today" kpi="open" />
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_22.5rem] gap-5 px-8 pt-5 pb-6">
-        <EventsColumn board={board} selectedId={selected?.id} onSelect={setSelectedId} />
-        {selected && <RosterColumn board={board} event={selected} onView={setViewSlot} />}
-        <AttentionColumn board={board} />
+      <div className="flex min-h-0 flex-1 px-8 pt-5 pb-6">
+        {view === "events" && (
+          <EventsColumn
+            board={board}
+            nav={nav}
+            selectedId={selected?.id}
+            onSelect={(id) => {
+              setSelectedId(id)
+              setView("roster")
+            }}
+          />
+        )}
+        {view === "roster" && selected && (
+          <RosterColumn board={board} nav={nav} event={selected} onView={setViewSlot} />
+        )}
+        {view === "attention" && <AttentionColumn board={board} nav={nav} />}
       </div>
 
       <ToastPill message={board.toast} placement="bottom" />
