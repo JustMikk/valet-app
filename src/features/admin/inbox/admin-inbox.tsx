@@ -32,7 +32,7 @@ function ThreadRow({
       aria-current={selected || undefined}
       onClick={onOpen}
       className={cn(
-        "box-content flex min-h-17 w-full items-center gap-3 border-0 border-b border-line px-4 py-1.5 text-left text-fg transition-colors duration-160 last:border-b-0",
+        "flex min-h-17 w-full items-center gap-3 border-0 border-b border-line px-4 py-1.5 text-left text-fg transition-colors duration-160 last:border-b-0",
         selected ? "bg-surface" : "bg-transparent hover:bg-surface/60",
       )}
     >
@@ -48,7 +48,7 @@ function ThreadRow({
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex items-baseline gap-2">
           <span className="flex-1 truncate text-16 font-semibold">{thread.name}</span>
-          <span className="text-13 font-medium text-fg-3">{thread.time}</span>
+          <span className="flex-none text-13 font-medium text-fg-3">{thread.time}</span>
         </span>
         <span className="truncate text-14 text-fg-2">{thread.last}</span>
       </span>
@@ -120,7 +120,7 @@ export function AdminInbox() {
           tools={tabsFor()}
         />
       )}
-      <div className="grid items-start gap-7 tablet:grid-cols-[minmax(17.5rem,22.5rem)_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 tablet:grid-cols-[minmax(20rem,26rem)_minmax(0,1fr)] desktop:grid-cols-[minmax(22rem,28rem)_minmax(0,1fr)]">
         {showList && (
           <div className="flex flex-col gap-3.5">
             {tabsFor("tablet:hidden")}
