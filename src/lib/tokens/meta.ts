@@ -9,7 +9,7 @@ export type ColorToken = {
 }
 
 export const COLOR_TOKENS: readonly ColorToken[] = [
-  { name: "--bg", role: "Screen background", light: "#FFFFFF", dark: "#0A0A0B" },
+  { name: "--bg", role: "Screen background", light: "#F7F7F5", dark: "#0A0A0B" },
   {
     name: "--surface",
     role: "Cards, fields, secondary buttons",

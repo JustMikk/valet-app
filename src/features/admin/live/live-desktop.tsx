@@ -7,6 +7,7 @@ import { ChipGroup, Icon, PillTabs, ToastPill } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import type { LiveSlot } from "@/lib/data/admin/ops-schemas"
 import type { Pulse } from "@/lib/live/model"
+import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 
 import { AttentionColumn } from "./live-attention-column"
@@ -24,6 +25,15 @@ const DAYS: { value: Day; label: string }[] = [
   { value: "pick", label: "Pick date" },
 ]
 
+/** Each count opens with a line icon, like the reference dashboard's stat cards. */
+const KPI_ICON: Record<keyof Pulse, IconName> = {
+  need: "error",
+  live: "sensors",
+  onShift: "group",
+  expected: "schedule",
+  open: "person_add",
+}
+
 function Kpi({
   label,
   kpi,
@@ -40,22 +50,29 @@ function Kpi({
   first?: boolean
 }) {
   return (
-    <div
-      className={cn(
-        "relative flex flex-col gap-1.5 border-r border-line last:border-r-0",
-        first ? "px-8 py-4.5" : "px-6 py-4.5",
-      )}
-    >
-      <span
-        className={cn(
-          "font-display text-40 leading-x100 font-bold tracking-n040 tabular-nums",
-          tone === "bad" && "text-bad",
-        )}
-      >
-        {pulse[kpi]}
-      </span>
-      <span className="text-14 font-medium text-fg-2">{label}</span>
-      <Trend kpi={kpi} pulse={pulse} yesterday={yesterday} className="absolute top-4.5 right-5" />
+    <div className={cn(CARD, "flex flex-col gap-3 rounded-r20 p-4.5", first && "pl-5")}>
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className={cn(
+            "grid size-10 place-items-center rounded-r12",
+            tone === "bad" ? "bg-bad-soft text-bad" : "bg-surface text-fg-2",
+          )}
+        >
+          <Icon name={KPI_ICON[kpi]} size={22} />
+        </span>
+        <Trend kpi={kpi} pulse={pulse} yesterday={yesterday} />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span
+          className={cn(
+            "font-display text-34 leading-x100 font-bold tracking-n040 tabular-nums",
+            tone === "bad" && "text-bad",
+          )}
+        >
+          {pulse[kpi]}
+        </span>
+        <span className="text-14 font-medium text-fg-2">{label}</span>
+      </div>
     </div>
   )
 }
@@ -120,7 +137,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
         </Button>
       </header>
 
-      <div className={cn(CARD, "mx-8 grid grid-cols-5 overflow-hidden")}>
+      <div className="mx-8 grid grid-cols-5 gap-3">
         <Kpi first label="Need you" kpi="need" {...trend} tone="bad" />
         <Kpi label="Events live" kpi="live" {...trend} />
         <Kpi label="On shift" kpi="onShift" {...trend} />
