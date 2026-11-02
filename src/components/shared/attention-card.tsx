@@ -111,7 +111,7 @@ export function AttentionCard({
       </div>
       {/* Two equal columns, so the strong action is the same width on every card: it always
           leads, and the rest (grey pills, or the round icon buttons) share the second column. */}
-      <div className={cn("grid grid-cols-2", compact ? "gap-1.5" : "gap-2")}>
+      <div className={cn("mt-auto grid grid-cols-2", compact ? "gap-1.5" : "gap-2")}>
         {strong && (
           <Button
             variant={primary === "bad" ? "destructive" : "strong"}
