@@ -101,7 +101,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      <header className="mb-5 flex items-center gap-4 border-b border-line bg-elev px-8 py-5">
+      <header className="mb-5 flex items-center gap-4 border-b border-line bg-elev px-6 py-5">
         <div className="flex flex-1 flex-col gap-1">
           <h1 className="m-0 font-display text-34 leading-x100 font-bold tracking-n030">
             Live Board
@@ -137,7 +137,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
         </Button>
       </header>
 
-      <div className="mx-8 grid grid-cols-5 gap-3">
+      <div className="mx-6 grid grid-cols-5 gap-3">
         <Kpi first label="Need you" kpi="need" {...trend} tone="bad" />
         <Kpi label="Events live" kpi="live" {...trend} />
         <Kpi label="On shift" kpi="onShift" {...trend} />
@@ -145,7 +145,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
         <Kpi label="Open slots today" kpi="open" {...trend} />
       </div>
 
-      <div className="flex min-h-0 flex-1 px-8 pt-5 pb-6">
+      <div className="flex min-h-0 flex-1 px-6 pt-4 pb-5">
         {view === "events" && (
           <EventsColumn
             board={board}

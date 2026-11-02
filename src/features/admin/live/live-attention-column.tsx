@@ -44,7 +44,7 @@ export function AttentionColumn({ board, nav }: { board: LiveBoard; nav: ReactNo
         }
       />
       <div
-        className={cn(BODY, "grid grid-cols-3 content-start gap-3 p-4 min-[1400px]:grid-cols-4")}
+        className={cn(BODY, "grid grid-cols-3 content-start gap-3 p-3 min-[1700px]:grid-cols-4")}
       >
         {shown.map((item) => (
           <div
