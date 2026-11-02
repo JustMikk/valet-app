@@ -43,7 +43,9 @@ export function AttentionColumn({ board, nav }: { board: LiveBoard; nav: ReactNo
           />
         }
       />
-      <div className={cn(BODY, "grid grid-cols-3 content-start gap-3 p-4")}>
+      <div
+        className={cn(BODY, "grid grid-cols-3 content-start gap-3 p-4 min-[1400px]:grid-cols-4")}
+      >
         {shown.map((item) => (
           <div
             key={item.key}
@@ -54,6 +56,7 @@ export function AttentionColumn({ board, nav }: { board: LiveBoard; nav: ReactNo
           >
             <AttentionCard
               density="compact"
+              className="h-full"
               variant="plain"
               primary="bad"
               tone={item.tone}
