@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 
 import { AttentionCard, PillTabs } from "@/components/shared"
 import type { AttentionItem } from "@/lib/live/model"
 import { cn } from "@/lib/utils"
 
-import { BODY, CARD, COLUMN, ColumnHead, countOf, TITLE } from "./live-columns"
+import { BODY, CARD, COLUMN, ColumnHead, countOf } from "./live-columns"
 import { attentionActions } from "./live-parts"
 import type { LiveBoard } from "./use-live-board"
 
@@ -18,7 +18,7 @@ const ATTENTION_GROUP: Record<AttentionItem["kind"], Exclude<AttentionFilter, "a
   waiting: "approvals",
 }
 
-export function AttentionColumn({ board }: { board: LiveBoard }) {
+export function AttentionColumn({ board, nav }: { board: LiveBoard; nav: ReactNode }) {
   const [filter, setFilter] = useState<AttentionFilter>("all")
   const all = board.attention
   const inGroup = (group: AttentionFilter) => (item: AttentionItem) =>
@@ -27,7 +27,7 @@ export function AttentionColumn({ board }: { board: LiveBoard }) {
   return (
     <section aria-label="Attention" className={cn(COLUMN, CARD)}>
       <ColumnHead
-        title={<h2 className={TITLE}>Attention · {board.pulse.need}</h2>}
+        nav={nav}
         tabs={
           <PillTabs
             label="Show attention"
@@ -43,12 +43,12 @@ export function AttentionColumn({ board }: { board: LiveBoard }) {
           />
         }
       />
-      <div className={cn(BODY, "gap-1 px-5 pt-2 pb-4")}>
+      <div className={cn(BODY, "grid grid-cols-3 content-start gap-3 p-4")}>
         {shown.map((item) => (
           <div
             key={item.key}
             className={cn(
-              "flex-none border-b border-line pb-1 last:border-b-0",
+              "rounded-r20 border border-line",
               board.leaving[item.key] ? "animate-out" : "animate-fade",
             )}
           >
@@ -67,7 +67,7 @@ export function AttentionColumn({ board }: { board: LiveBoard }) {
           </div>
         ))}
         {shown.length === 0 && (
-          <p className="m-0 py-2 text-15 text-fg-2">
+          <p className="col-span-full m-0 px-1 py-2 text-15 text-fg-2">
             {all.length === 0
               ? "All clear. Nothing needs you right now."
               : "Nothing of this kind right now."}

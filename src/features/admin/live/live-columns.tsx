@@ -13,30 +13,22 @@ import type { LiveBoard } from "./use-live-board"
 
 /** White card on the page ground, like the invoice page (Regency mockup). */
 export const CARD = "rounded-r24 border border-line bg-elev"
-export const COLUMN = "flex min-h-0 flex-col overflow-hidden"
+export const COLUMN = "flex min-h-0 flex-1 flex-col overflow-hidden"
 export const BODY = "no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto"
 const ACTION = "h-10 px-3.5 text-14 whitespace-nowrap"
 const EMPTY = "m-0 px-3 py-4 text-15 text-fg-2"
 
 export const countOf = <T,>(items: T[], test: (item: T) => boolean) => items.filter(test).length
 
-/** Every column opens the same way: title (with any detail beside it), then its filter tabs. */
-export function ColumnHead({
-  title,
-  aside,
-  tabs,
-}: {
-  title: ReactNode
-  aside?: ReactNode
-  tabs: ReactNode
-}) {
+/**
+ * The board shows one column at a time: the column switch (`nav`) on the left of the panel's
+ * top row, that column's own filters on the right.
+ */
+export function ColumnHead({ nav, tabs }: { nav: ReactNode; tabs: ReactNode }) {
   return (
-    <div className="flex flex-none flex-col gap-3 border-b border-line px-5 pt-4.5 pb-3.5">
-      <div className="flex items-start gap-2.5">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">{title}</div>
-        {aside}
-      </div>
-      {tabs}
+    <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-5 py-3.5">
+      {nav}
+      <div className="ml-auto">{tabs}</div>
     </div>
   )
 }
@@ -93,10 +85,12 @@ export function EventsColumn({
   board,
   selectedId,
   onSelect,
+  nav,
 }: {
   board: LiveBoard
   selectedId: string | undefined
   onSelect: (id: string) => void
+  nav: ReactNode
 }) {
   const [filter, setFilter] = useState<EventFilter>("all")
   const all = board.summaries
@@ -104,7 +98,7 @@ export function EventsColumn({
   return (
     <section aria-label="Events" className={cn(COLUMN, CARD)}>
       <ColumnHead
-        title={<h2 className={TITLE}>Events · {all.length}</h2>}
+        nav={nav}
         tabs={
           <PillTabs
             label="Show events"
@@ -119,7 +113,7 @@ export function EventsColumn({
           />
         }
       />
-      <div className={cn(BODY, "gap-1 p-2")}>
+      <div className={cn(BODY, "grid grid-cols-3 content-start gap-2 p-3")}>
         {events.map((event) => (
           <EventRow
             key={event.id}
@@ -128,7 +122,7 @@ export function EventsColumn({
             onSelect={() => onSelect(event.id)}
           />
         ))}
-        {events.length === 0 && <p className={EMPTY}>No events here.</p>}
+        {events.length === 0 && <p className={cn(EMPTY, "col-span-full")}>No events here.</p>}
       </div>
     </section>
   )
@@ -150,10 +144,12 @@ export function RosterColumn({
   board,
   event,
   onView,
+  nav,
 }: {
   board: LiveBoard
   event: EventSummary
   onView: (slot: LiveSlot) => void
+  nav: ReactNode
 }) {
   const [filter, setFilter] = useState<SlotFilter>("all")
   const slots = sheetSlots(event)
@@ -163,15 +159,7 @@ export function RosterColumn({
   return (
     <section aria-label={`${event.venue} roster`} className={cn(COLUMN, CARD)}>
       <ColumnHead
-        title={
-          <>
-            <h2 className={TITLE}>{event.venue}</h2>
-            <span className="text-13 text-fg-2">
-              {event.time} · {event.rel}
-            </span>
-          </>
-        }
-        aside={<StatusBadge status={event.health.status} size="sm" />}
+        nav={nav}
         tabs={
           <PillTabs
             label="Show slots"
@@ -187,7 +175,16 @@ export function RosterColumn({
           />
         }
       />
-      <div className={cn(BODY, "gap-3 px-5 pt-3.5 pb-4")}>
+      <div className={cn(BODY, "gap-3 px-5 pt-4 pb-4")}>
+        <div className="flex items-start gap-2.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <h2 className={TITLE}>{event.venue}</h2>
+            <span className="text-13 text-fg-2">
+              {event.time} · {event.rel}
+            </span>
+          </div>
+          <StatusBadge status={event.health.status} size="sm" />
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button
             variant="secondary"
