@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { AdminHead, AdminPage } from "../common/admin-page"
 import { DataHead, DataRow, StatusCell, TABLE_CARD } from "../common/data-table"
 import { Pager, usePager } from "../common/pager"
+import { SummaryBar } from "../common/summary-bar"
 import { QueryState } from "../data/query-state"
 import { useInvoices, usePayroll, useSendPayroll } from "../data/queries"
 import { Money } from "./invoice-parts"
@@ -71,8 +72,23 @@ function ClientInvoices() {
 
 function InvoiceTable({ list }: { list: InvoiceRow[] }) {
   const pager = usePager(list)
+  const overdue = list.filter((row) => row.status.label.startsWith("Overdue"))
+  const overdueCents = overdue.reduce((total, row) => total + row.amountCents, 0)
   return (
     <div className="flex flex-col gap-5">
+      {overdue.length > 0 && (
+        <SummaryBar
+          icon="receipt_long"
+          tone="bad"
+          action={{
+            label: overdue.length === 1 ? "Open it" : "Open the oldest",
+            href: `/admin/invoices/detail?id=${overdue[overdue.length - 1].id}`,
+          }}
+        >
+          {overdue.length} {overdue.length === 1 ? "invoice is" : "invoices are"} overdue:{" "}
+          {dollars(overdueCents)} still to collect.
+        </SummaryBar>
+      )}
       <div className={TABLE_CARD}>
         <DataHead columns={["Venue · period", "Hours", "Amount", "Status"]} />
         <div className="flex flex-col">

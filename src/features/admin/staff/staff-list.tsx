@@ -11,6 +11,7 @@ import { DataHead, DataRow, PersonCell, StatusCell, TABLE_CARD } from "../common
 import { Pager, usePager } from "../common/pager"
 import { QueryState } from "../data/query-state"
 import { useStaff } from "../data/queries"
+import { SummaryBar } from "../common/summary-bar"
 import { InviteSheet } from "./invite-sheet"
 
 function inTab(tab: StaffTab, bucket: StaffBucket): boolean {
@@ -115,6 +116,18 @@ function Directory({
       {tabs}
       <div className="flex flex-col gap-3.5">
         {search}
+        {tab === "invited" && rows.length > 0 && (
+          <SummaryBar icon="person_add" tone="info">
+            {rows.length} {rows.length === 1 ? "invite is" : "invites are"} pending. People show as
+            active once they open the link and sign in.
+          </SummaryBar>
+        )}
+        {tab === "alerts" && rows.length > 0 && (
+          <SummaryBar icon="notifications" tone="warn">
+            {rows.length} {rows.length === 1 ? "person has" : "people have"} alerts off and
+            won&apos;t get shift or late pushes. Message them to turn alerts back on.
+          </SummaryBar>
+        )}
         <div className={TABLE_CARD}>
           <DataHead columns={["Name", "Status", "Next shift", "This week"]} />
           <div className="flex flex-col">
