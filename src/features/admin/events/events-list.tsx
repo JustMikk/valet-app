@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { AdminHead, AdminPage, CARD_GRID } from "../common/admin-page"
 import { QueryState } from "../data/query-state"
 import { useEvents } from "../data/queries"
+import { ShortSummary } from "./short-summary"
 
 const STATE_SPEC = {
   live: ADMIN_STATUS.live,
@@ -183,7 +184,15 @@ export function EventsList() {
         {tab !== "past" && <DateFilter value={range} onChange={setRange} />}
       </div>
       <QueryState query={events} rows={3}>
-        {(list) => <Days list={tab === "past" ? list : inRange(list)} />}
+        {(list) => {
+          const shown = tab === "past" ? list : inRange(list)
+          return (
+            <div className="flex flex-col gap-5">
+              {tab === "short" && <ShortSummary list={shown} />}
+              <Days list={shown} />
+            </div>
+          )
+        }}
       </QueryState>
     </AdminPage>
   )
