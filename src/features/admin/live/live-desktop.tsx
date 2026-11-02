@@ -113,7 +113,7 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
         <Kpi label="Open slots today" kpi="open" {...trend} />
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_21.25rem] gap-5 px-8 pt-5 pb-6">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_22.5rem] gap-5 px-8 pt-5 pb-6">
         <EventsColumn board={board} selectedId={selected?.id} onSelect={setSelectedId} />
         {selected && <RosterColumn board={board} event={selected} onView={setViewSlot} />}
         <AttentionColumn board={board} />
