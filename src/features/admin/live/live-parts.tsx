@@ -53,7 +53,7 @@ const UP_IS_GOOD: Record<keyof Pulse, boolean> = {
   open: false,
 }
 
-/** "↑ 2" in green when the change is good news, brick red when it is bad, grey when flat. */
+/** "↑ 2" as a small pill: green tint when the change is good news, red tint when bad, grey when flat. */
 export function Trend({ kpi, className }: { kpi: keyof Pulse; className?: string }) {
   const delta = PULSE_TREND[kpi]
   const good = delta > 0 === UP_IS_GOOD[kpi]
@@ -65,8 +65,8 @@ export function Trend({ kpi, className }: { kpi: keyof Pulse; className?: string
           : `${delta > 0 ? "Up" : "Down"} ${Math.abs(delta)} since yesterday`
       }
       className={cn(
-        "inline-flex items-center gap-0.5 text-13 font-semibold tabular-nums",
-        delta === 0 ? "text-fg-3" : good ? "text-ok" : "text-bad",
+        "inline-flex h-6 items-center gap-0.5 rounded-pill pr-2 pl-1.5 text-12 font-semibold tabular-nums",
+        delta === 0 ? "bg-surface text-fg-3" : good ? "bg-ok-soft text-ok" : "bg-bad-soft text-bad",
         className,
       )}
     >
@@ -107,7 +107,7 @@ export function PhoneStats({ pulse }: { pulse: Pulse }) {
       </div>
       {small.map(([kpi, label]) => (
         <div key={label} className={cn(STAT_CARD, "gap-0.5 p-3")}>
-          <Trend kpi={kpi} className="absolute top-2.5 right-2.5 text-12" />
+          <Trend kpi={kpi} className="absolute top-2 right-2" />
           <span className="font-display text-24 leading-x110 font-bold tracking-n030 tabular-nums">
             {pulse[kpi]}
           </span>
