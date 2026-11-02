@@ -7,6 +7,7 @@ import type { AttentionItem } from "@/lib/live/model"
 import { cn } from "@/lib/utils"
 
 import { BODY, CARD, COLUMN, ColumnHead, countOf } from "./live-columns"
+import { SummaryBar } from "../common/summary-bar"
 import { attentionActions } from "./live-parts"
 import type { LiveBoard } from "./use-live-board"
 
@@ -24,6 +25,16 @@ export function AttentionColumn({ board, nav }: { board: LiveBoard; nav: ReactNo
   const inGroup = (group: AttentionFilter) => (item: AttentionItem) =>
     group === "all" || ATTENTION_GROUP[item.kind] === group
   const shown = all.filter(inGroup(filter))
+  const open = countOf(all, inGroup("open"))
+  const late = countOf(all, inGroup("late"))
+  const approvals = countOf(all, inGroup("approvals"))
+  const parts = [
+    open && `${open} open`,
+    late && `${late} late`,
+    approvals && `${approvals} ${approvals === 1 ? "approval" : "approvals"}`,
+  ].filter(Boolean)
+  // Every event with open slots, once: what "Broadcast open slots" sends to.
+  const openEvents = [...new Set(all.filter(inGroup("open")).map((item) => item.eventId))]
   return (
     <section aria-label="Attention" className={cn(COLUMN, CARD)}>
       <ColumnHead
@@ -46,6 +57,23 @@ export function AttentionColumn({ board, nav }: { board: LiveBoard; nav: ReactNo
       <div
         className={cn(BODY, "grid grid-cols-3 content-start gap-3 p-3 min-[1700px]:grid-cols-4")}
       >
+        {all.length > 0 && (
+          <SummaryBar
+            icon="error"
+            tone="bad"
+            className="col-span-full"
+            action={
+              openEvents.length > 0
+                ? {
+                    label: "Broadcast open slots",
+                    onClick: () => openEvents.forEach((id) => board.broadcastEvent(id)),
+                  }
+                : undefined
+            }
+          >
+            {all.length} {all.length === 1 ? "thing needs" : "things need"} you: {parts.join(", ")}.
+          </SummaryBar>
+        )}
         {shown.map((item) => (
           <div
             key={item.key}
