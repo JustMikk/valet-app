@@ -15,8 +15,7 @@ type PillTabsProps<T extends string> = {
 
 /**
  * Admin page filters (Admin Pages "tabs"): 40 px, 10 px corners, styled like the Live Board's day chips
- * (Regency brand: the selected one is the accent tint with an accent ring, the rest plain
- * text), with an optional count bubble. A single-select button group; the selection is `aria-pressed`.
+ * (Regency brand: the selected one is a filled ink pill, the rest plain text), with an optional count bubble. A single-select button group; the selection is `aria-pressed`.
  */
 export function PillTabs<T extends string>({
   label,
@@ -42,7 +41,7 @@ export function PillTabs<T extends string>({
             className={cn(
               "flex h-10 flex-none items-center gap-1.5 rounded-r10 border-0 px-3.5 text-16 transition-[background-color,color] duration-200",
               on
-                ? "bg-accent-soft font-semibold text-accent-text shadow-[inset_0_0_0_1.5px_var(--accent)]"
+                ? "bg-fg font-semibold text-bg"
                 : "bg-transparent font-medium text-fg-2 hover:bg-surface",
             )}
           >
@@ -51,7 +50,7 @@ export function PillTabs<T extends string>({
               <span
                 className={cn(
                   "box-border h-5 min-w-5 rounded-pill px-1.5 text-center text-11 leading-5 font-bold",
-                  on ? "bg-accent-text text-white" : "bg-surface-2 text-fg",
+                  on ? "bg-bg/20 text-bg" : "bg-surface-2 text-fg",
                 )}
               >
                 {item.count}
