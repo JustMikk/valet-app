@@ -18,7 +18,8 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg: #ffffff;
+  /* A faint grey page so white cards stand apart without shadows (client direction). */
+  --bg: #f7f7f5;
   /* Light grey fills for fields, secondary buttons and selection (client palette: no ivory). */
   --surface: #f4f4f2;
   --surface-2: #ececea;
@@ -27,7 +28,7 @@
   --fg: #0e0e10;
   /* Neutral greys (client palette: silver, no warm tint). */
   --fg-2: #5e5e5b;
-  /* Muted text: 5.0:1 on bg, 4.5:1 on surface (OPEN_QUESTIONS D11 keeps ≥ 4.5:1). */
+  /* Muted text: 4.6:1 on bg, 4.5:1 on surface (OPEN_QUESTIONS D11 keeps ≥ 4.5:1). */
   --fg-3: #70706c;
   /* Graphics (hatch, expected segment, outline rings): silver, ≥ 3:1 on bg and surface. */
   --fg-3-line: #8a8a86;
