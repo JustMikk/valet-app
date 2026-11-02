@@ -8,6 +8,8 @@ import { useBreakpoint } from "@/hooks/use-breakpoint"
 import type { Thread } from "@/lib/data"
 import { cn } from "@/lib/utils"
 
+import { TABLE_CARD } from "../common/data-table"
+import { Pager, usePager } from "../common/pager"
 import { AdminHead, AdminPage } from "../common/admin-page"
 import { QueryState } from "../data/query-state"
 import { useInbox } from "../data/queries"
@@ -30,8 +32,8 @@ function ThreadRow({
       aria-current={selected || undefined}
       onClick={onOpen}
       className={cn(
-        "box-content flex min-h-18 w-full items-center gap-3 border-0 border-b border-line py-1.5 text-left text-fg tablet:px-3",
-        selected ? "bg-surface tablet:rounded-r16" : "bg-transparent",
+        "box-content flex min-h-17 w-full items-center gap-3 border-0 border-b border-line px-4 py-1.5 text-left text-fg transition-colors duration-160 last:border-b-0",
+        selected ? "bg-surface" : "bg-transparent hover:bg-surface/60",
       )}
     >
       <span
@@ -73,6 +75,7 @@ export function AdminInbox() {
   const requestedThread = threads.find((t) => t.id === requested)
   const tab: InboxTab = picked ?? (requestedThread?.announcement ? "announcements" : "messages")
   const shown = threads.filter((t) => t.announcement === (tab === "announcements"))
+  const pager = usePager(shown, 7)
   const unreadIn = (announcement: boolean) =>
     threads.filter((t) => t.announcement === announcement && t.unread).length
   const tabs = [
@@ -121,27 +124,30 @@ export function AdminInbox() {
         {showList && (
           <div className="flex flex-col gap-3.5">
             {tabsFor("tablet:hidden")}
-            <div className="flex flex-col border-t border-line">
-              <QueryState query={inbox} rows={4}>
-                {() =>
-                  shown.length === 0 ? (
-                    <p className="m-0 py-8 text-center text-15 text-fg-2">
-                      {tab === "announcements"
-                        ? "No announcements sent yet."
-                        : "No chats with staff yet."}
-                    </p>
-                  ) : (
-                    shown.map((thread) => (
-                      <ThreadRow
-                        key={thread.id}
-                        thread={thread}
-                        selected={!phone && thread.id === selected}
-                        onOpen={() => router.replace(`/admin/inbox?thread=${thread.id}`)}
-                      />
-                    ))
-                  )
-                }
-              </QueryState>
+            <div className={TABLE_CARD}>
+              <div className="flex flex-col">
+                <QueryState query={inbox} rows={4}>
+                  {() =>
+                    shown.length === 0 ? (
+                      <p className="m-0 py-8 text-center text-15 text-fg-2">
+                        {tab === "announcements"
+                          ? "No announcements sent yet."
+                          : "No chats with staff yet."}
+                      </p>
+                    ) : (
+                      pager.rows.map((thread) => (
+                        <ThreadRow
+                          key={thread.id}
+                          thread={thread}
+                          selected={!phone && thread.id === selected}
+                          onOpen={() => router.replace(`/admin/inbox?thread=${thread.id}`)}
+                        />
+                      ))
+                    )
+                  }
+                </QueryState>
+              </div>
+              <Pager {...pager} />
             </div>
           </div>
         )}

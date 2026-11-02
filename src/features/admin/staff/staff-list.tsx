@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils"
 import type { StaffBucket, StaffList as StaffListData, StaffTab } from "@/lib/data"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
-import { DataHead, DataRow, PersonCell, StatusCell } from "../common/data-table"
+import { DataHead, DataRow, PersonCell, StatusCell, TABLE_CARD } from "../common/data-table"
+import { Pager, usePager } from "../common/pager"
 import { QueryState } from "../data/query-state"
 import { useStaff } from "../data/queries"
 import { InviteSheet } from "./invite-sheet"
@@ -107,27 +108,31 @@ function Directory({
       inTab(tab, row.bucket) &&
       (!q || row.name.toLowerCase().includes(q) || row.email.toLowerCase().includes(q)),
   )
+  const pager = usePager(rows)
 
   return (
     <>
       {tabs}
       <div className="flex flex-col gap-3.5">
         {search}
-        <DataHead columns={["Name", "Status", "Next shift", "This week"]} />
-        <div className="flex flex-col border-t border-line">
-          {rows.map((row) => (
-            <DataRow key={row.id} href={`/admin/staff/person?id=${row.id}`}>
-              <PersonCell name={row.name} sub={row.email} />
-              <StatusCell status={row.status} />
-              <span className="hidden text-15 text-fg-2 tablet:block">{row.next}</span>
-              <span className="hidden text-right font-mono text-15 font-semibold tablet:block">
-                {row.hours}
-              </span>
-            </DataRow>
-          ))}
-          {rows.length === 0 && (
-            <p className="m-0 py-8 text-center text-15 text-fg-2">No one matches that.</p>
-          )}
+        <div className={TABLE_CARD}>
+          <DataHead columns={["Name", "Status", "Next shift", "This week"]} />
+          <div className="flex flex-col">
+            {pager.rows.map((row) => (
+              <DataRow key={row.id} href={`/admin/staff/person?id=${row.id}`}>
+                <PersonCell name={row.name} sub={row.email} />
+                <StatusCell status={row.status} />
+                <span className="hidden text-15 text-fg-2 tablet:block">{row.next}</span>
+                <span className="hidden text-right font-mono text-15 font-semibold tablet:block">
+                  {row.hours}
+                </span>
+              </DataRow>
+            ))}
+            {rows.length === 0 && (
+              <p className="m-0 py-8 text-center text-15 text-fg-2">No one matches that.</p>
+            )}
+          </div>
+          <Pager {...pager} />
         </div>
       </div>
     </>

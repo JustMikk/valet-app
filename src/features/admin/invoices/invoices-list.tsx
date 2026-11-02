@@ -10,7 +10,8 @@ import type { InvoiceRow, Payroll } from "@/lib/data/admin/ops-schemas"
 import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
-import { DataHead, DataRow, StatusCell } from "../common/data-table"
+import { DataHead, DataRow, StatusCell, TABLE_CARD } from "../common/data-table"
+import { Pager, usePager } from "../common/pager"
 import { QueryState } from "../data/query-state"
 import { useInvoices, usePayroll, useSendPayroll } from "../data/queries"
 import { Money } from "./invoice-parts"
@@ -63,35 +64,41 @@ function ClientInvoices() {
 
   return (
     <QueryState query={invoices} rows={4}>
-      {(list) => (
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3.5">
-            <DataHead columns={["Venue · period", "Hours", "Amount", "Status"]} />
-            <div className="flex flex-col border-t border-line">
-              {list.length === 0 && (
-                <p className="py-8 text-center text-15 text-fg-2">No invoices yet.</p>
-              )}
-              {list.map((invoice) => (
-                <DataRow key={invoice.id} href={`/admin/invoices/detail?id=${invoice.id}`}>
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="truncate text-16 font-semibold">{invoice.venue}</span>
-                    <span className="truncate text-14 text-fg-2">{invoice.period}</span>
-                  </span>
-                  <span className="hidden text-15 font-medium text-fg-2 tabular-nums tablet:block">
-                    {invoice.hours}
-                  </span>
-                  {/* Phone: amount over status at the row's end; from tablet, two columns. */}
-                  <span className="flex flex-col items-end gap-1 tablet:contents">
-                    <Money cents={invoice.amountCents} className="text-16 font-semibold" />
-                    <StatusCell status={invoice.status} className="tablet:justify-self-end" />
-                  </span>
-                </DataRow>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {(list) => <InvoiceTable list={list} />}
     </QueryState>
+  )
+}
+
+function InvoiceTable({ list }: { list: InvoiceRow[] }) {
+  const pager = usePager(list)
+  return (
+    <div className="flex flex-col gap-5">
+      <div className={TABLE_CARD}>
+        <DataHead columns={["Venue · period", "Hours", "Amount", "Status"]} />
+        <div className="flex flex-col">
+          {list.length === 0 && (
+            <p className="py-8 text-center text-15 text-fg-2">No invoices yet.</p>
+          )}
+          {pager.rows.map((invoice) => (
+            <DataRow key={invoice.id} href={`/admin/invoices/detail?id=${invoice.id}`}>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="truncate text-16 font-semibold">{invoice.venue}</span>
+                <span className="truncate text-14 text-fg-2">{invoice.period}</span>
+              </span>
+              <span className="hidden text-15 font-medium text-fg-2 tabular-nums tablet:block">
+                {invoice.hours}
+              </span>
+              {/* Phone: amount over status at the row's end; from tablet, two columns. */}
+              <span className="flex flex-col items-end gap-1 tablet:contents">
+                <Money cents={invoice.amountCents} className="text-16 font-semibold" />
+                <StatusCell status={invoice.status} className="tablet:justify-self-end" />
+              </span>
+            </DataRow>
+          ))}
+        </div>
+        <Pager {...pager} />
+      </div>
+    </div>
   )
 }
 
