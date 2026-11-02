@@ -10,6 +10,8 @@ type PillTabsProps<T extends string> = {
   items: PillTab<T>[]
   value: T
   onValueChange: (value: T) => void
+  /** `sm` is the Live Board column headers: 34 px, 14 px labels. */
+  size?: "md" | "sm"
   className?: string
 }
 
@@ -23,6 +25,7 @@ export function PillTabs<T extends string>({
   items,
   value,
   onValueChange,
+  size = "md",
   className,
 }: PillTabsProps<T>) {
   return (
@@ -40,7 +43,8 @@ export function PillTabs<T extends string>({
             aria-pressed={on}
             onClick={() => onValueChange(item.value)}
             className={cn(
-              "flex h-10 flex-none items-center gap-1.5 rounded-r10 border-0 px-3.5 text-16 transition-[background-color,color] duration-200",
+              "flex flex-none items-center gap-1.5 rounded-r10 border-0 transition-[background-color,color] duration-200",
+              size === "sm" ? "h-8.5 px-3 text-14" : "h-10 px-3.5 text-16",
               on
                 ? "bg-accent-soft font-semibold text-accent-text shadow-[inset_0_0_0_1.5px_var(--accent)]"
                 : "bg-transparent font-medium text-fg-2 hover:bg-surface",
