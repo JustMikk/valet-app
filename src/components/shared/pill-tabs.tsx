@@ -32,7 +32,11 @@ export function PillTabs<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className={cn("no-scrollbar flex gap-2 overflow-x-auto", className)}
+      className={cn(
+        "no-scrollbar flex overflow-x-auto",
+        size === "sm" ? "gap-1" : "gap-2",
+        className,
+      )}
     >
       {items.map((item) => {
         const on = item.value === value
@@ -44,7 +48,7 @@ export function PillTabs<T extends string>({
             onClick={() => onValueChange(item.value)}
             className={cn(
               "flex flex-none items-center gap-1.5 rounded-r10 border-0 transition-[background-color,color] duration-200",
-              size === "sm" ? "h-8.5 px-3 text-14" : "h-10 px-3.5 text-16",
+              size === "sm" ? "h-8.5 gap-1 px-2.5 text-14" : "h-10 px-3.5 text-16",
               on
                 ? "bg-accent-soft font-semibold text-accent-text shadow-[inset_0_0_0_1.5px_var(--accent)]"
                 : "bg-transparent font-medium text-fg-2 hover:bg-surface",
