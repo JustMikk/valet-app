@@ -116,16 +116,14 @@ function PersonBody({ person }: { person: Person }) {
               Deactivate
             </Button>
           )}
-          {!person.active && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-2 h-13 text-16 text-bad shadow-[inset_0_0_0_1.5px_var(--line)]"
-              onClick={() => setDeleteOpen(true)}
-            >
-              Delete permanently
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-13 text-16 text-bad shadow-[inset_0_0_0_1.5px_var(--line)]"
+            onClick={() => setDeleteOpen(true)}
+          >
+            Delete permanently
+          </Button>
         </div>
       </div>
       <ConfirmSheet

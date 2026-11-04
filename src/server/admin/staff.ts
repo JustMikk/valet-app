@@ -219,19 +219,29 @@ export async function inviteStaff(adminId: string, emails: string[]): Promise<In
 }
 
 /**
- * Permanently delete a staff record. The person must be inactive (deactivated first).
- * Past hours, punches and message threads are deleted by CASCADE on the FK.
+ * Permanently delete a staff record, active or not. Their upcoming unclocked shifts reopen for
+ * others; their past shifts, hours, punches, messages and notifications are deleted with them.
  */
 export async function deleteStaff(adminId: string, staffId: string): Promise<void> {
   const ctx = await adminCtx(adminId)
-  const [person] = await rows<{ id: string; active: boolean }>(
-    sql()`select id, active from staff where id = ${staffId} and tenant_id = ${ctx.tenantId}`,
+  const [person] = await rows<{ id: string }>(
+    sql()`select id from staff where id = ${staffId} and tenant_id = ${ctx.tenantId}`,
   )
   if (!person) throw notFound("Person not found.")
-  if (person.active) {
-    throw notFound("Deactivate this person before deleting them.")
-  }
-  await sql()`delete from staff where id = ${staffId} and tenant_id = ${ctx.tenantId}`
+  const db = sql()
+  await db.transaction([
+    db`delete from drops where staff_id = ${staffId}`,
+    db`delete from punches where staff_id = ${staffId}`,
+    db`delete from notifications where staff_id = ${staffId}`,
+    db`delete from messages where staff_id = ${staffId}`,
+    db`update assignments a set staff_id = null, status = 'open', claimed_at = null,
+                                assigned_at = null, assigned_by = null
+       from events e
+       where a.staff_id = ${staffId} and e.id = a.event_id
+         and a.clocked_in_at is null and e.ends_at > now()`,
+    db`delete from assignments where staff_id = ${staffId}`,
+    db`delete from staff where id = ${staffId} and tenant_id = ${ctx.tenantId}`,
+  ])
 }
 
 /** Deactivate: they leave their upcoming shifts (reopened for others) and can no longer sign in. */
