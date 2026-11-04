@@ -144,8 +144,8 @@ export function PushStep({ onAllow, onSkip }: PushStepProps) {
       <div className="flex flex-col gap-2.5">
         <h1 className={STEP_TITLE}>Turn on notifications</h1>
         <p className={STEP_BODY}>
-          So you hear about new shifts, changes and messages from dispatch. There are no text
-          messages, so this is how we reach you.
+          So you hear about new shifts, changes and messages from admin. There are no text messages,
+          so this is how we reach you.
         </p>
       </div>
       <div className="mt-auto flex flex-col gap-2.5">

@@ -14,15 +14,15 @@ import { landingPath } from "./safe-next"
 
 const ROLES = [
   { value: "staff" as const, label: "Staff" },
-  { value: "admin" as const, label: "Dispatch" },
+  { value: "admin" as const, label: "Admin" },
 ]
 
 const COPY: Record<Role, string> = {
-  staff: "Enter the email dispatch invited you with.",
-  admin: "Enter your dispatcher email and password.",
+  staff: "Enter the email your admin invited you with.",
+  admin: "Enter your admin email and password.",
 }
 
-/** Sign in: staff with their email alone, dispatchers with email and password. */
+/** Sign in: staff with their email alone, admins with email and password. */
 export function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()

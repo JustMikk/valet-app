@@ -54,7 +54,7 @@ function DropForm({ shift }: { shift: ShiftDetail }) {
       {shift.lateDrop && (
         <div className="flex items-start gap-2.5 rounded-r18 bg-warn-soft px-4 py-3.5 text-15 leading-x140 font-semibold text-warn">
           <Icon name="schedule" filled size={22} />
-          This is less than 24 hours before start, so dispatch will be alerted that it&apos;s a late
+          This is less than 24 hours before start, so admin will be alerted that it&apos;s a late
           drop.
         </div>
       )}
@@ -90,8 +90,8 @@ function DropForm({ shift }: { shift: ShiftDetail }) {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           maxLength={280}
-          aria-label="Note for dispatch"
-          placeholder="Add a note for dispatch (optional)"
+          aria-label="Note for admin"
+          placeholder="Add a note for admin (optional)"
           className="field-sizing-fixed min-h-0"
         />
       </div>

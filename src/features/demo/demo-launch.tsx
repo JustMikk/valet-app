@@ -9,7 +9,7 @@ import type { Role } from "@/lib/data/api-client"
 
 const APPS: { role: Role; href: string; title: string; note: string }[] = [
   { role: "staff", href: "/staff", title: "Staff app", note: "Signed in as the demo worker" },
-  { role: "admin", href: "/admin", title: "Admin app", note: "Signed in as the demo dispatcher" },
+  { role: "admin", href: "/admin", title: "Admin app", note: "Signed in as the demo admin" },
 ]
 
 /** One-tap entry to either app with the demo's built-in people (needs DEMO_MODE=1 on the server). */

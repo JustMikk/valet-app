@@ -172,7 +172,7 @@ export async function punchIn(
 
   const row = await loadOwn(staffId, req.assignmentId)
   if (row.status !== "confirmed" && row.status !== "claimed") {
-    throw conflict("assignment_changed", "Your assignment changed. Message dispatch.")
+    throw conflict("assignment_changed", "Your assignment changed. Message your admin.")
   }
   if (row.clocked_in_at && !row.clocked_out_at) {
     throw conflict("already_clocked_in", "You're already on the clock for this shift.")
@@ -193,7 +193,7 @@ export async function punchIn(
     )
   }
   if (at >= row.ends_at) {
-    throw conflict("event_over", "This event is over. Message dispatch to add your hours.")
+    throw conflict("event_over", "This event is over. Message your admin to add your hours.")
   }
   if (!req.selfie) throw badRequest("A selfie is required to clock in.", "selfie_required")
 

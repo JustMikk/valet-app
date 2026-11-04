@@ -19,7 +19,7 @@ export function DoneStep({ pushOn, onFinish }: DoneStepProps) {
         <p className={STEP_BODY}>
           {pushOn
             ? "Location, the app and notifications are on. Your first shift is tonight at The Grand Hotel."
-            : "Notifications are off, so dispatch can’t alert you. You can turn them on any time in Profile."}
+            : "Notifications are off, so admin can’t alert you. You can turn them on any time in Profile."}
         </p>
       </div>
       <Button variant="strong" size="xl" className="text-18" onClick={onFinish}>

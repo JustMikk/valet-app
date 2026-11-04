@@ -205,7 +205,7 @@ export async function decideRequest(
         icon: "event_busy",
         tone: "warn",
         title: "Clock-in not approved",
-        body: `${request.title}. Message dispatch for help.`,
+        body: `${request.title}. Message your admin for help.`,
         href: "/staff/inbox",
       },
     ])

@@ -57,7 +57,7 @@ export function resultContent(key: ResultKey, f: ResultFacts): ResultContent {
     case "claimed":
       return {
         title: "It’s yours.",
-        body: `${f.venue}, ${f.dateLabel}, ${f.timeLabel} is now in your shifts. Dispatch has been notified.`,
+        body: `${f.venue}, ${f.dateLabel}, ${f.timeLabel} is now in your shifts. Admin has been notified.`,
         primaryLabel: "View in my shifts",
         primaryHref: "/staff/shifts",
         icon: "check",
@@ -90,8 +90,8 @@ export function resultContent(key: ResultKey, f: ResultFacts): ResultContent {
         title: "Shift dropped.",
         body: `${f.venue} (${f.dateLabel}) has been reopened${
           f.late
-            ? ", and dispatch was alerted it’s a late drop. Thanks for letting us know early."
-            : ". Dispatch has been notified."
+            ? ", and admin was alerted it’s a late drop. Thanks for letting us know early."
+            : ". Admin has been notified."
         }`,
         primaryLabel: "Back to my shifts",
         primaryHref: "/staff/shifts",

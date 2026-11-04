@@ -50,7 +50,7 @@ export async function dropShift(
     throw conflict("clocked_in", "You're clocked in. Clock out instead of dropping.")
   }
   if (isPast(row, now) || row.starts_at <= now) {
-    throw conflict("in_progress", "This event has started. Message dispatch instead.")
+    throw conflict("in_progress", "This event has started. Message your admin instead.")
   }
   const late = hoursUntilStart(row, now) < LATE_DROP_HOURS
 

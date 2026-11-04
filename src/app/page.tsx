@@ -25,7 +25,7 @@ export default function Home() {
             Valet Workforce
           </h1>
           <p className="m-0 text-17 leading-x145 text-fg-2">
-            Shifts, clock-in and dispatch for Regency Valet Parking.
+            Shifts, clock-in and admin tools for Regency Valet Parking.
           </p>
         </div>
         <div className="flex flex-col gap-2.5">
@@ -45,7 +45,7 @@ export default function Home() {
             nativeButton={false}
             render={<Link href="/login?role=admin" />}
           >
-            Dispatch sign in
+            Admin sign in
           </Button>
         </div>
       </main>

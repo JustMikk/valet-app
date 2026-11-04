@@ -31,8 +31,8 @@ export function InviteStep({ onNext }: { onNext: () => void }) {
           {ONBOARDING_INVITE.company} invited you to join their crew.
         </h1>
         <p className={STEP_BODY}>
-          See your shifts, claim open ones, clock in at the venue, and chat with dispatch, all in
-          one app.
+          See your shifts, claim open ones, clock in at the venue, and chat with admin, all in one
+          app.
         </p>
       </div>
       <div className="flex flex-col gap-2.5">
@@ -177,7 +177,7 @@ export function ProfileStep({ onNext }: { onNext: () => void }) {
           <Icon name="add_a_photo" size={34} />
         </div>
         <span className="flex-1 text-15 leading-x145 text-fg-2">
-          Optional photo. It helps dispatch recognise you on the board.
+          Optional photo. It helps admin recognise you on the board.
         </span>
       </div>
       <TextField
@@ -187,7 +187,7 @@ export function ProfileStep({ onNext }: { onNext: () => void }) {
         autoComplete="name"
       />
       <TextField
-        label="Phone (for dispatch to call)"
+        label="Phone (for admin to call)"
         defaultValue={profile?.phone ?? STAFF_USER.phone}
         readOnly
         type="tel"

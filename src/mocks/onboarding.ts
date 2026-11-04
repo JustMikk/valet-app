@@ -34,6 +34,6 @@ export const INSTALL_STEPS = {
 
 export const LOCATION_PROMISES = [
   "One reading per clock-in and clock-out",
-  "Seen only by Regency dispatch",
+  "Seen only by Regency admin",
   "You can still browse shifts without it",
 ] as const

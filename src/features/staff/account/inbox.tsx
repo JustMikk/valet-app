@@ -17,7 +17,7 @@ const TABS = [
   { value: "announcements" as const, label: "Announcements" },
 ]
 
-/** Single dispatch thread: bubbles, a broadcast with a claimable event, and a composer. */
+/** Single admin thread: bubbles, a broadcast with a claimable event, and a composer. */
 export function StaffInbox() {
   const router = useRouter()
   const { setNotificationsOpen } = useShellMenu()
@@ -59,10 +59,10 @@ export function StaffInbox() {
           </div>
           <div className="flex flex-1 flex-col gap-0.5">
             <span className="font-display text-22 leading-x120 font-semibold tracking-n020">
-              Regency Dispatch
+              Regency Admin
             </span>
             <span className="text-14 text-fg-2">
-              Jamie, Alex and the dispatch team · usually reply in minutes
+              Jamie, Alex and the admin team · usually reply in minutes
             </span>
           </div>
           <button
@@ -90,7 +90,7 @@ export function StaffInbox() {
                 <p className="m-0 py-10 text-center text-15 text-fg-2">
                   {tab === "announcements"
                     ? "No announcements yet."
-                    : "No messages yet. Say hi to dispatch below."}
+                    : "No messages yet. Say hi to admin below."}
                 </p>
               ) : (
                 visible.map((m) =>
@@ -124,8 +124,8 @@ export function StaffInbox() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
-              aria-label="Message dispatch"
-              placeholder="Message dispatch"
+              aria-label="Message admin"
+              placeholder="Message admin"
               className="h-12 min-w-0 flex-1 rounded-pill border-0 bg-surface px-4.5 text-17 text-fg caret-accent outline-none placeholder:text-fg-3 focus:shadow-[inset_0_0_0_1.5px_var(--fg)]"
             />
             <button

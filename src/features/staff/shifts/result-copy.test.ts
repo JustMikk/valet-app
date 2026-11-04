@@ -7,7 +7,7 @@ const body = (key: ResultKey) => resultContent(key, RESULT_EXAMPLES[key]).body
 describe("resultContent", () => {
   it("reproduces the design's copy from the example shifts", () => {
     expect(body("claimed")).toBe(
-      "Harbor Pavilion · Brunch, Sun Oct 25, 10:00 AM – 3:00 PM is now in your shifts. Dispatch has been notified.",
+      "Harbor Pavilion · Brunch, Sun Oct 25, 10:00 AM – 3:00 PM is now in your shifts. Admin has been notified.",
     )
     expect(body("filled")).toBe(
       "Someone claimed the last spot at The Grand Hotel (Wed Oct 28) a moment before you. Other open shifts are still available.",
@@ -16,7 +16,7 @@ describe("resultContent", () => {
       "The Laurel Club (7:30 PM – 1:00 AM) overlaps The Grand Hotel tonight (6:00 – 11:00 PM). You can only hold one at a time.",
     )
     expect(body("dropped")).toBe(
-      "Harbor Pavilion (Sat Oct 24) has been reopened, and dispatch was alerted it’s a late drop. Thanks for letting us know early.",
+      "Harbor Pavilion (Sat Oct 24) has been reopened, and admin was alerted it’s a late drop. Thanks for letting us know early.",
     )
   })
 
@@ -28,9 +28,7 @@ describe("resultContent", () => {
 
   it("only mentions a late drop when it was one", () => {
     const early = resultContent("dropped", { ...RESULT_EXAMPLES.dropped, late: false }).body
-    expect(early).toBe(
-      "Harbor Pavilion (Sat Oct 24) has been reopened. Dispatch has been notified.",
-    )
+    expect(early).toBe("Harbor Pavilion (Sat Oct 24) has been reopened. Admin has been notified.")
   })
 
   it("falls back gracefully when an overlap has no conflict details", () => {

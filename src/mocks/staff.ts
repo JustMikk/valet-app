@@ -181,7 +181,7 @@ export const CHAT_MESSAGES: ChatFixture[] = [
   { kind: "day", text: "TODAY · FRI OCT 23" },
   {
     kind: "message",
-    who: "Jamie · Dispatch",
+    who: "Jamie · Admin",
     text: "Hi Jordan, Priya at the front desk is your contact tonight. Park in the east lot, level B1.",
     ref: "re: The Grand Hotel · Fri",
     meta: "2:10 PM",
@@ -198,7 +198,7 @@ export const CHAT_MESSAGES: ChatFixture[] = [
   },
   {
     kind: "message",
-    who: "Alex · Dispatch",
+    who: "Alex · Admin",
     text: "Use the side entrance on Mission St. Front drive is blocked until 6:30.",
     img: "PHOTO · PARKING MAP",
     meta: "5:38 PM",
@@ -273,7 +273,7 @@ export const NOTIFICATION_GROUPS: {
 export const NOTIFY_PREFS = [
   { key: "open", label: "New open shifts", note: "When a shift you can claim is posted" },
   { key: "remind", label: "Shift reminders", note: "24 hours and 1 hour before" },
-  { key: "msg", label: "Messages", note: "From dispatch" },
+  { key: "msg", label: "Messages", note: "From admin" },
   {
     key: "change",
     label: "Changes & cancellations",

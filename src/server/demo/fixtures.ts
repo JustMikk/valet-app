@@ -274,7 +274,7 @@ export function buildFixtures(now: Date, scenario: Scenario, options: Options = 
   message(
     jordan.id,
     "dispatch",
-    "Jamie · Dispatch",
+    "Jamie · Admin",
     "Hi Jordan, Priya at the front desk is your contact tonight. Park in the east lot, level B1.",
     ago(220),
     { ...JAMIE, ref_label: `re: The Grand Hotel · ${tonightWeekday}` },
@@ -285,7 +285,7 @@ export function buildFixtures(now: Date, scenario: Scenario, options: Options = 
   message(
     jordan.id,
     "dispatch",
-    "Alex · Dispatch",
+    "Alex · Admin",
     "Use the side entrance on Mission St. Front drive is blocked until 6:30.",
     ago(13),
     { image_label: "PHOTO · PARKING MAP" },
@@ -293,7 +293,7 @@ export function buildFixtures(now: Date, scenario: Scenario, options: Options = 
   message(
     person("Maya Patel").id,
     "dispatch",
-    "Jamie · Dispatch",
+    "Jamie · Admin",
     "Hi Maya, you're on the Grand Hotel crew tonight. East lot, level B1.",
     ago(205),
     JAMIE,

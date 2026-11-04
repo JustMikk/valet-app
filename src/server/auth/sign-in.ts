@@ -46,7 +46,7 @@ export async function staffSignIn(email: string): Promise<Session> {
     throw new ApiError(
       401,
       "unknown_email",
-      "We can't find that email. Ask dispatch to invite you, or check the spelling.",
+      "We can't find that email. Ask your admin to invite you, or check the spelling.",
     )
   }
   return issueToken(staffId, "staff")

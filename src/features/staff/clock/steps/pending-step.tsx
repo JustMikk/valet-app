@@ -33,7 +33,7 @@ export function PendingStep({ venue, waitSecs, note, onSimulateApproval }: Pendi
             Waiting for approval
           </h1>
           <p className="m-0 text-17 leading-x145 text-fg-2">
-            Sent to dispatch at {venue.requestTime}. If approved, you&apos;re on the clock from{" "}
+            Sent to admin at {venue.requestTime}. If approved, you&apos;re on the clock from{" "}
             {venue.requestTime}. We&apos;ll notify you either way.
           </p>
         </div>
@@ -52,7 +52,7 @@ export function PendingStep({ venue, waitSecs, note, onSimulateApproval }: Pendi
       </div>
       <div className="flex flex-col gap-2.5">
         <Button variant="secondary" onClick={onSimulateApproval}>
-          Message dispatch
+          Message admin
         </Button>
         <span className="text-center text-13 text-fg-3">
           Prototype: tap above to simulate an approval

@@ -90,7 +90,7 @@ export function useClockFlow({ shift, device, initialStep }: Input) {
           await afterPunch(approved)
           setStep("success")
         } else if (status.status === "rejected") {
-          setError("Dispatch couldn't approve this clock-in. Message dispatch for help.")
+          setError("Admin couldn't approve this clock-in. Message your admin for help.")
           setStep("outside")
         }
       } catch {

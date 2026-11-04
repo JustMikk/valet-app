@@ -96,7 +96,7 @@ function DetailBody({ shift: D }: { shift: ShiftDetailData }) {
           icon="chat_bubble"
           onClick={() => router.push("/staff/inbox")}
         >
-          Message dispatch
+          Message admin
         </ActionButton>
         {D.canDrop && (
           <ActionButton

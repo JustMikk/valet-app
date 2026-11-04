@@ -54,7 +54,7 @@ export function OpenShifts() {
           {(items) =>
             items.length === 0 ? (
               <EmptyState icon="add_circle" title="No open shifts right now">
-                When dispatch posts spots to claim, they appear here and you get a notification.
+                When admin posts spots to claim, they appear here and you get a notification.
               </EmptyState>
             ) : (
               <div className="grid gap-3 desktop:grid-cols-2">

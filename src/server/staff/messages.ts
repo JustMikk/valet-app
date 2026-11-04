@@ -27,7 +27,7 @@ type MessageRow = {
 const READ_AFTER_MS = 2500
 
 function senderFirstName(name: string | null): string {
-  return name?.split(" · ")[0]?.trim() || "Dispatch"
+  return name?.split(" · ")[0]?.trim() || "Admin"
 }
 
 export async function getMessages(staffId: string, now: Date): Promise<ChatItem[]> {

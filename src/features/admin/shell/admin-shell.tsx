@@ -15,7 +15,7 @@ type Badges = { live: number; hours: number; inbox: number }
 
 const count = (n: number) => (n > 0 ? { text: String(n) } : undefined)
 
-/** The eight sections; badges are what needs the dispatcher right now. */
+/** The eight sections; badges are what needs the admin right now. */
 function navItems(badges: Badges) {
   const LIVE: ShellNavItem = {
     key: "live",
@@ -97,8 +97,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <AppShell
       app="admin"
       logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
-      brand={{ title: "Regency", subtitle: "Dispatch" }}
-      phoneTitle="Dispatch"
+      brand={{ title: "Regency", subtitle: "Admin" }}
+      phoneTitle="Admin"
       user={{
         initials: session?.admin.initials ?? "",
         name: session?.admin.name ?? "",

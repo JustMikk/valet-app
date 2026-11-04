@@ -63,7 +63,7 @@ export function ShiftsList() {
               >
                 {tab === "past"
                   ? "Shifts you work show up here with your hours."
-                  : "Claim an open shift or wait for dispatch to assign you."}
+                  : "Claim an open shift or wait for admin to assign you."}
               </EmptyState>
             ) : (
               <div key={tab} className="grid gap-3 desktop:grid-cols-2">

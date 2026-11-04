@@ -16,13 +16,13 @@ const STEPS = [
   },
   {
     icon: "event_available",
-    title: "Get assigned by dispatch",
+    title: "Get assigned by admin",
     note: "Assigned shifts show up here",
     to: "/staff/inbox",
   },
   {
     icon: "chat_bubble",
-    title: "Message dispatch",
+    title: "Message admin",
     note: "Ask about work or availability",
     to: "/staff/inbox",
   },
@@ -52,7 +52,7 @@ export function EmptyHome({ open }: { open: Home["open"] }) {
           </ActionButton>
         }
       >
-        You don&rsquo;t have any shifts yet. When you claim one or dispatch assigns you, it appears
+        You don&rsquo;t have any shifts yet. When you claim one or admin assigns you, it appears
         here with a clock-in button.
       </EmptyState>
 

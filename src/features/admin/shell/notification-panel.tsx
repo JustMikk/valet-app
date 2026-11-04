@@ -6,7 +6,7 @@ import { usePush } from "@/hooks/use-push"
 import { QueryState } from "../data/query-state"
 import { useNotifications } from "../data/queries"
 
-/** The drawer's content for dispatch: what needs attention, and alerts on this device. */
+/** The drawer's content for admin: what needs attention, and alerts on this device. */
 export function NotificationPanel() {
   const { setNotificationsOpen } = useShellMenu()
   const notifications = useNotifications()

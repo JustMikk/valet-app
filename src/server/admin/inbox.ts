@@ -133,7 +133,7 @@ export async function getThread(adminId: string, id: string, now: Date): Promise
         mine: m.sender === "dispatch",
         meta:
           m.sender === "dispatch"
-            ? `${formatStamp(m.created_at, now, ctx.tz)} · ${firstName(m.sender_name ?? "Dispatch")}`
+            ? `${formatStamp(m.created_at, now, ctx.tz)} · ${firstName(m.sender_name ?? "Admin")}`
             : formatStamp(m.created_at, now, ctx.tz),
       })),
     }

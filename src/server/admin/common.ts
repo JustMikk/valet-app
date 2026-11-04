@@ -44,7 +44,7 @@ export async function messageStaff(
 ): Promise<void> {
   await sql()`insert into messages
                 (tenant_id, staff_id, sender, sender_name, body, ref_label, delivered_at, sender_admin_id, admin_read_at)
-              values (${ctx.tenantId}, ${staffId}, 'dispatch', ${`${firstName(ctx.name)} · Dispatch`},
+              values (${ctx.tenantId}, ${staffId}, 'dispatch', ${`${firstName(ctx.name)} · Admin`},
                       ${text}, ${options.refLabel ?? null}, now(), ${ctx.adminId}, now())`
   const [prefs] = await rows<{ notify_msg: boolean }>(
     sql()`select notify_msg from staff where id = ${staffId}`,
