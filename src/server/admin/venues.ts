@@ -4,7 +4,7 @@ import type { NewVenueRequest, VenueDetail, VenuePatch, VenueRow } from "@/lib/d
 import { calendarDaysBetween, formatZoneShort } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
-import { conflict, notFound } from "../http/handler"
+import { notFound } from "../http/handler"
 import { adminCtx } from "./common"
 
 type ListRow = {
@@ -158,21 +158,24 @@ export async function patchVenue(
   return getVenue(adminId, venueId, now)
 }
 
-/** Removes a venue. Blocked while it still has events on record (nothing to reassign them to). */
+/**
+ * Removes a venue together with its events (and their shifts, punches and hours) and invoices.
+ * Chat messages and announcements that mention those events stay; they just lose the event link.
+ */
 export async function deleteVenue(adminId: string, venueId: string): Promise<void> {
   const ctx = await adminCtx(adminId)
   const [venue] = await rows<{ id: string }>(
     sql()`select id from venues where id = ${venueId} and tenant_id = ${ctx.tenantId}`,
   )
   if (!venue) throw notFound("Venue not found.")
-  const [{ count }] = await rows<{ count: number }>(
-    sql()`select count(*)::int as count from events where venue_id = ${venueId}`,
-  )
-  if (count > 0) {
-    throw conflict(
-      "venue_has_events",
-      "This venue has events on record and can't be deleted. Cancel or reassign them first.",
-    )
-  }
-  await sql()`delete from venues where id = ${venueId} and tenant_id = ${ctx.tenantId}`
+  const db = sql()
+  await db.transaction([
+    db`delete from invoices where venue_id = ${venueId}`,
+    db`update messages set event_id = null
+       where event_id in (select id from events where venue_id = ${venueId})`,
+    db`update broadcasts set event_id = null
+       where event_id in (select id from events where venue_id = ${venueId})`,
+    db`delete from events where venue_id = ${venueId}`,
+    db`delete from venues where id = ${venueId} and tenant_id = ${ctx.tenantId}`,
+  ])
 }

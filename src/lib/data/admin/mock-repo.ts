@@ -1,7 +1,6 @@
 // In-memory AdminRepo over the design's fixtures: what the static (fixture-only) build runs on. It
 // mirrors the server's rules closely enough for the same screens: actions change state in memory
 // and reset on reload.
-import { ApiError } from "@/lib/data/api-client"
 import { deriveBoard, first } from "@/lib/live/model"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import {
@@ -202,14 +201,6 @@ export const mockAdminRepo: AdminRepo = {
     return venueDetail(id)
   },
   deleteVenue: async (id) => {
-    const seed = VENUES.find((v) => v.id === id)
-    if (seed && seed.upcoming !== "No upcoming") {
-      throw new ApiError(
-        409,
-        "venue_has_events",
-        "This venue has events on record and can't be deleted. Cancel or reassign them first.",
-      )
-    }
     venueStore.delete(id)
   },
 

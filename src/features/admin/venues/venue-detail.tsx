@@ -131,7 +131,7 @@ function VenueBody({ venue }: { venue: VenueData }) {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title={`Delete ${venue.name}?`}
-        consequence="This permanently removes the venue. Venues with events on record can't be deleted — cancel or reassign those first."
+        consequence="This permanently removes the venue along with its events, shifts, hours and invoices. This cannot be undone."
         confirmLabel="Delete venue"
         tone="destructive"
         onConfirm={() =>
