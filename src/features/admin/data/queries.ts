@@ -97,6 +97,14 @@ export function useUpdateVenue() {
   })
 }
 
+export function useDeleteVenue() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: (id: string) => adminRepo.deleteVenue(id),
+    onSuccess: refresh,
+  })
+}
+
 export const useStaff = () => useQuery({ queryKey: keys.staff, queryFn: () => adminRepo.staff() })
 
 export const usePerson = (id: string | undefined) =>

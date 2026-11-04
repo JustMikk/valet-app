@@ -4,14 +4,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 
-import { Icon, PillTabs } from "@/components/shared"
+import { ConfirmSheet, Icon, PillTabs } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { RADII, type VenueDetail as VenueData } from "@/lib/data"
 import { formatRate } from "@/lib/money/format"
 
 import { AdminPage, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
-import { useUpdateVenue, useVenue } from "../data/queries"
+import { useDeleteVenue, useUpdateVenue, useVenue } from "../data/queries"
 import { VenueMap } from "./venue-map"
 
 const RADIUS_ITEMS = RADII.map((r) => ({ value: String(r), label: `${r} m` }))
@@ -32,7 +32,9 @@ export function VenueDetail() {
 function VenueBody({ venue }: { venue: VenueData }) {
   const router = useRouter()
   const update = useUpdateVenue()
+  const deleteVenue = useDeleteVenue()
   const [radius, setRadius] = useState(venue.radiusM)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   return (
     <div className={SPLIT}>
@@ -115,7 +117,27 @@ function VenueBody({ venue }: { venue: VenueData }) {
         >
           Save venue
         </Button>
+        {deleteVenue.error && <ErrorNotice message={deleteVenue.error.message} />}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-13 text-16 text-bad shadow-[inset_0_0_0_1.5px_var(--line)]"
+          onClick={() => setDeleteOpen(true)}
+        >
+          Delete venue
+        </Button>
       </div>
+      <ConfirmSheet
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={`Delete ${venue.name}?`}
+        consequence="This permanently removes the venue. Venues with events on record can't be deleted — cancel or reassign those first."
+        confirmLabel="Delete venue"
+        tone="destructive"
+        onConfirm={() =>
+          deleteVenue.mutate(venue.id, { onSuccess: () => router.push("/admin/venues") })
+        }
+      />
     </div>
   )
 }

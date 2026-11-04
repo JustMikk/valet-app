@@ -58,6 +58,9 @@ export const httpAdminRepo: AdminRepo = {
   createVenue: (request) => api("admin/venues", VenueDetailDto, post(request)),
   updateVenue: (id, patch) =>
     api(`admin/venues/${id}`, VenueDetailDto, { ...call, method: "PATCH", body: patch }),
+  deleteVenue: async (id) => {
+    await api(`admin/venues/${id}`, Ack, { ...call, method: "DELETE" })
+  },
 
   staff: () => api("admin/staff", StaffListDto, call),
   person: (id) => needsId(id, (v) => api(`admin/staff/${v}`, PersonDto, call)),

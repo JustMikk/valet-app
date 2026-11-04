@@ -5,5 +5,5 @@ export async function tenantTimezone(staffId: string): Promise<string> {
   const [row] = await rows<{ timezone: string }>(
     sql()`select t.timezone from staff s join tenants t on t.id = s.tenant_id where s.id = ${staffId}`,
   )
-  return row?.timezone ?? "America/Los_Angeles"
+  return row?.timezone ?? "America/Chicago"
 }

@@ -54,7 +54,7 @@ export function ClockFlow() {
     fallbackName: shift?.venue,
     fallbackHours: shift?.rangeLabel,
     sim: device.sim ?? "inside",
-    nowLabel: formatTime(flow.offlineAt ?? now, shift?.timezone ?? "America/Los_Angeles"),
+    nowLabel: formatTime(flow.offlineAt ?? now, shift?.timezone ?? "America/Chicago"),
   })
 
   const close = () => router.push("/staff")

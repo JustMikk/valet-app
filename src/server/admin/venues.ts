@@ -4,7 +4,7 @@ import type { NewVenueRequest, VenueDetail, VenuePatch, VenueRow } from "@/lib/d
 import { calendarDaysBetween, formatZoneShort } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
-import { notFound } from "../http/handler"
+import { conflict, notFound } from "../http/handler"
 import { adminCtx } from "./common"
 
 type ListRow = {
@@ -156,4 +156,23 @@ export async function patchVenue(
       bill_rate_cents = coalesce(${patch.billRateCents ?? null}::int, bill_rate_cents)
     where id = ${venueId} and tenant_id = ${ctx.tenantId}`
   return getVenue(adminId, venueId, now)
+}
+
+/** Removes a venue. Blocked while it still has events on record (nothing to reassign them to). */
+export async function deleteVenue(adminId: string, venueId: string): Promise<void> {
+  const ctx = await adminCtx(adminId)
+  const [venue] = await rows<{ id: string }>(
+    sql()`select id from venues where id = ${venueId} and tenant_id = ${ctx.tenantId}`,
+  )
+  if (!venue) throw notFound("Venue not found.")
+  const [{ count }] = await rows<{ count: number }>(
+    sql()`select count(*)::int as count from events where venue_id = ${venueId}`,
+  )
+  if (count > 0) {
+    throw conflict(
+      "venue_has_events",
+      "This venue has events on record and can't be deleted. Cancel or reassign them first.",
+    )
+  }
+  await sql()`delete from venues where id = ${venueId} and tenant_id = ${ctx.tenantId}`
 }

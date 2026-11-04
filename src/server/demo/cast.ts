@@ -1,7 +1,7 @@
 // The demo's people and places (illustrative data, not real people). Names come from the design
 // export and the admin mock; ids are stable so sessions survive a reset.
 
-export const TZ = "America/Los_Angeles"
+export const TZ = "America/Chicago"
 
 /** People keep their ids across resets, so a browser's session survives reseeding the demo. */
 export const stableId = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`

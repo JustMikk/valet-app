@@ -1,6 +1,7 @@
 // In-memory AdminRepo over the design's fixtures: what the static (fixture-only) build runs on. It
 // mirrors the server's rules closely enough for the same screens: actions change state in memory
 // and reset on reload.
+import { ApiError } from "@/lib/data/api-client"
 import { deriveBoard, first } from "@/lib/live/model"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import {
@@ -53,7 +54,7 @@ const venueStore = new Map<string, VenueDetail>(
     {
       id: venue.id,
       name: venue.name,
-      address: venue.id === "grand" ? VENUE_DETAIL.address : `${venue.address} · PT`,
+      address: venue.id === "grand" ? VENUE_DETAIL.address : `${venue.address} · CT`,
       street: venue.address,
       lat: 37.7936,
       lng: -122.3965,
@@ -84,6 +85,8 @@ const staffRows: StaffRow[] = STAFF_ROWS.map((row) => ({
 let sentInvoice = false
 let unreadNotices = 2
 let threadMessages: ThreadMessage[] = THREAD_MESSAGES.map((m, i) => ({ id: `m${i}`, ...m }))
+/** Conversations started from the inbox's "New message" picker, keyed by staff id. */
+const newThreadMessages = new Map<string, ThreadMessage[]>()
 
 const eventCards: EventCard[] = EVENT_DAYS.flatMap((day) => day.items)
 
@@ -183,7 +186,7 @@ export const mockAdminRepo: AdminRepo = {
     venueStore.set(id, {
       ...request,
       id,
-      address: `${request.street} · PT`,
+      address: `${request.street} · CT`,
       contact: request.contactName,
     })
     return venueDetail(id)
@@ -193,10 +196,21 @@ export const mockAdminRepo: AdminRepo = {
     const next = { ...current, ...patch }
     venueStore.set(current.id, {
       ...next,
-      address: `${next.street} · PT`,
+      address: `${next.street} · CT`,
       contact: next.contactName,
     })
     return venueDetail(id)
+  },
+  deleteVenue: async (id) => {
+    const seed = VENUES.find((v) => v.id === id)
+    if (seed && seed.upcoming !== "No upcoming") {
+      throw new ApiError(
+        409,
+        "venue_has_events",
+        "This venue has events on record and can't be deleted. Cancel or reassign them first.",
+      )
+    }
+    venueStore.delete(id)
   },
 
   staff: () =>
@@ -288,7 +302,7 @@ export const mockAdminRepo: AdminRepo = {
     structuredClone({
       events: liveEvents,
       timeline: { ...TIMELINE, ticks: [...TIMELINE.ticks] },
-      zone: "PT",
+      zone: "CT",
       serverNow: new Date().toISOString(),
     }),
   decide: async (punchId, decision) => {
@@ -481,6 +495,18 @@ export const mockAdminRepo: AdminRepo = {
       unread: THREADS.filter((t) => "unread" in t && t.unread).length,
     }),
   thread: async (id) => {
+    const person = id ? staffRows.find((r) => r.id === id) : undefined
+    if (person) {
+      return structuredClone({
+        id: person.id,
+        name: person.name,
+        initials: person.initials,
+        subtitle: "Valet attendant",
+        announcement: false,
+        canReply: true,
+        messages: newThreadMessages.get(person.id) ?? [],
+      })
+    }
     const index = Number(id?.replace("t", "")) || 0
     const t = THREADS[index] ?? THREADS[0]
     return structuredClone({
@@ -493,9 +519,14 @@ export const mockAdminRepo: AdminRepo = {
       messages: threadMessages,
     })
   },
-  reply: async (_id, text) => {
-    const message = { id: `m${threadMessages.length}`, text, meta: "Just now · Jamie", mine: true }
-    threadMessages = [...threadMessages, message]
+  reply: async (id, text) => {
+    const message = { id: `m${Date.now()}`, text, meta: "Just now · Jamie", mine: true }
+    const person = id ? staffRows.find((r) => r.id === id) : undefined
+    if (person) {
+      newThreadMessages.set(person.id, [...(newThreadMessages.get(person.id) ?? []), message])
+    } else {
+      threadMessages = [...threadMessages, message]
+    }
     return structuredClone(message)
   },
   notifications: async (): Promise<Notifications> => ({

@@ -56,6 +56,8 @@ export interface AdminRepo {
   venue(id: string | undefined): Promise<VenueDetail>
   createVenue(request: NewVenueRequest): Promise<VenueDetail>
   updateVenue(id: string, patch: VenuePatch): Promise<VenueDetail>
+  /** Blocked while the venue still has events on record. */
+  deleteVenue(id: string): Promise<void>
 
   staff(): Promise<StaffList>
   person(id: string | undefined): Promise<Person>

@@ -363,7 +363,7 @@ export const VENUES: {
 
 export const VENUE_DETAIL = {
   name: "The Grand Hotel",
-  address: "400 Market St, San Francisco · PT",
+  address: "400 Market St, San Francisco · CT",
   rows: [
     { k: "Venue contact", v: "Priya · front desk" },
     { k: "Default dress code", v: "Black suit" },

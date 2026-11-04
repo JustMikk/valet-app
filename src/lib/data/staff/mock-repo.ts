@@ -65,7 +65,7 @@ function homeShift(now: number): Home["shift"] {
     shortAddress: "400 Market St",
     mapsUrl: TONIGHT.mapsUrl,
     venueGeo: GRAND,
-    timezone: "America/Los_Angeles",
+    timezone: "America/Chicago",
     radiusM: CLOCK_VENUE.radiusM,
     neededAccuracyM: CLOCK_VENUE.neededAccuracyM,
     contact: TONIGHT.contact,

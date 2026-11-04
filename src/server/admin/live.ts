@@ -51,7 +51,7 @@ function hoursFrom(base: Date, instant: Date): number {
 
 export function buildLive(slots: SlotRow[], now: Date): Live {
   const groups = groupByEvent(slots)
-  const tz = groups[0]?.rows[0]?.timezone ?? "America/Los_Angeles"
+  const tz = groups[0]?.rows[0]?.timezone ?? "America/Chicago"
   const earliest = groups.reduce<Date>(
     (min, g) => (g.rows[0].starts_at < min ? g.rows[0].starts_at : min),
     now,

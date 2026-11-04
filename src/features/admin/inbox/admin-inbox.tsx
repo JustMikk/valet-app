@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { Icon, PillTabs } from "@/components/shared"
+import { Button } from "@/components/ui/button"
 import { useBreakpoint } from "@/hooks/use-breakpoint"
 import type { Thread } from "@/lib/data"
 import { cn } from "@/lib/utils"
@@ -12,6 +13,7 @@ import { AdminHead, AdminPage } from "../common/admin-page"
 import { QueryState } from "../data/query-state"
 import { useInbox } from "../data/queries"
 import { Conversation } from "./conversation"
+import { NewMessageSheet } from "./new-message-sheet"
 
 type InboxTab = "messages" | "announcements"
 
@@ -67,6 +69,7 @@ export function AdminInbox() {
   const inbox = useInbox()
   const requested = useSearchParams().get("thread") ?? undefined
   const [picked, setPicked] = useState<InboxTab | null>(null)
+  const [newMessageOpen, setNewMessageOpen] = useState(false)
 
   const threads = inbox.data?.threads ?? []
   // Opening a thread from elsewhere (a person's Message button) lands on the tab it belongs to.
@@ -102,6 +105,14 @@ export function AdminInbox() {
       <div className="grid items-start gap-7 tablet:grid-cols-[minmax(17.5rem,22.5rem)_minmax(0,1fr)]">
         {showList && (
           <div className="flex flex-col gap-3.5">
+            <Button
+              variant="secondary"
+              className="h-12 gap-2 text-16"
+              onClick={() => setNewMessageOpen(true)}
+            >
+              <Icon name="add_circle" size={22} />
+              New message
+            </Button>
             <PillTabs
               label="Inbox"
               items={tabs}
@@ -149,6 +160,14 @@ export function AdminInbox() {
           />
         )}
       </div>
+      <NewMessageSheet
+        open={newMessageOpen}
+        onOpenChange={setNewMessageOpen}
+        onPick={(staffId) => {
+          setPicked("messages")
+          router.replace(`/admin/inbox?thread=${staffId}`)
+        }}
+      />
     </AdminPage>
   )
 }
