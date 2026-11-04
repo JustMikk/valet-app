@@ -54,9 +54,9 @@ export function LoginForm() {
         <div className="flex items-center justify-between gap-4">
           <Link href="/" aria-label="Valet Workforce home">
             <Image
-              src="/brand/regency-logo.png"
+              src="/brand/regency-logo.svg"
               alt="Regency"
-              width={72}
+              width={119}
               height={40}
               className="h-10 w-auto"
             />

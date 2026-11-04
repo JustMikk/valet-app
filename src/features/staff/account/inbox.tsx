@@ -50,10 +50,10 @@ export function StaffInbox() {
         <div className="flex items-center gap-3.5 border-b border-line pb-4">
           <div className="grid size-13 flex-none place-items-center rounded-r16 bg-white shadow-[inset_0_0_0_1px_var(--line)]">
             <Image
-              src="/brand/regency-logo.png"
+              src="/brand/regency-logo.svg"
               alt=""
               width={44}
-              height={25}
+              height={15}
               className="h-auto w-11"
             />
           </div>

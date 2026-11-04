@@ -54,7 +54,7 @@ export function PhoneChrome({
 
   const brandPill = (
     <GlassPill>
-      <Image src={logo.src} alt="" width={54} height={30} className="h-7.5 w-auto" />
+      <Image src={logo.src} alt="" width={89} height={30} className="h-7.5 w-auto" />
       {title}
     </GlassPill>
   )

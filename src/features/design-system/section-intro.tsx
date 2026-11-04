@@ -43,9 +43,9 @@ export function SectionIntro({ accent, onAccentChange }: IntroProps) {
         <div className="flex max-w-190 flex-col gap-4">
           <div className="flex items-center gap-3">
             <Image
-              src="/brand/regency-logo.png"
+              src="/brand/regency-logo.svg"
               alt="Regency Parking Service"
-              width={79}
+              width={131}
               height={44}
               className="h-11 w-auto"
               priority

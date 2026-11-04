@@ -81,10 +81,10 @@ function SettingsBody({ settings }: { settings: SettingsData }) {
           <GlassCard className="flex items-center gap-4 p-4">
             <div className="grid size-18 flex-none place-items-center rounded-r18 bg-white shadow-[inset_0_0_0_1px_var(--line)]">
               <Image
-                src="/brand/regency-logo.png"
+                src="/brand/regency-logo.svg"
                 alt=""
                 width={60}
-                height={34}
+                height={20}
                 className="h-auto w-15"
               />
             </div>

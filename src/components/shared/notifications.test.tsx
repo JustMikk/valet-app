@@ -109,7 +109,7 @@ describe("notification bell and drawer", () => {
   const shell = (unread: number, onClose?: () => void) => (
     <AppShell
       app="staff"
-      logo={{ src: "/brand/regency-logo.png", alt: "Regency" }}
+      logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
       brand={{ title: "Regency" }}
       phoneTitle="Regency"
       user={{ initials: "JE", name: "Jordan Ellis", role: "Valet" }}
@@ -148,7 +148,7 @@ describe("notification bell and drawer", () => {
     render(
       <AppShell
         app="staff"
-        logo={{ src: "/brand/regency-logo.png", alt: "Regency" }}
+        logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
         brand={{ title: "Regency" }}
         phoneTitle="Regency"
         user={{ initials: "JE", name: "Jordan Ellis", role: "Valet" }}

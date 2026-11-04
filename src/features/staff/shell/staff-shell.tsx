@@ -57,7 +57,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
   return (
     <AppShell
       app="staff"
-      logo={{ src: "/brand/regency-logo.png", alt: "Regency" }}
+      logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
       brand={{ title: "Regency" }}
       phoneTitle="Regency"
       user={{

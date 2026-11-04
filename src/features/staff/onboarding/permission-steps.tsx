@@ -126,10 +126,10 @@ export function PushStep({ onAllow, onSkip }: PushStepProps) {
       <div className="flex animate-sheet-up items-start gap-3 rounded-r22 glass p-4 [animation-delay:200ms] [animation-duration:500ms]">
         <div className="grid size-10 flex-none place-items-center rounded-r10 bg-white shadow-[inset_0_0_0_1px_var(--line)]">
           <Image
-            src="/brand/regency-logo.png"
+            src="/brand/regency-logo.svg"
             alt=""
             width={34}
-            height={19}
+            height={11}
             className="h-auto w-8.5"
           />
         </div>

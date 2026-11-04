@@ -54,9 +54,9 @@ function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
             <span className="text-15 text-fg-2">{invoice.period}</span>
           </div>
           <Image
-            src="/brand/regency-logo.png"
+            src="/brand/regency-logo.svg"
             alt=""
-            width={79}
+            width={131}
             height={44}
             className="h-11 w-auto"
           />

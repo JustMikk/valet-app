@@ -19,10 +19,10 @@ export function InviteStep({ onNext }: { onNext: () => void }) {
     <OnboardingScreen grow className="justify-center gap-7">
       <div className="grid size-30 place-items-center rounded-r32 bg-white logo-tile-glow">
         <Image
-          src="/brand/regency-logo.png"
+          src="/brand/regency-logo.svg"
           alt="Regency Parking Service"
           width={100}
-          height={56}
+          height={34}
           className="h-auto w-25"
         />
       </div>

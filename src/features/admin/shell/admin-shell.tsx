@@ -96,7 +96,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   return (
     <AppShell
       app="admin"
-      logo={{ src: "/brand/regency-logo.png", alt: "Regency" }}
+      logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
       brand={{ title: "Regency", subtitle: "Dispatch" }}
       phoneTitle="Dispatch"
       user={{

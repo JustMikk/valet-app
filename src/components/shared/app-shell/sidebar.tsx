@@ -88,7 +88,7 @@ export function Sidebar({
       )}
     >
       <div className={cn("flex items-center gap-2.5 px-2 pt-1", d.logoRow)}>
-        <Image src={logo.src} alt={logo.alt} width={64} height={36} className="h-9 w-auto" />
+        <Image src={logo.src} alt={logo.alt} width={107} height={36} className="h-9 w-auto" />
         <span className="hidden flex-col desktop:flex">
           <span
             className={cn(
