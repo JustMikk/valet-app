@@ -3,6 +3,7 @@ export type {
   ShellAccount,
   ShellApp,
   ShellBadge,
+  ShellLogo,
   ShellNavItem,
   ShellNotifications,
   ShellUser,

@@ -148,7 +148,7 @@ function HomeContent({ shift, upNext, open }: ContentProps) {
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-r9 bg-surface-2">
                   <div
-                    className="h-full rounded-r9 bg-fg transition-[width] duration-1000 ease-linear"
+                    className="h-full rounded-r9 bg-fg-3-line transition-[width] duration-1000 ease-linear"
                     // Progress is a live percentage of the scheduled shift.
                     style={{ width: `${view.progress}%` }}
                   />

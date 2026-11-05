@@ -10,6 +10,7 @@ import { useNotificationChime } from "@/lib/platform/use-notification-chime"
 
 import { useHome, useMarkNotificationsRead, useNotifications, useProfile } from "../data/queries"
 import { NotificationPanel } from "./notification-panel"
+import { BRAND_CREST } from "@/lib/brand"
 
 /** Home, Shifts, Open (with a count of claimable shifts) and Inbox. */
 const navItems = (openCount: number): ShellNavItem[] => [
@@ -57,7 +58,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
   return (
     <AppShell
       app="staff"
-      logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
+      logo={{ ...BRAND_CREST, alt: "Regency" }}
       brand={{ title: "Regency" }}
       phoneTitle="Regency"
       user={{

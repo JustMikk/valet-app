@@ -10,7 +10,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        accent: "bg-accent text-accent-ink",
+        // Regency (client choice, ADR-020): the light accent with a white label.
+        // Below 4.5:1 by design; the bold label and icon carry it.
+        accent: "bg-accent text-white",
         strong: "bg-fg text-bg",
         secondary: "bg-surface text-fg",
         elevated: "bg-elev text-fg",

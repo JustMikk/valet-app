@@ -11,11 +11,18 @@ import { NotificationDrawer } from "./notification-drawer"
 import { PhoneChrome } from "./phone-chrome"
 import { RouteScreen } from "./route-screen"
 import { Sidebar } from "./sidebar"
-import type { ShellAccount, ShellApp, ShellNavItem, ShellNotifications, ShellUser } from "./types"
+import type {
+  ShellAccount,
+  ShellApp,
+  ShellLogo,
+  ShellNavItem,
+  ShellNotifications,
+  ShellUser,
+} from "./types"
 
 type AppShellProps = {
   app: ShellApp
-  logo: { src: string; alt: string }
+  logo: ShellLogo
   /** Desktop sidebar brand block. */
   brand: { title: string; subtitle?: string }
   /** Phone top-bar title. */
@@ -37,6 +44,10 @@ type AppShellProps = {
   mode?: "app" | "overlay" | "bare"
   /** Hide the floating phone top bar (the Live Board draws its own). */
   topBar?: boolean
+  /** Hide the phone tab bar on focused pages whose actions pin to the bottom instead. */
+  tabBar?: boolean
+  /** Wide screens: a top bar drawn above every page in place of the Back row (it brings its own). */
+  pageBar?: ReactNode
   /** Width class of the wide-screen Back row, matching the page's content width. */
   contentMax?: string
   /** The bell and its drawer. Left out, the shell draws neither. */
@@ -85,6 +96,8 @@ export function AppShell({
   isRoot,
   mode = "app",
   topBar = true,
+  tabBar = true,
+  pageBar,
   contentMax = "max-w-280",
   notifications,
   account,
@@ -126,7 +139,8 @@ export function AppShell({
           ) : (
             <RouteScreen
               back={
-                !isRoot && (
+                pageBar ??
+                (!isRoot && (
                   <div
                     className={cn(
                       "mx-auto box-border hidden w-full px-8 pt-6 tablet:block desktop:px-12 desktop:pt-7",
@@ -142,7 +156,7 @@ export function AppShell({
                       Back
                     </button>
                   </div>
-                )
+                ))
               }
             >
               {children}
@@ -160,6 +174,7 @@ export function AppShell({
               currentKey={currentKey}
               isRoot={isRoot}
               showTopBar={topBar}
+              showTabBar={tabBar}
               unread={notifications?.unread}
               accountMenu={Boolean(account)}
               onBack={onBack}

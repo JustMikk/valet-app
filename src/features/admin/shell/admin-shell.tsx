@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import { signOut } from "@/lib/data"
@@ -9,7 +9,9 @@ import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shar
 import { useNotificationChime } from "@/lib/platform/use-notification-chime"
 
 import { useMarkNotificationsRead, useNotifications, useSession } from "../data/queries"
+import { AdminTopBar, TopBarSlotProvider } from "../common/top-bar"
 import { NotificationPanel } from "./notification-panel"
+import { BRAND_CREST } from "@/lib/brand"
 
 type Badges = { live: number; hours: number; inbox: number }
 
@@ -23,7 +25,7 @@ function navItems(badges: Badges) {
     phoneLabel: "Live",
     icon: "sensors",
     href: "/admin",
-    badge: badges.live > 0 ? { text: String(badges.live), tone: "warn" } : undefined,
+    badge: badges.live > 0 ? { text: String(badges.live), tone: "bad" } : undefined,
   }
   const EVENTS: ShellNavItem = {
     key: "events",
@@ -54,7 +56,7 @@ function navItems(badges: Badges) {
   const INBOX: ShellNavItem = {
     key: "inbox",
     label: "Inbox",
-    icon: "chat_bubble",
+    icon: "mail",
     href: "/admin/inbox",
     badge: count(badges.inbox),
   }
@@ -70,6 +72,9 @@ function navItems(badges: Badges) {
     more: [STAFF, VENUES, INVOICES, SETTINGS],
   }
 }
+
+/** Focused pages: their main actions pin to the bottom on phone, so the tab bar steps aside. */
+const NO_TAB_BAR = ["/admin/invoices/detail", "/admin/invoices/new"]
 
 /** Which nav item a path belongs to; detail pages keep their section highlighted. */
 function navKeyFor(path: string, keys: string[]): string {
@@ -88,55 +93,66 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const nav = navItems(session?.badges ?? { live: 0, hours: 0, inbox: 0 })
   const roots = nav.sidebar.map((item) => item.href)
 
+  const [slot, setSlot] = useState<HTMLElement | null>(null)
+
   const goBack = () => {
     if (window.history.length > 1) router.back()
     else router.push("/admin")
   }
 
   return (
-    <AppShell
-      app="admin"
-      logo={{ src: "/brand/regency-logo.svg", alt: "Regency" }}
-      brand={{ title: "Regency", subtitle: "Admin" }}
-      phoneTitle="Admin"
-      user={{
-        initials: session?.admin.initials ?? "",
-        name: session?.admin.name ?? "",
-        role: session?.admin.role ?? "",
-      }}
-      sidebarItems={nav.sidebar}
-      tabItems={nav.tabs}
-      moreItems={nav.more}
-      currentKey={navKeyFor(
-        pathname,
-        nav.sidebar.map((item) => item.key),
-      )}
-      isRoot={roots.includes(pathname)}
-      // The Live Board draws its own menu and search pills on phone.
-      topBar={pathname !== "/admin"}
-      contentMax="max-w-290"
-      notifications={{
-        unread,
-        // Closing the drawer is what reads them, so the dots stay while you look.
-        onClose: () => {
-          if (unread > 0) markRead.mutate()
-        },
-        children: <NotificationPanel />,
-      }}
-      account={{
-        onSignOut: () => {
-          signOut("admin")
-          router.push("/")
-        },
-        onSwitch: () => {
-          signOut("admin")
-          router.push("/login?role=admin")
-        },
-      }}
-      banner={<PwaInstallBanner />}
-      onBack={goBack}
-    >
-      {children}
-    </AppShell>
+    <TopBarSlotProvider value={slot}>
+      <AppShell
+        app="admin"
+        logo={{ ...BRAND_CREST, alt: "Regency" }}
+        brand={{ title: "Regency", subtitle: "Admin" }}
+        phoneTitle="Admin"
+        user={{
+          initials: session?.admin.initials ?? "",
+          name: session?.admin.name ?? "",
+          role: session?.admin.role ?? "",
+        }}
+        sidebarItems={nav.sidebar}
+        tabItems={nav.tabs}
+        moreItems={nav.more}
+        currentKey={navKeyFor(
+          pathname,
+          nav.sidebar.map((item) => item.key),
+        )}
+        isRoot={roots.includes(pathname)}
+        // The Live Board draws its own menu and search pills on phone.
+        topBar={pathname !== "/admin"}
+        tabBar={!NO_TAB_BAR.includes(pathname)}
+        contentMax="max-w-290"
+        notifications={{
+          unread,
+          // Closing the drawer is what reads them, so the dots stay while you look.
+          onClose: () => {
+            if (unread > 0) markRead.mutate()
+          },
+          children: <NotificationPanel />,
+        }}
+        account={{
+          onSignOut: () => {
+            signOut("admin")
+            router.push("/")
+          },
+          onSwitch: () => {
+            signOut("admin")
+            router.push("/login?role=admin")
+          },
+        }}
+        banner={<PwaInstallBanner />}
+        onBack={goBack}
+        // Every page but the Live Board (which draws its own) gets the white top bar.
+        pageBar={
+          pathname === "/admin" ? undefined : (
+            <AdminTopBar isRoot={roots.includes(pathname)} onBack={goBack} slotRef={setSlot} />
+          )
+        }
+      >
+        {children}
+      </AppShell>
+    </TopBarSlotProvider>
   )
 }

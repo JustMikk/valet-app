@@ -11,8 +11,8 @@ type TabItem = {
   icon: IconName
   /** Unread or pending count shown on the tab. */
   badge?: number | string
-  /** Staff app badges are `fg`; the admin Live tab uses `warn`. */
-  badgeTone?: "fg" | "warn"
+  /** Staff app badges are `fg`; the admin Live tab uses `bad` (crimson, Regency brand). */
+  badgeTone?: "fg" | "warn" | "bad"
 } & ({ href: string; onSelect?: never } | { onSelect: (key: string) => void; href?: never })
 
 type TabBarProps = {
@@ -27,7 +27,7 @@ type TabBarProps = {
 }
 
 const ITEM =
-  "relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-pill border-0 bg-transparent text-fg no-underline transition-[background-color,transform] duration-200 active:scale-94 aria-[current=page]:bg-surface"
+  "relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-pill border-0 bg-transparent text-fg no-underline transition-[background-color,transform] duration-200 active:scale-94 aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent-text"
 
 const SIZES = {
   staff: {
@@ -44,7 +44,11 @@ const SIZES = {
   },
 } as const
 
-const BADGE_TONE = { fg: "bg-fg text-bg", warn: "bg-warn text-white" } as const
+const BADGE_TONE = {
+  fg: "bg-fg text-bg",
+  warn: "bg-warn text-white",
+  bad: "bg-bad text-white",
+} as const
 
 function TabContent({ item, size }: { item: TabItem; size: keyof typeof SIZES }) {
   const s = SIZES[size]
@@ -71,7 +75,7 @@ function TabContent({ item, size }: { item: TabItem; size: keyof typeof SIZES })
   )
 }
 
-/** Floating glass tab bar for phone (Staff PWA / Admin shells): 76 px, active = surface pill. */
+/** Floating glass tab bar for phone (Staff PWA / Admin shells): 76 px, active = accent pill. */
 export function TabBar({ label, items, current, size = "staff", className }: TabBarProps) {
   return (
     <nav

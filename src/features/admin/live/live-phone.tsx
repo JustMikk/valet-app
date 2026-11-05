@@ -12,48 +12,54 @@ import {
   UnderlineTabs,
   useShellMenu,
 } from "@/components/shared"
+import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 
 import { useNotifications } from "../data/queries"
 import { EventSheet } from "./event-sheet"
-import { attentionActions, LiveDot, SlotBar } from "./live-parts"
+import { attentionActions, PhoneStats, SlotBar } from "./live-parts"
 import { People, Timeline } from "./live-phone-tabs"
 import type { EventSummary } from "@/lib/live/model"
 import type { LiveBoard } from "./use-live-board"
 
 type Tab = "events" | "timeline" | "people"
-const TABS: { value: Tab; label: string }[] = [
-  { value: "events", label: "Events" },
-  { value: "timeline", label: "Timeline" },
-  { value: "people", label: "People" },
+const TABS: { value: Tab; label: string; icon: IconName }[] = [
+  { value: "events", label: "Events", icon: "calendar_month" },
+  { value: "timeline", label: "Timeline", icon: "schedule" },
+  { value: "people", label: "People", icon: "group" },
 ]
 
 const ROW_PRESS = "transition-[transform,background-color] duration-160 active:scale-97"
 
+/**
+ * Phone event row, kept to two lines and the bar: venue and (only when something is wrong) its
+ * status, then time and fill. Relative time and the on-site/open breakdown live in the event
+ * sheet; the bar's label still says them in words.
+ */
 function EventRow({ event, onOpen }: { event: EventSummary; onOpen: () => void }) {
+  const problem = event.health.status.tone !== "ok"
   return (
     <button
       type="button"
       onClick={onOpen}
       className={cn(
-        "flex w-full animate-rise flex-col gap-3 border-0 border-b border-line bg-transparent py-4.5 text-left text-fg",
+        "flex w-full animate-rise flex-col gap-2.5 border-0 border-b border-line bg-transparent py-4 text-left text-fg",
         ROW_PRESS,
       )}
     >
-      <div className="flex w-full items-start gap-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.75">
-          <span className="text-18 leading-x125 font-semibold">{event.venue}</span>
-          <span className="text-14 text-fg-2">
-            {event.time} · {event.rel}
-          </span>
+      <div className="flex w-full flex-col gap-1">
+        <div className="flex w-full items-start justify-between gap-3">
+          <span className="min-w-0 text-17 leading-x125 font-semibold">{event.venue}</span>
+          {problem && <StatusBadge status={event.health.status} size="sm" className="flex-none" />}
         </div>
-        <StatusBadge status={event.health.status} size="sm" />
+        <span className="flex items-center gap-1.5 text-14 text-fg-2">
+          <Icon name="schedule" filled size={16} className="text-accent-text" />
+          <span>
+            {event.time} · <b className="font-semibold text-fg">{event.filledOf}</b>
+          </span>
+        </span>
       </div>
       <SlotBar bar={event.bar} label={event.legend} />
-      <div className="flex w-full justify-between text-14 font-medium text-fg-2">
-        <span>{event.legend}</span>
-        <span className="font-semibold text-fg">{event.filledOf}</span>
-      </div>
     </button>
   )
 }
@@ -92,33 +98,8 @@ export function LivePhone({ board }: { board: LiveBoard }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <h1 className="m-0 flex items-baseline gap-3 font-normal">
-            <span className="inline-flex overflow-hidden font-display text-72 leading-x090 font-bold tracking-n050 tabular-nums">
-              <span key={pulse.need} className="inline-block animate-roll">
-                {pulse.need}
-              </span>
-            </span>
-            <span className="font-display text-26 leading-x100 font-semibold tracking-n020">
-              need you
-            </span>
-          </h1>
-          <div className="flex flex-wrap items-center gap-1.5 text-16 font-medium text-fg-2">
-            <LiveDot />
-            <span>·</span>
-            <span>
-              <b className="text-fg">{pulse.live}</b> events
-            </span>
-            <span>·</span>
-            <span>
-              <b className="text-fg">{pulse.onShift}</b> on shift
-            </span>
-            <span>·</span>
-            <span>
-              <b className="text-fg">{pulse.open}</b> open
-            </span>
-          </div>
-        </div>
+        <h1 className="sr-only">Live Board</h1>
+        <PhoneStats pulse={pulse} yesterday={board.yesterday} />
 
         <UnderlineTabs
           label="Live Board view"
@@ -126,7 +107,7 @@ export function LivePhone({ board }: { board: LiveBoard }) {
           value={tab}
           onValueChange={(v) => setTab(v as Tab)}
           className="gap-6"
-          listClassName="-mx-5 gap-6.5 px-5"
+          listClassName="-mx-5 gap-6 px-5"
         >
           <UnderlineTabPanel value="events" className="flex flex-col gap-6">
             {board.attention.length > 0 && (
@@ -143,7 +124,8 @@ export function LivePhone({ board }: { board: LiveBoard }) {
                     )}
                   >
                     <AttentionCard
-                      variant="glass"
+                      variant="solid"
+                      primary="bad"
                       tone={item.tone}
                       icon={item.icon}
                       title={item.title}
@@ -151,7 +133,7 @@ export function LivePhone({ board }: { board: LiveBoard }) {
                       selfie={item.selfie}
                       selfieUrl={item.selfieUrl}
                       actions={attentionActions(item, board.run)}
-                      className="gap-3.5 p-4"
+                      className="gap-3.5 rounded-card p-4"
                     />
                   </div>
                 ))}

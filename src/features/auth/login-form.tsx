@@ -11,6 +11,7 @@ import { signInAdmin, signInStaff } from "@/lib/data"
 import type { Role } from "@/lib/data/api-client"
 
 import { landingPath } from "./safe-next"
+import { BRAND_LOGO } from "@/lib/brand"
 
 const ROLES = [
   { value: "staff" as const, label: "Staff" },
@@ -54,10 +55,10 @@ export function LoginForm() {
         <div className="flex items-center justify-between gap-4">
           <Link href="/" aria-label="Valet Workforce home">
             <Image
-              src="/brand/regency-logo.svg"
+              src={BRAND_LOGO.src}
               alt="Regency"
-              width={119}
-              height={40}
+              width={BRAND_LOGO.width}
+              height={BRAND_LOGO.height}
               className="h-10 w-auto"
             />
           </Link>

@@ -2,9 +2,10 @@ import Image from "next/image"
 
 import { AccentSwitcher } from "./accent-switcher"
 import { SectionTitle, SheetPanel } from "./primitives"
+import { BRAND_LOGO } from "@/lib/brand"
 
 const SPECS = [
-  ["Type", "Bricolage Grotesque · Onest · Geist Mono"],
+  ["Type", "Prompt (display, UI and numbers)"],
   ["Icons", "Material Symbols Rounded, filled"],
   ["Grid", "4 pt · 20 px mobile gutter"],
   ["Targets", "48 px min · 56 px primary"],
@@ -43,10 +44,10 @@ export function SectionIntro({ accent, onAccentChange }: IntroProps) {
         <div className="flex max-w-190 flex-col gap-4">
           <div className="flex items-center gap-3">
             <Image
-              src="/brand/regency-logo.svg"
+              src={BRAND_LOGO.src}
               alt="Regency Parking Service"
-              width={131}
-              height={44}
+              width={BRAND_LOGO.width}
+              height={BRAND_LOGO.height}
               className="h-11 w-auto"
               priority
             />

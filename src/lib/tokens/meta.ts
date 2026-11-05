@@ -9,16 +9,16 @@ export type ColorToken = {
 }
 
 export const COLOR_TOKENS: readonly ColorToken[] = [
-  { name: "--bg", role: "Screen background", light: "#FFFFFF", dark: "#0A0A0B" },
+  { name: "--bg", role: "Screen background", light: "#F7F7F5", dark: "#0A0A0B" },
   {
     name: "--surface",
     role: "Cards, fields, secondary buttons",
     light: "#F4F4F2",
     dark: "#18181A",
   },
-  { name: "--surface-2", role: "Avatars, pressed states", light: "#E9E9E6", dark: "#252528" },
+  { name: "--surface-2", role: "Avatars, pressed states", light: "#ECECEA", dark: "#252528" },
   { name: "--elev", role: "Floating pills, sheets", light: "#FFFFFF", dark: "#1E1E21" },
-  { name: "--fg", role: "Primary text, strong buttons", light: "#0B0B0B", dark: "#F4F4F2" },
+  { name: "--fg", role: "Primary text, strong buttons", light: "#0E0E10", dark: "#F4F4F2" },
   { name: "--fg-2", role: "Secondary text", light: "#5E5E5B", dark: "#A6A6A1" },
   { name: "--fg-3", role: "Inactive tabs, expected", light: "#70706C", dark: "#86867F" },
   { name: "--line", role: "Hairlines, dividers", light: "#E6E6E3", dark: "#2B2B2E" },
@@ -28,11 +28,11 @@ export const COLOR_TOKENS: readonly ColorToken[] = [
   { name: "--accent-text", role: "Accent as text", light: "#7F611A", dark: "#E6C77E" },
   { name: "--ok", role: "On site, verified", light: "#257A32", dark: "#62C46F" },
   { name: "--ok-soft", role: "Success fill", light: "#E5F3E1", dark: "#14261A" },
-  { name: "--warn", role: "Late, flagged, overrun", light: "#B9480E", dark: "#FF8F57" },
-  { name: "--warn-soft", role: "Warning fill", light: "#FCEDE2", dark: "#2E1B11" },
-  { name: "--bad", role: "Short, missing, no-show", light: "#C02A20", dark: "#FF6E63" },
-  { name: "--bad-soft", role: "Danger fill", light: "#FBE7E5", dark: "#311715" },
-  { name: "--info", role: "Waiting for approval", light: "#1E5BC6", dark: "#82AEFF" },
-  { name: "--info-soft", role: "Info fill", light: "#E6EDFA", dark: "#14203A" },
-  { name: "--hero", role: "Feature card ground", light: "#0E0F12", dark: "#1E1E21" },
+  { name: "--warn", role: "Late, flagged, overrun", light: "#7F611A", dark: "#FF8F57" },
+  { name: "--warn-soft", role: "Warning fill", light: "#F7EFDA", dark: "#2E1B11" },
+  { name: "--bad", role: "Short, missing, no-show", light: "#9E1B1E", dark: "#FF6E63" },
+  { name: "--bad-soft", role: "Danger fill", light: "#F7EDED", dark: "#311715" },
+  { name: "--info", role: "Waiting for approval", light: "#5E5E5B", dark: "#82AEFF" },
+  { name: "--info-soft", role: "Info fill", light: "#ECEBE8", dark: "#14203A" },
+  { name: "--hero", role: "Feature card ground", light: "#0E0E10", dark: "#1E1E21" },
 ]

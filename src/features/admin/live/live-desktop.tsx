@@ -3,15 +3,20 @@
 import { useState } from "react"
 import Link from "next/link"
 
-import { AttentionCard, ChipGroup, Icon, StatusBadge, ToastPill } from "@/components/shared"
+import { ChipGroup, Icon, PillTabs, ToastPill } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import type { LiveSlot } from "@/lib/data/admin/ops-schemas"
+import type { Pulse } from "@/lib/live/model"
+import type { IconName } from "@/lib/icons/icon-names"
+import { cn } from "@/lib/utils"
 
-import { sheetSlots, type EventSummary } from "@/lib/live/model"
-import { attentionActions, LiveDot, SlotBar, SlotRow } from "./live-parts"
+import { AttentionColumn } from "./live-attention-column"
+import { CARD, EventsColumn, RosterColumn } from "./live-columns"
+import { LiveDot, Trend } from "./live-parts"
 import { StaffLocationModal } from "./staff-location-modal"
 import type { LiveBoard } from "./use-live-board"
+
+type View = "events" | "roster" | "attention"
 
 type Day = "today" | "tomorrow" | "pick"
 const DAYS: { value: Day; label: string }[] = [
@@ -20,88 +25,83 @@ const DAYS: { value: Day; label: string }[] = [
   { value: "pick", label: "Pick date" },
 ]
 
+/** Each count opens with a line icon, like the reference dashboard's stat cards. */
+const KPI_ICON: Record<keyof Pulse, IconName> = {
+  need: "error",
+  live: "sensors",
+  onShift: "group",
+  expected: "schedule",
+  open: "person_add",
+}
+
 function Kpi({
-  value,
   label,
+  kpi,
+  pulse,
+  yesterday,
   tone,
   first,
 }: {
-  value: number
   label: string
+  kpi: keyof Pulse
+  pulse: Pulse
+  yesterday: Pulse | null
   tone?: "bad"
   first?: boolean
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-1.5 border-r border-line last:border-r-0",
-        first ? "px-8 py-4.5" : "px-6 py-4.5",
-      )}
-    >
-      <span
-        className={cn(
-          "font-display text-40 leading-x100 font-bold tracking-n040 tabular-nums",
-          tone === "bad" && "text-bad",
-        )}
-      >
-        {value}
-      </span>
-      <span className="text-14 font-medium text-fg-2">{label}</span>
+    <div className={cn(CARD, "flex flex-col gap-3 rounded-r20 p-4.5", first && "pl-5")}>
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className={cn(
+            "grid size-10 place-items-center rounded-r12",
+            tone === "bad" ? "bg-bad-soft text-bad" : "bg-surface text-fg-2",
+          )}
+        >
+          <Icon name={KPI_ICON[kpi]} size={22} />
+        </span>
+        <Trend kpi={kpi} pulse={pulse} yesterday={yesterday} />
+      </div>
+      <div className="flex flex-col gap-1">
+        <span
+          className={cn(
+            "font-display text-34 leading-x100 font-bold tracking-n040 tabular-nums",
+            tone === "bad" && "text-bad",
+          )}
+        >
+          {pulse[kpi]}
+        </span>
+        <span className="text-14 font-medium text-fg-2">{label}</span>
+      </div>
     </div>
   )
 }
 
-function DesktopEventRow({
-  event,
-  selected,
-  onSelect,
-}: {
-  event: EventSummary
-  selected: boolean
-  onSelect: () => void
-}) {
-  return (
-    <button
-      type="button"
-      aria-current={selected || undefined}
-      onClick={onSelect}
-      className={cn(
-        "flex w-full flex-col gap-2.5 border-0 px-6 py-4 text-left text-fg transition-transform duration-160 active:scale-97",
-        selected ? "bg-surface shadow-[inset_3px_0_0_var(--fg)]" : "bg-transparent",
-      )}
-    >
-      <div className="flex w-full items-start gap-2.5">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.75">
-          <span className="text-16 leading-x125 font-semibold">{event.venue}</span>
-          <span className="text-13 text-fg-2">
-            {event.time} · {event.rel}
-          </span>
-        </div>
-        <StatusBadge status={event.health.status} size="sm" />
-      </div>
-      <SlotBar bar={event.bar} label={event.legend} className="h-2" />
-      <div className="flex w-full justify-between text-13 font-medium text-fg-2">
-        <span>{event.legend}</span>
-        <span className="font-semibold text-fg">{event.filledOf}</span>
-      </div>
-    </button>
-  )
-}
-
-const PANE = "no-scrollbar min-h-0 overflow-y-auto"
-const ACTION = "h-10 px-3.5 text-14 whitespace-nowrap"
-
-/** Live Board for 1100 px and wider: KPI strip, event list, roster and attention column. */
+/** Live Board for 1100 px and wider: KPI card, then events, roster or attention behind tabs. */
 export function LiveDesktop({ board }: { board: LiveBoard }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [day, setDay] = useState<Day>("today")
   const [viewSlot, setViewSlot] = useState<LiveSlot | null>(null)
   const { pulse } = board
+  const trend = { pulse, yesterday: board.yesterday }
+  const [view, setView] = useState<View>("events")
   const selected = board.summaries.find((e) => e.id === selectedId) ?? board.summaries[0]
+  const nav = (
+    <PillTabs
+      label="Show"
+      value={view}
+      onValueChange={setView}
+      items={[
+        { value: "events", label: "Events", count: board.summaries.length },
+        ...(selected ? [{ value: "roster" as const, label: selected.venue }] : []),
+        { value: "attention", label: "Attention", count: pulse.need },
+      ]}
+    />
+  )
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col bg-bg">
-      <header className="flex items-center gap-4 border-b border-line px-8 pt-6 pb-5">
+    <div className="relative flex h-full min-h-0 flex-col">
+      <header className="mb-5 flex items-center gap-4 border-b border-line bg-elev px-6 py-5">
         <div className="flex flex-1 flex-col gap-1">
           <h1 className="m-0 font-display text-34 leading-x100 font-bold tracking-n030">
             Live Board
@@ -137,108 +137,30 @@ export function LiveDesktop({ board }: { board: LiveBoard }) {
         </Button>
       </header>
 
-      <div className="grid grid-cols-5 border-b border-line">
-        <Kpi first value={pulse.need} label="Need you" tone="bad" />
-        <Kpi value={pulse.live} label="Events live" />
-        <Kpi value={pulse.onShift} label="On shift" />
-        <Kpi value={pulse.expected} label="Expected, not here" />
-        <Kpi value={pulse.open} label="Open slots today" />
+      <div className="mx-6 grid grid-cols-5 gap-3">
+        <Kpi first label="Need you" kpi="need" {...trend} tone="bad" />
+        <Kpi label="Events live" kpi="live" {...trend} />
+        <Kpi label="On shift" kpi="onShift" {...trend} />
+        <Kpi label="Expected, not here" kpi="expected" {...trend} />
+        <Kpi label="Open slots today" kpi="open" {...trend} />
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_21.25rem]">
-        <section aria-label="Events" className={cn(PANE, "border-r border-line py-2")}>
-          {board.summaries.map((event) => (
-            <DesktopEventRow
-              key={event.id}
-              event={event}
-              selected={event.id === selected?.id}
-              onSelect={() => setSelectedId(event.id)}
-            />
-          ))}
-        </section>
-
-        {selected && (
-          <section
-            aria-label={`${selected.venue} roster`}
-            className={cn(PANE, "flex flex-col gap-3.5 border-r border-line px-6 py-5")}
-          >
-            <div className="flex items-start gap-2.5">
-              <div className="flex flex-1 flex-col gap-0.75">
-                <h2 className="m-0 font-display text-24 leading-x115 font-bold tracking-n025">
-                  {selected.venue}
-                </h2>
-                <span className="text-14 text-fg-2">
-                  {selected.time} · {selected.rel}
-                </span>
-              </div>
-              <StatusBadge status={selected.health.status} size="sm" />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="secondary"
-                size="xs"
-                className={ACTION}
-                onClick={() => board.addSlot(selected.id)}
-              >
-                Add slot
-              </Button>
-              <Button
-                variant="secondary"
-                size="xs"
-                className={ACTION}
-                onClick={() => board.broadcastEvent(selected.id)}
-              >
-                Broadcast
-              </Button>
-              <Button
-                variant="secondary"
-                size="xs"
-                className={ACTION}
-                onClick={() => board.messageCrew(selected.id)}
-              >
-                Message crew
-              </Button>
-            </div>
-            <ul className="m-0 flex list-none flex-col border-t border-line p-0">
-              {sheetSlots(selected).map(({ slot }) => (
-                <SlotRow
-                  key={slot.id}
-                  compact
-                  slot={slot}
-                  onAssign={() => board.assign(selected.id)}
-                  onView={setViewSlot}
-                />
-              ))}
-            </ul>
-          </section>
+      <div className="flex min-h-0 flex-1 px-6 pt-4 pb-5">
+        {view === "events" && (
+          <EventsColumn
+            board={board}
+            nav={nav}
+            selectedId={selected?.id}
+            onSelect={(id) => {
+              setSelectedId(id)
+              setView("roster")
+            }}
+          />
         )}
-
-        <section aria-label="Attention" className={cn(PANE, "flex flex-col gap-3 bg-bg p-5")}>
-          <h2 className="m-0 text-18 font-semibold tracking-n010">Attention · {pulse.need}</h2>
-          {board.attention.map((item) => (
-            <div
-              key={item.key}
-              className={cn(
-                "overflow-hidden rounded-r20",
-                board.leaving[item.key] ? "animate-out" : "animate-fade",
-              )}
-            >
-              <AttentionCard
-                density="compact"
-                tone={item.tone}
-                icon={item.icon}
-                title={item.title}
-                meta={item.sub}
-                selfie={item.selfie}
-                selfieUrl={item.selfieUrl}
-                actions={attentionActions(item, board.run)}
-              />
-            </div>
-          ))}
-          {board.attention.length === 0 && (
-            <p className="m-0 text-15 text-fg-2">All clear. Nothing needs you right now.</p>
-          )}
-        </section>
+        {view === "roster" && selected && (
+          <RosterColumn board={board} nav={nav} event={selected} onView={setViewSlot} />
+        )}
+        {view === "attention" && <AttentionColumn board={board} nav={nav} />}
       </div>
 
       <ToastPill message={board.toast} placement="bottom" />

@@ -1,7 +1,7 @@
 // In-memory AdminRepo over the design's fixtures: what the static (fixture-only) build runs on. It
 // mirrors the server's rules closely enough for the same screens: actions change state in memory
 // and reset on reload.
-import { deriveBoard, first } from "@/lib/live/model"
+import { deriveBoard, first, type Pulse } from "@/lib/live/model"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import {
   ADJUSTED,
@@ -69,6 +69,16 @@ const venueStore = new Map<string, VenueDetail>(
 )
 let instructions: string = EVENT_DETAIL.instructions
 let liveEvents: LiveEvent[] = structuredClone(LIVE_EVENTS)
+
+/** The demo has no history: yesterday is today's counts less a fixed example change. */
+const DEMO_CHANGE: Pulse = { need: 2, live: 1, onShift: 2, expected: -1, open: 0 }
+const demoYesterday = (now: Pulse): Pulse => ({
+  need: Math.max(0, now.need - DEMO_CHANGE.need),
+  live: Math.max(0, now.live - DEMO_CHANGE.live),
+  onShift: Math.max(0, now.onShift - DEMO_CHANGE.onShift),
+  expected: Math.max(0, now.expected - DEMO_CHANGE.expected),
+  open: Math.max(0, now.open - DEMO_CHANGE.open),
+})
 const approvedHours = new Set<string>()
 let cleanApproved = false
 const staffRows: StaffRow[] = STAFF_ROWS.map((row) => ({
@@ -295,6 +305,7 @@ export const mockAdminRepo: AdminRepo = {
       timeline: { ...TIMELINE, ticks: [...TIMELINE.ticks] },
       zone: "CT",
       serverNow: new Date().toISOString(),
+      yesterday: demoYesterday(deriveBoard(liveEvents, {}).pulse),
     }),
   decide: async (punchId, decision) => {
     const event = liveEvents.find((e) => e.slots.some((s) => s.facts.punchId === punchId))

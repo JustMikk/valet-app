@@ -10,17 +10,22 @@ export type CoverageCounts = {
 
 type Segment = keyof CoverageCounts
 
-// Order, words and fills per the Design System sheet ("coverage-bar").
-// The legend's open swatch is outlined only; the bar segment is hatched and outlined.
+// Order and words per the Design System sheet ("coverage-bar"); fills follow the Regency silver
+// bars (ADR-020): on site silver, late gold, expected light silver, open the empty track.
 const SEGMENTS: { key: Segment; words: string; fill: string; swatch: string }[] = [
-  { key: "onSite", words: "on site", fill: "bg-ok", swatch: "bg-ok" },
-  { key: "late", words: "late", fill: "bg-warn", swatch: "bg-warn" },
-  { key: "expected", words: "expected", fill: "bg-fg-3-line", swatch: "bg-fg-3-line" },
+  { key: "onSite", words: "on site", fill: "bg-fg-3-line", swatch: "bg-fg-3-line" },
+  { key: "late", words: "late", fill: "bg-accent", swatch: "bg-accent" },
+  {
+    key: "expected",
+    words: "expected",
+    fill: "bg-fg-3-line/45",
+    swatch: "bg-fg-3-line/45",
+  },
   {
     key: "open",
     words: "open",
-    fill: "hatch-open",
-    swatch: "shadow-[inset_0_0_0_1.5px_var(--fg-3-line)]",
+    fill: "bg-surface-2",
+    swatch: "bg-surface-2 shadow-[inset_0_0_0_1px_var(--line)]",
   },
 ]
 
@@ -51,7 +56,7 @@ type CoverageBarProps = {
   className?: string
 }
 
-/** On site + late + expected + open = headcount. Open is hatched so it reads without color. */
+/** On site + late + expected + open = headcount; the label says it in words. */
 export function CoverageBar({ counts: input, legend = false, className }: CoverageBarProps) {
   const counts = normalise(input)
   const present = SEGMENTS.filter((s) => counts[s.key] > 0)

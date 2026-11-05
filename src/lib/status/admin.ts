@@ -23,7 +23,7 @@ export const ADMIN_STATUS = {
   }),
   expected: { tone: "neutral", icon: "schedule", filled: true, label: "Expected" },
   clockedOut: { tone: "muted", icon: "check_circle", filled: true, label: "Clocked out" },
-  active: { tone: "neutral", icon: "check_circle", filled: true, label: "Active" },
+  active: { tone: "ok", icon: "check_circle", filled: true, label: "Active" },
   alertsOff: { tone: "warn", icon: "notifications_off", filled: true, label: "Alerts off" },
   invited: { tone: "info", icon: "person_add", filled: true, label: "Invited" },
   inactive: { tone: "neutral", icon: "block", filled: true, label: "Inactive" },
@@ -34,5 +34,5 @@ export const ADMIN_STATUS = {
     label: `Overdue ${days}d`,
   }),
   paid: { tone: "ok", icon: "check_circle", filled: true, label: "Paid" },
-  sent: { tone: "info", icon: "north_east", filled: true, label: "Sent" },
+  sent: { tone: "ok", icon: "north_east", filled: true, label: "Sent" },
 } as const satisfies Record<string, StatusSpec | ((n: number) => StatusSpec)>

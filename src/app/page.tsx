@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { PwaInstallBanner, ThemeToggle } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import { BRAND_LOGO } from "@/lib/brand"
 
 /** Public landing page: who this is for and where to sign in. */
 export default function Home() {
@@ -12,10 +13,10 @@ export default function Home() {
       <main className="mx-auto flex min-h-dvh w-full max-w-130 flex-col justify-center gap-9 px-5 py-12">
         <div className="flex items-center justify-between gap-4">
           <Image
-            src="/brand/regency-logo.svg"
+            src={BRAND_LOGO.src}
             alt="Regency"
-            width={149}
-            height={50}
+            width={BRAND_LOGO.width}
+            height={BRAND_LOGO.height}
             className="h-12 w-auto"
           />
           <ThemeToggle />

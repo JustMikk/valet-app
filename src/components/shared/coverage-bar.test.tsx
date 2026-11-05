@@ -55,9 +55,9 @@ describe("CoverageBar", () => {
     expect((segments[0] as HTMLElement).style.flexGrow).toBe("4")
   })
 
-  it("hatches open slots so they read without color", () => {
+  it("draws open slots as the empty track (the label says it in words)", () => {
     const { container } = render(<CoverageBar counts={counts} />)
-    expect(container.querySelector("[data-segment='open']")).toHaveClass("hatch-open")
+    expect(container.querySelector("[data-segment='open']")).toHaveClass("bg-surface-2")
   })
 
   it("shows the legend with the headcount", () => {

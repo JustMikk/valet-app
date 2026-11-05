@@ -11,6 +11,7 @@ import { QueryState } from "../data/query-state"
 import { useMessages, useNotifications, useSendMessage } from "../data/queries"
 import { ChatBubble } from "./chat-bubble"
 import { forTab, type InboxTab } from "./chat-tabs"
+import { BRAND_CREST } from "@/lib/brand"
 
 const TABS = [
   { value: "chat" as const, label: "Chat" },
@@ -50,11 +51,11 @@ export function StaffInbox() {
         <div className="flex items-center gap-3.5 border-b border-line pb-4">
           <div className="grid size-13 flex-none place-items-center rounded-r16 bg-white shadow-[inset_0_0_0_1px_var(--line)]">
             <Image
-              src="/brand/regency-logo.svg"
+              src={BRAND_CREST.src}
               alt=""
-              width={44}
-              height={15}
-              className="h-auto w-11"
+              width={BRAND_CREST.width}
+              height={BRAND_CREST.height}
+              className="h-9 w-auto"
             />
           </div>
           <div className="flex flex-1 flex-col gap-0.5">
@@ -134,7 +135,7 @@ export function StaffInbox() {
               onClick={send}
               className={cn(
                 "grid size-12 flex-none place-items-center rounded-pill border-0 transition-[background-color,color,transform] duration-200 active:scale-92",
-                canSend ? "bg-accent text-accent-ink" : "bg-surface text-fg-3",
+                canSend ? "bg-accent text-white" : "bg-surface text-fg-3",
               )}
             >
               <Icon name="arrow_upward" size={24} />

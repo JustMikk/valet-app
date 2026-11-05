@@ -9,13 +9,16 @@ import { cn } from "@/lib/utils"
 const COLUMNS =
   "tablet:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,0.8fr)] tablet:gap-4"
 
-/** Column headings, shown from tablet up only. */
+/** The table's frame: a white card with a hairline, its rows divided by faint lines. */
+export const TABLE_CARD = "flex flex-col overflow-hidden rounded-r24 border border-line bg-elev"
+
+/** Column headings on a light grey band, shown from tablet up only. */
 export function DataHead({ columns }: { columns: [string, string, string, string] }) {
   return (
     <div
       aria-hidden="true"
       className={cn(
-        "hidden px-1 text-13 font-semibold tracking-p020 text-fg-3 tablet:grid",
+        "hidden h-11 items-center border-b border-line bg-surface px-5 text-12 font-semibold tracking-p050 text-fg-3 uppercase tablet:grid",
         COLUMNS,
       )}
     >
@@ -27,13 +30,13 @@ export function DataHead({ columns }: { columns: [string, string, string, string
   )
 }
 
-/** Link row of the table: 72 px, hairline separated, press scale. */
+/** Link row of the table: 68 px, hairline separated, a grey wash on hover. */
 export function DataRow({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
       className={cn(
-        "box-content grid min-h-18 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-line py-2 text-left text-fg no-underline transition-transform duration-160 active:scale-99 tablet:px-1",
+        "box-content grid min-h-17 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-line px-4 py-1.5 text-left text-fg no-underline transition-colors duration-160 last:border-b-0 hover:bg-surface/60 active:bg-surface tablet:px-5",
         COLUMNS,
       )}
     >
@@ -56,8 +59,14 @@ export function PersonCell({ name, sub }: { name: string; sub: string }) {
 }
 
 /** Status chip in a table cell. */
-export function StatusCell({ status }: { status: StatusSpec }) {
-  return <StatusBadge status={status} size="sm" className="self-center justify-self-start" />
+export function StatusCell({ status, className }: { status: StatusSpec; className?: string }) {
+  return (
+    <StatusBadge
+      status={status}
+      size="sm"
+      className={cn("self-center justify-self-start", className)}
+    />
+  )
 }
 
 /** Chevron that marks a row as navigable on phone, where the amount column is hidden. */

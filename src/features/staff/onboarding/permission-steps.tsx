@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { INSTALL_STEPS, LOCATION_PROMISES, type InstallOs } from "@/mocks/onboarding"
 
 import { OnboardingScreen, STEP_BODY, STEP_TITLE } from "./onboarding-frame"
+import { BRAND_CREST } from "@/lib/brand"
 
 const CTA = "text-18"
 const SKIP = "h-12 text-15 text-fg-2"
@@ -126,11 +127,11 @@ export function PushStep({ onAllow, onSkip }: PushStepProps) {
       <div className="flex animate-sheet-up items-start gap-3 rounded-r22 glass p-4 [animation-delay:200ms] [animation-duration:500ms]">
         <div className="grid size-10 flex-none place-items-center rounded-r10 bg-white shadow-[inset_0_0_0_1px_var(--line)]">
           <Image
-            src="/brand/regency-logo.svg"
+            src={BRAND_CREST.src}
             alt=""
-            width={34}
-            height={11}
-            className="h-auto w-8.5"
+            width={BRAND_CREST.width}
+            height={BRAND_CREST.height}
+            className="h-7 w-auto"
           />
         </div>
         <div className="flex flex-1 flex-col gap-0.5">

@@ -108,7 +108,7 @@ export function PayStubModal({
               disabled={send.isPending}
               onClick={() => send.mutate(row.staffId, { onSuccess: () => setSent(true) })}
               className={cn(
-                "text-accent-fg flex items-center gap-2 rounded-pill bg-accent px-3.5 py-2 text-14 font-semibold transition-opacity",
+                "flex items-center gap-2 rounded-pill bg-accent-text px-3.5 py-2 text-14 font-semibold text-white transition-opacity",
                 send.isPending && "opacity-50",
               )}
             >

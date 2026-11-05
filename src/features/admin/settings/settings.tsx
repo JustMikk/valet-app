@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { AdminHead, AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useSettings, useUpdateSettings } from "../data/queries"
+import { BRAND_CREST } from "@/lib/brand"
 
 const ROW = "box-content flex min-h-16.5 w-full items-center gap-3 border-0 border-b border-line"
 
@@ -81,11 +82,11 @@ function SettingsBody({ settings }: { settings: SettingsData }) {
           <GlassCard className="flex items-center gap-4 p-4">
             <div className="grid size-18 flex-none place-items-center rounded-r18 bg-white shadow-[inset_0_0_0_1px_var(--line)]">
               <Image
-                src="/brand/regency-logo.svg"
+                src={BRAND_CREST.src}
                 alt=""
-                width={60}
-                height={20}
-                className="h-auto w-15"
+                width={BRAND_CREST.width}
+                height={BRAND_CREST.height}
+                className="h-12 w-auto"
               />
             </div>
             <div className="flex flex-1 flex-col gap-0.5">

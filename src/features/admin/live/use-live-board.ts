@@ -143,6 +143,7 @@ export function useLiveBoard() {
     timeline: query.data?.timeline ?? null,
     zone: query.data?.zone ?? "",
     updatedAt: query.data?.serverNow ?? null,
+    yesterday: query.data?.yesterday ?? null,
     query,
     leaving,
     toast,

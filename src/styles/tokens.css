@@ -1,7 +1,8 @@
 /*
  * Design tokens — the single source of every color, glass, radius and motion value.
  * Values are copied from the design export (docs/inputs/designs: Staff PWA + Admin shells,
- * DESIGN_README.md). Names match the export exactly. Keep src/lib/tokens/meta.ts in sync:
+ * DESIGN_README.md). Names match the export exactly. Light-theme neutrals, line and danger
+ * colors follow the Regency website (warm paper, ivory, ink, crimson; ADR-020). Keep src/lib/tokens/meta.ts in sync:
  * the sync test fails if they drift.
  *
  * Scoping (can be set on any element, so the showcase can render both themes side by side):
@@ -17,18 +18,23 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg: #ffffff;
+  /* A faint grey page so white cards stand apart without shadows (client direction). */
+  --bg: #f7f7f5;
+  /* Light grey fills for fields, secondary buttons and selection (client palette: no ivory). */
   --surface: #f4f4f2;
-  --surface-2: #e9e9e6;
+  --surface-2: #ececea;
   --elev: #ffffff;
-  --fg: #0b0b0b;
+  /* Website ink. */
+  --fg: #0e0e10;
+  /* Neutral greys (client palette: silver, no warm tint). */
   --fg-2: #5e5e5b;
-  /* Text: darkened from the export's #8E8E8A to meet 4.5:1 on bg and surface (OPEN_QUESTIONS D11). */
+  /* Muted text: 4.6:1 on bg, 4.5:1 on surface (OPEN_QUESTIONS D11 keeps ≥ 4.5:1). */
   --fg-3: #70706c;
-  /* Graphics (hatch, expected segment, outline rings): the export's value; ≥ 3:1 non-text contrast. */
-  --fg-3-line: #8e8e8a;
+  /* Graphics (hatch, expected segment, outline rings): silver, ≥ 3:1 on bg and surface. */
+  --fg-3-line: #8a8a86;
+  /* Light grey hairlines for borders and dividers (client palette). */
   --line: #e6e6e3;
-  --hero: #0e0f12;
+  --hero: #0e0e10;
 
   --accent: #c9a24a;
   --accent-rgb: 201 162 74;
@@ -36,25 +42,28 @@
   --accent-soft: #f7efda;
   --accent-text: #7f611a;
 
-  /* Darkened from the export's #2A7F36 to meet 4.5:1 on --ok-soft (D11). */
+  /* Regency palette (ADR-020): status keeps its icon and words; ok is green (on track, active,
+     sent, paid), warn brown, bad crimson, info grey, all >= 4.5:1 on their fills. */
   --ok: #257a32;
   --ok-soft: #e5f3e1;
-  --warn: #b9480e;
-  --warn-soft: #fcede2;
-  --bad: #c02a20;
-  --bad-soft: #fbe7e5;
-  --info: #1e5bc6;
-  --info-soft: #e6edfa;
+  --warn: #7f611a;
+  --warn-soft: #f7efda;
+  /* Website crimson. */
+  --bad: #9e1b1e;
+  --bad-soft: #f7eded;
+  --info: #5e5e5b;
+  --info-soft: #ecebe8;
 
   --chrome: rgba(255, 255, 255, 0.62);
-  --card: rgba(255, 255, 255, 0.58);
-  --sheet: rgba(255, 255, 255, 0.8);
+  /* Clean light theme: cards are solid white (no glow behind them to show through). */
+  --card: #ffffff;
+  /* Clean light theme: sheets and drawers are solid white. */
+  --sheet: #ffffff;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.75);
-  --card-line: inset 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 18px rgba(0, 0, 0, 0.05);
-  --ambient:
-    radial-gradient(70% 38% at 92% -4%, rgb(var(--accent-rgb) / 0.34), transparent 70%),
-    radial-gradient(55% 30% at -10% 22%, rgb(var(--accent-rgb) / 0.16), transparent 70%),
-    radial-gradient(60% 30% at 110% 70%, rgb(var(--accent-rgb) / 0.12), transparent 70%);
+  /* Clean light theme (client direction): a hairline stroke, no drop shadow. */
+  --card-line: inset 0 0 0 1px var(--line);
+  /* No glow or tint on the page ground: plain white (client direction, ADR-020). */
+  --ambient: none;
   --hero-glow: radial-gradient(
     120% 140% at 85% 110%,
     rgb(var(--accent-rgb) / 0.42),
@@ -133,11 +142,9 @@
 [data-app="admin"],
 [data-theme="light"] [data-app="admin"],
 [data-app="admin"] [data-theme="light"] {
-  --sheet: rgba(255, 255, 255, 0.82);
-  --card-line: inset 0 0 0 1px rgba(0, 0, 0, 0.05), 0 4px 18px rgba(0, 0, 0, 0.05);
-  --ambient:
-    radial-gradient(70% 38% at 92% -4%, rgb(var(--accent-rgb) / 0.3), transparent 70%),
-    radial-gradient(55% 30% at -10% 30%, rgb(var(--accent-rgb) / 0.12), transparent 70%);
+  --sheet: #ffffff;
+  --card-line: inset 0 0 0 1px var(--line);
+  --ambient: none;
 }
 
 [data-theme="dark"][data-app="admin"],

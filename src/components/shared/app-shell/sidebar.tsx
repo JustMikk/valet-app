@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { Icon } from "../icon"
 import { useShellMenu } from "./menu-context"
 import { NotificationBell } from "./notification-bell"
-import type { ShellApp, ShellBadge, ShellNavItem, ShellUser } from "./types"
+import type { ShellApp, ShellBadge, ShellLogo, ShellNavItem, ShellUser } from "./types"
 
 // The two apps differ slightly (Staff PWA.dc.html vs Admin.dc.html): item height, side padding,
 // desktop width and the brand block.
@@ -23,7 +23,11 @@ const DENSITY = {
   },
 } as const
 
-const BADGE_TONE = { fg: "bg-fg text-bg", warn: "bg-warn text-white" } as const
+const BADGE_TONE = {
+  fg: "bg-fg text-bg",
+  warn: "bg-warn text-white",
+  bad: "bg-bad text-white",
+} as const
 
 function SidebarBadge({ badge }: { badge: ShellBadge }) {
   return (
@@ -40,7 +44,7 @@ function SidebarBadge({ badge }: { badge: ShellBadge }) {
 
 type SidebarProps = {
   app: ShellApp
-  logo: { src: string; alt: string }
+  logo: ShellLogo
   brand: { title: string; subtitle?: string }
   items: ShellNavItem[]
   currentKey: string | null
@@ -88,7 +92,13 @@ export function Sidebar({
       )}
     >
       <div className={cn("flex items-center gap-2.5 px-2 pt-1", d.logoRow)}>
-        <Image src={logo.src} alt={logo.alt} width={107} height={36} className="h-9 w-auto" />
+        <Image
+          src={logo.src}
+          alt={logo.alt}
+          width={logo.width}
+          height={logo.height}
+          className="h-9 w-auto"
+        />
         <span className="hidden flex-col desktop:flex">
           <span
             className={cn(
@@ -115,7 +125,7 @@ export function Sidebar({
             className={cn(
               "relative flex items-center justify-center gap-3 rounded-r14 text-15 transition-[background-color,box-shadow,transform] duration-200 active:scale-97 desktop:justify-start",
               d.item,
-              on ? "bg-chrome font-semibold text-fg shadow-float" : "font-medium text-fg-2",
+              on ? "bg-surface-2 font-semibold text-fg" : "font-medium text-fg-2 hover:bg-surface",
             )}
           >
             <Icon name={item.icon} filled size={24} />

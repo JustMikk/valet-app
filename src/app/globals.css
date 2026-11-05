@@ -34,9 +34,10 @@
 
 /* Font families: next/font variables are set on <html> in the root layout. */
 :root {
-  --ff: var(--font-onest), system-ui, sans-serif;
-  --fd: var(--font-bricolage), var(--font-onest), sans-serif;
-  --fm: var(--font-geist-mono), ui-monospace, monospace;
+  /* One family, as on the Regency website; --fm keeps its role (numbers) via tabular figures. */
+  --ff: var(--font-prompt), system-ui, sans-serif;
+  --fd: var(--font-prompt), system-ui, sans-serif;
+  --fm: var(--font-prompt), system-ui, sans-serif;
 }
 
 @theme inline {
@@ -475,6 +476,19 @@
   }
   body {
     @apply bg-bg text-fg;
+  }
+  /* Selects draw their own chevron (Icon), so drop the browser's; the open list follows the
+     theme so it stays readable in dark mode. */
+  select {
+    appearance: none;
+  }
+  option {
+    background-color: var(--elev);
+    color: var(--fg);
+  }
+  /* Numbers (--fm) share the text family now; tabular figures keep columns and timers steady. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {

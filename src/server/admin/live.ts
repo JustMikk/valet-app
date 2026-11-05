@@ -22,6 +22,7 @@ import { conflict, notFound } from "../http/handler"
 import { notifyAdmins } from "../notify"
 import { sweepExpiredSelfies } from "../retention"
 import { adminCtx, firstName, messageStaff, notifyStaff, type AdminCtx } from "./common"
+import { pulseOf, pulseYesterday, recordPulse } from "./pulse"
 import { classifySlot, loadSlots, type SlotRow } from "./slots"
 
 const HOUR = 3_600_000
@@ -94,6 +95,7 @@ export function buildLive(slots: SlotRow[], now: Date): Live {
     timeline: { from, span, now: hoursFrom(base, now), ticks },
     zone: formatZoneShort(now, tz),
     serverNow: now.toISOString(),
+    yesterday: null,
   }
 }
 
@@ -102,7 +104,17 @@ export async function getLive(adminId: string, now: Date): Promise<Live> {
   await sweepExpiredSelfies(now)
   const live = buildLive(await loadSlots(ctx.tenantId), now)
   await announceLate(ctx.tenantId, live)
-  return live
+  await recordPulse(ctx.tenantId, pulseOf(live), now)
+  return { ...live, yesterday: await pulseYesterday(ctx.tenantId, now) }
+}
+
+/** Saves every tenant's counts: the scheduled job, so quiet hours have snapshots too. */
+export async function recordAllPulses(now: Date): Promise<number> {
+  const tenants = await rows<{ id: string }>(sql()`select id from tenants`)
+  for (const { id } of tenants) {
+    await recordPulse(id, pulseOf(buildLive(await loadSlots(id), now)), now)
+  }
+  return tenants.length
 }
 
 /** Someone not clocked in after the start is a dispatcher alert, raised once per shift. */

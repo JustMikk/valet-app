@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 
 import { GlassCard, Icon, PersonAvatar, PillTabs } from "@/components/shared"
 import { Button } from "@/components/ui/button"
@@ -94,22 +94,16 @@ function EntryCard({ entry, index, busy, onApprove, onAdjust }: EntryCardProps) 
   )
 }
 
-function Body({ hours }: { hours: Hours }) {
-  const [tab, setTab] = useState<HoursTab>("review")
+function Body({ hours, tab, tabs }: { hours: Hours; tab: HoursTab; tabs: ReactNode }) {
   const [adjusting, setAdjusting] = useState<HoursEntry | null>(null)
   const { approve, approveClean } = useHoursActions()
 
-  const pending = hours.review.length
   const entries = tab === "review" ? hours.review : hours.approved
-  const tabs = [
-    { value: "review" as const, label: "Needs review", count: pending || undefined },
-    { value: "approved" as const, label: "Approved" },
-  ]
   const error = approve.error ?? approveClean.error
 
   return (
     <>
-      <PillTabs label="Show" items={tabs} value={tab} onValueChange={setTab} />
+      {tabs}
       <div className="flex flex-col gap-4">
         {tab === "review" && hours.cleanCount > 0 && (
           <GlassCard className="flex flex-wrap items-center gap-3 px-4.5 py-4">
@@ -161,11 +155,21 @@ function Body({ hours }: { hours: Hours }) {
 /** Hours review: approve the clean batch in one tap; flagged entries approve or adjust in place. */
 export function HoursReview() {
   const hours = useHours()
+  const [tab, setTab] = useState<HoursTab>("review")
+  const pending = hours.data?.review.length ?? 0
+  const tabs = [
+    { value: "review" as const, label: "Needs review", count: pending || undefined },
+    { value: "approved" as const, label: "Approved" },
+  ]
+  const tabsFor = (className?: string) => (
+    <PillTabs label="Show" items={tabs} value={tab} onValueChange={setTab} className={className} />
+  )
   return (
     <AdminPage>
-      <AdminHead title="Hours" sub={hours.data?.period ?? "…"} />
+      <AdminHead title="Hours" sub={hours.data?.period ?? "…"} tools={tabsFor()} />
       <QueryState query={hours} rows={3}>
-        {(data) => <Body hours={data} />}
+        {/* Phone: the filters sit under the heading; from tablet they live in the top bar. */}
+        {(data) => <Body hours={data} tab={tab} tabs={tabsFor("tablet:hidden")} />}
       </QueryState>
     </AdminPage>
   )

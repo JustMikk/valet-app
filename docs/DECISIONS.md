@@ -334,3 +334,35 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - The hand-made period invoice (venue and dates) still works as a fallback. It records the events it billed (`invoice_events`), and those are never drafted again; events with their own invoice are left out of it.
 
 **Consequences.** Migrations 008–009. Lines are a snapshot like before. Early arrival still counts (the Hours screen shows the same total): D43.
+
+## ADR-020 — Regency website brand: Prompt, website logo, website palette
+
+**Date:** 2026-10-26 · **Status:** proposed (client direction: match the Regency website's font, logo and colors; owner to confirm)
+
+**Decision.**
+
+- **Type.** Prompt (the Regency website's typeface, weights 300–700) replaces Bricolage Grotesque, Onest and Geist Mono. `--ff`, `--fd` and `--fm` keep their roles but all name Prompt; anything set in `font-mono` gets tabular figures so columns and timers still line up. Supersedes the type part of D1.
+- **Logo.** The website's SVG marks replace `regency-logo.png`: the crest (`/brand/regency-crest.svg`) in square spots (app rail, phone pill, logo tiles) and the crest with wordmark (`/brand/regency-logo.svg`) in wide spots (page headers, invoices). Paths and sizes live in `src/lib/brand.ts`.
+- **Color (light theme).** Neutrals, lines and danger follow the website: light grey `--surface` `#F4F4F2`, `--surface-2` `#ECECEA` (client palette, no ivory), ink `--fg` / `--hero` `#0E0E10`, neutral greys `--fg-2` `#5E5E5B`, `--fg-3` `#70706C` (4.5:1 on surface, so D11 still holds), silver `--fg-3-line` `#8A8A86` for graphics; live slot bars are dark silver (on site) and silver (expected), light grey hairline `--line` `#E6E6E3`, crimson `--bad` `#9E1B1E`. The light page ground is plain white with no accent glow, and cards are solid white with a grey hairline and no shadow: the client asked for a clean look. The tenant accent is unchanged (its default is already the website gold); `--accent-text` stays `#7F611A` because the website's darker gold `#9D7A2C` is 4.0:1 on white, below AA for text.
+- **Five colours (client direction).** Light theme uses only black, light grey, white, brick red and brown/gold. Status keeps its icon and words (never colour alone) on: `--ok` green `#257A32` on `#E5F3E1` (client asked for green on track, active, sent; paid and on site follow), `--info` dark grey on light grey, `--warn` brown on the gold tint, `--bad` crimson; every pair is at least 4.5:1. Gold buttons (Button `accent` and the gold pills that mirror it) are the light accent with a white label (`--accent`, #C9A24A, on white). **This is 2.4:1, below WCAG AA (4.5:1); the client chose it knowingly after seeing the numbers** (a readable alternative, the tint on `--accent-text`, is 5.1:1). Labels stay bold and keep their icons. Send actions (Send invoice, Send to all, Send pay stub) stay brown with white text.
+- **Card-on-grey, filled tabs (client direction, after a reference dashboard).** The light page is a faint grey `--bg` `#F7F7F5` so white cards stand apart without shadows (muted text 4.6:1 on it). The selected tab or day chip is a filled ink pill with light text, replacing the gold tint and ring.
+- The dark theme is unchanged: the website has no dark mode.
+
+**Consequences.** One family to load instead of three. Prompt is wider than Bricolage, so dense headings were checked for overflow. `src/lib/tokens/meta.ts` updated with the new light values.
+
+**Invoices screens (UI only, same ADR).** The list shows four totals (Outstanding = sent + overdue, Overdue, In draft, Paid), summed on screen from the rows the list already loads; each tab's action sits beside the tabs (New invoice; payroll's Send to all). The detail puts the number on a black logo banner with the status as a chip (read from the number label the API already sends), splits an event invoice's summary into a "what · when" row and a "time · crew" row, sets cents smaller, and highlights Total Due. On phone and tablet the invoice detail and New invoice hide the tab bar (`AppShell tabBar`) and pin their actions to the bottom edge. No API or data changes.
+
+## ADR-021 — Live Board counts show the change since yesterday
+
+**Context.** The client asked for an up/down figure on each Live Board count (Need you, Events live, On shift, Expected, Open slots), compared with the same time yesterday. The server only knows each slot's state now: a slot's past occupant is overwritten when someone drops or is replaced, so yesterday's board cannot be rebuilt reliably from history.
+
+**Decision.**
+
+- **Snapshots, not replay.** `pulse_snapshots` (migration 011) holds the five counts per tenant. `recordPulse` saves them at most every 5 minutes, from each Live Board load and from `GET /api/cron/pulse` (`CRON_SECRET`, like retention) so quiet hours are covered. The counts come from `deriveBoard`, the same function the browser uses, so they always match the board.
+- **Matching.** `GET /api/admin/live` gains `yesterday`: the snapshot closest to exactly 24 hours ago, within ±15 minutes, or `null`. With `null` the board shows no arrow, not a fake "no change".
+- **Retention.** Snapshots older than 8 days are deleted on each save.
+- **Colour.** The arrow is green when the change is good news for that count (more on shift, fewer needing you) and brick red when it is bad; grey when flat. The words ("Up 2 since yesterday") are the accessible name.
+- Snapshot failures are logged and never fail the board.
+- The demo (mock repo) has no history, so it reports today's counts less a fixed example change.
+
+**Consequences.** Real arrows appear one day after deploy. A scheduler must call `/api/cron/pulse` every 5 minutes for full coverage; without it, snapshots exist only for times someone had the board open.

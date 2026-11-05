@@ -72,12 +72,24 @@ export const LiveEventDto = z.object({
 })
 export type LiveEvent = z.infer<typeof LiveEventDto>
 
+/** The Live Board's five counts. */
+export const PulseDto = z.object({
+  need: int,
+  live: int,
+  onShift: int,
+  expected: int,
+  open: int,
+})
+export type Pulse = z.infer<typeof PulseDto>
+
 export const LiveDto = z.object({
   events: z.array(LiveEventDto),
   timeline: z.object({ from: z.number(), span: z.number(), now: z.number(), ticks: z.array(int) }),
   /** Short zone name of the venues' clock: "PT". */
   zone: str,
   serverNow: str,
+  /** The counts at this time yesterday (ADR-021); null until there is a snapshot to compare. */
+  yesterday: z.nullable(PulseDto),
 })
 export type Live = z.infer<typeof LiveDto>
 

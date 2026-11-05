@@ -11,6 +11,7 @@ import { STAFF_USER } from "@/mocks/staff"
 import { ErrorNotice } from "../data/query-state"
 import { useProfile } from "../data/queries"
 import { OnboardingScreen, STEP_BODY, STEP_TITLE } from "./onboarding-frame"
+import { BRAND_CREST } from "@/lib/brand"
 
 const CTA = "text-18"
 
@@ -19,11 +20,11 @@ export function InviteStep({ onNext }: { onNext: () => void }) {
     <OnboardingScreen grow className="justify-center gap-7">
       <div className="grid size-30 place-items-center rounded-r32 bg-white logo-tile-glow">
         <Image
-          src="/brand/regency-logo.svg"
+          src={BRAND_CREST.src}
           alt="Regency Parking Service"
-          width={100}
-          height={34}
-          className="h-auto w-25"
+          width={BRAND_CREST.width}
+          height={BRAND_CREST.height}
+          className="h-20 w-auto"
         />
       </div>
       <div className="flex flex-col gap-3">

@@ -2,8 +2,8 @@ import { cn } from "@/lib/utils"
 
 import { Mono, SectionTitle, SheetPanel } from "./primitives"
 
-// Type scale rows (sheet section 03), set in the app fonts (D1): display and titles in
-// Bricolage Grotesque, UI text in Onest, numbers in Geist Mono.
+// Type scale rows (sheet section 03), set in the app font: Prompt throughout, as on the
+// Regency website; numbers use its tabular figures.
 const TYPE_ROWS = [
   {
     meta: ["display", "56/56 · 700 · -3.5%"],
@@ -41,7 +41,7 @@ const TYPE_ROWS = [
     className: "text-13 leading-4.5 font-medium text-fg-2",
   },
   {
-    meta: ["mono / timer", "Geist Mono 600"],
+    meta: ["mono / timer", "Prompt 600 · tabular"],
     sample: "02:14:07",
     className: "font-mono text-28 leading-x100 font-semibold tracking-n020",
   },

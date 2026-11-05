@@ -4,7 +4,10 @@ import type { IconName } from "@/lib/icons/icon-names"
 
 export type ShellApp = "staff" | "admin"
 
-export type ShellBadge = { text: string; tone?: "fg" | "warn" }
+/** The tenant mark; width and height are its intrinsic size, so the box keeps its shape while loading. */
+export type ShellLogo = { src: string; alt: string; width: number; height: number }
+
+export type ShellBadge = { text: string; tone?: "fg" | "warn" | "bad" }
 
 export type ShellNavItem = {
   key: string

@@ -2,7 +2,7 @@
 // events and slots (their states and facts). Pure and shared: the server counts what needs the
 // dispatcher for the navigation badge, the screens render it. Wording is built from facts
 // (minutes late, distance outside, who dropped), never stored as prose.
-import type { LiveEvent, LiveSlot, SlotState } from "@/lib/data/admin/ops-schemas"
+import type { LiveEvent, LiveSlot, Pulse, SlotState } from "@/lib/data/admin/ops-schemas"
 import type { IconName } from "@/lib/icons/icon-names"
 import type { StatusSpec } from "@/lib/status/presets"
 
@@ -34,14 +34,16 @@ export function slotStatus(slot: Pick<LiveSlot, "state" | "facts">): StatusSpec 
 }
 
 /** Bar segment fill per state; open slots are hatched instead. */
+// Silver bars (client palette, ADR-020): on site silver, needs a decision mid grey, expected a
+// lighter silver, late gold; the bar's label says it in words.
 export const SEGMENT_FILL: Record<Exclude<SlotState, "open">, string> = {
-  onsite: "bg-ok",
-  flagged: "bg-ok",
-  override: "bg-ok",
-  waiting: "bg-info",
-  late: "bg-warn",
-  due: "bg-fg-3-line",
-  upcoming: "bg-fg-3-line",
+  onsite: "bg-fg-3-line",
+  flagged: "bg-fg-3-line",
+  override: "bg-fg-3-line",
+  waiting: "bg-fg-3",
+  late: "bg-accent",
+  due: "bg-fg-3-line/45",
+  upcoming: "bg-fg-3-line/45",
 }
 
 const BAR_ORDER: SlotState[] = [
@@ -108,7 +110,7 @@ export type AttentionItem = {
   actions: { id: ActionId; label: string }[]
 }
 
-export type Pulse = { need: number; live: number; onShift: number; expected: number; open: number }
+export type { Pulse }
 
 /** Unfilled events inside this many minutes of starting raise an alert (the "4-hour alert"). */
 export const UNFILLED_ALERT_MIN = 4 * 60

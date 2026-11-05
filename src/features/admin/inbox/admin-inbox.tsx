@@ -9,6 +9,8 @@ import { useBreakpoint } from "@/hooks/use-breakpoint"
 import type { Thread } from "@/lib/data"
 import { cn } from "@/lib/utils"
 
+import { TABLE_CARD } from "../common/data-table"
+import { Pager, usePager } from "../common/pager"
 import { AdminHead, AdminPage } from "../common/admin-page"
 import { QueryState } from "../data/query-state"
 import { useInbox } from "../data/queries"
@@ -32,8 +34,8 @@ function ThreadRow({
       aria-current={selected || undefined}
       onClick={onOpen}
       className={cn(
-        "box-content flex min-h-18 w-full items-center gap-3 border-0 border-b border-line py-1.5 text-left text-fg tablet:px-3",
-        selected ? "bg-surface tablet:rounded-r16" : "bg-transparent",
+        "flex min-h-17 w-full items-center gap-3 border-0 border-b border-line px-4 py-1.5 text-left text-fg transition-colors duration-160 last:border-b-0",
+        selected ? "bg-surface" : "bg-transparent hover:bg-surface/60",
       )}
     >
       <span
@@ -48,7 +50,7 @@ function ThreadRow({
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex items-baseline gap-2">
           <span className="flex-1 truncate text-16 font-semibold">{thread.name}</span>
-          <span className="text-13 font-medium text-fg-3">{thread.time}</span>
+          <span className="flex-none text-13 font-medium text-fg-3">{thread.time}</span>
         </span>
         <span className="truncate text-14 text-fg-2">{thread.last}</span>
       </span>
@@ -76,6 +78,7 @@ export function AdminInbox() {
   const requestedThread = threads.find((t) => t.id === requested)
   const tab: InboxTab = picked ?? (requestedThread?.announcement ? "announcements" : "messages")
   const shown = threads.filter((t) => t.announcement === (tab === "announcements"))
+  const pager = usePager(shown, 7)
   const unreadIn = (announcement: boolean) =>
     threads.filter((t) => t.announcement === announcement && t.unread).length
   const tabs = [
@@ -89,6 +92,23 @@ export function AdminInbox() {
   const selected = requested ?? (phone ? undefined : shown[0]?.id)
   const data = inbox.data
 
+  // Phone: the filters sit over the list; from tablet they live in the top bar.
+  const tabsFor = (className?: string) => (
+    <PillTabs
+      className={className}
+      label="Inbox"
+      items={tabs}
+      value={tab}
+      onValueChange={(next) => {
+        setPicked(next)
+        // The open thread belongs to the other tab: show that tab's first one instead.
+        if (requestedThread && requestedThread.announcement !== (next === "announcements")) {
+          router.replace("/admin/inbox")
+        }
+      }}
+    />
+  )
+
   return (
     <AdminPage>
       {!(phone && open) && (
@@ -100,9 +120,10 @@ export function AdminInbox() {
             icon: "campaign",
             onClick: () => router.push("/admin/inbox/announce"),
           }}
+          tools={tabsFor()}
         />
       )}
-      <div className="grid items-start gap-7 tablet:grid-cols-[minmax(17.5rem,22.5rem)_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 tablet:grid-cols-[minmax(20rem,26rem)_minmax(0,1fr)] desktop:grid-cols-[minmax(22rem,28rem)_minmax(0,1fr)]">
         {showList && (
           <div className="flex flex-col gap-3.5">
             <Button
@@ -113,42 +134,31 @@ export function AdminInbox() {
               <Icon name="add_circle" size={22} />
               New message
             </Button>
-            <PillTabs
-              label="Inbox"
-              items={tabs}
-              value={tab}
-              onValueChange={(next) => {
-                setPicked(next)
-                // The open thread belongs to the other tab: show that tab's first one instead.
-                if (
-                  requestedThread &&
-                  requestedThread.announcement !== (next === "announcements")
-                ) {
-                  router.replace("/admin/inbox")
-                }
-              }}
-            />
-            <div className="flex flex-col border-t border-line">
-              <QueryState query={inbox} rows={4}>
-                {() =>
-                  shown.length === 0 ? (
-                    <p className="m-0 py-8 text-center text-15 text-fg-2">
-                      {tab === "announcements"
-                        ? "No announcements sent yet."
-                        : "No chats with staff yet."}
-                    </p>
-                  ) : (
-                    shown.map((thread) => (
-                      <ThreadRow
-                        key={thread.id}
-                        thread={thread}
-                        selected={!phone && thread.id === selected}
-                        onOpen={() => router.replace(`/admin/inbox?thread=${thread.id}`)}
-                      />
-                    ))
-                  )
-                }
-              </QueryState>
+            {tabsFor("tablet:hidden")}
+            <div className={TABLE_CARD}>
+              <div className="flex flex-col">
+                <QueryState query={inbox} rows={4}>
+                  {() =>
+                    shown.length === 0 ? (
+                      <p className="m-0 py-8 text-center text-15 text-fg-2">
+                        {tab === "announcements"
+                          ? "No announcements sent yet."
+                          : "No chats with staff yet."}
+                      </p>
+                    ) : (
+                      pager.rows.map((thread) => (
+                        <ThreadRow
+                          key={thread.id}
+                          thread={thread}
+                          selected={!phone && thread.id === selected}
+                          onOpen={() => router.replace(`/admin/inbox?thread=${thread.id}`)}
+                        />
+                      ))
+                    )
+                  }
+                </QueryState>
+              </div>
+              <Pager {...pager} />
             </div>
           </div>
         )}

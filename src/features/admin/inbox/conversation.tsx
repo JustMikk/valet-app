@@ -90,7 +90,7 @@ export function Conversation({ id, onBack }: ConversationProps) {
                   type="submit"
                   aria-label="Send"
                   disabled={!draft.trim() || reply.isPending}
-                  className="grid size-11 place-items-center rounded-pill border-0 bg-accent text-accent-ink transition-transform duration-160 active:scale-94 disabled:bg-surface-2 disabled:text-fg-3"
+                  className="grid size-11 place-items-center rounded-pill border-0 bg-accent text-white transition-transform duration-160 active:scale-94 disabled:bg-surface-2 disabled:text-fg-3"
                 >
                   <Icon name="arrow_upward" size={22} />
                 </button>

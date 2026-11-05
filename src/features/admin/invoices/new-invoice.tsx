@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation"
 
 import { Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage, FORM } from "../common/admin-page"
 import { FIELD_CONTROL, FormField } from "../common/form-field"
 import { ErrorNotice } from "../data/query-state"
 import { useCreateInvoice, useVenues } from "../data/queries"
 import { halfMonth, type Half } from "./half-month"
+import { ACTION_BAR } from "./invoice-parts"
 
 const PRESETS: { key: Half; label: string }[] = [
   { key: "last", label: "Last half-month" },
@@ -40,9 +42,10 @@ export function NewInvoice() {
       <AdminHead
         title="New invoice"
         sub="Built from approved hours. Hours still in review are left out"
+        crumb={{ label: "Invoices", href: "/admin/invoices", current: "New" }}
       />
       <form
-        className={FORM}
+        className={cn(FORM, "pb-24 desktop:pb-0")}
         onSubmit={(e) => {
           e.preventDefault()
           if (!ready) return
@@ -104,14 +107,16 @@ export function NewInvoice() {
           ))}
         </div>
         {create.error && <ErrorNotice message={create.error.message} />}
-        <Button
-          type="submit"
-          variant="accent"
-          className="text-17"
-          disabled={!ready || create.isPending}
-        >
-          Create draft
-        </Button>
+        <div className={ACTION_BAR}>
+          <Button
+            type="submit"
+            variant="strong"
+            className="flex-1 text-17"
+            disabled={!ready || create.isPending}
+          >
+            Create draft
+          </Button>
+        </div>
       </form>
     </AdminPage>
   )

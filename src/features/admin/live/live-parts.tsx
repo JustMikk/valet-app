@@ -1,8 +1,15 @@
 import { Icon, StatusBadge } from "@/components/shared"
 import { Button } from "@/components/ui/button"
+import type { IconName } from "@/lib/icons/icon-names"
 import { cn } from "@/lib/utils"
 import type { LiveSlot, SlotState } from "@/lib/data"
-import { SEGMENT_FILL, slotStatus, type ActionId, type AttentionItem } from "@/lib/live/model"
+import {
+  SEGMENT_FILL,
+  slotStatus,
+  type ActionId,
+  type AttentionItem,
+  type Pulse,
+} from "@/lib/live/model"
 
 export const HEALTH_TEXT = {
   ok: "text-ok",
@@ -14,10 +21,102 @@ export const HEALTH_TEXT = {
 /** Pulsing "Live" marker; the word keeps it from being colour alone. */
 export function LiveDot({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-semibold text-ok", className)}>
-      <span aria-hidden="true" className="size-2 animate-blink rounded-r9 bg-ok" />
+    <span
+      className={cn("inline-flex items-center gap-1.5 font-semibold text-accent-text", className)}
+    >
+      <span aria-hidden="true" className="size-2 animate-blink rounded-r9 bg-accent" />
       Live
     </span>
+  )
+}
+
+const STAT_CARD = "relative flex flex-col rounded-r18 border border-line bg-elev"
+
+/** Whether a rise is good news for the count: more crew on shift is; more people needed is not. */
+const UP_IS_GOOD: Record<keyof Pulse, boolean> = {
+  need: false,
+  live: true,
+  onShift: true,
+  expected: false,
+  open: false,
+}
+
+/**
+ * "↑ 2" since the same time yesterday, as a small pill: green tint when the change is good news,
+ * red tint when bad, grey when flat. Nothing when there is no snapshot to compare (ADR-021).
+ */
+export function Trend({
+  kpi,
+  pulse,
+  yesterday,
+  className,
+}: {
+  kpi: keyof Pulse
+  pulse: Pulse
+  yesterday: Pulse | null
+  className?: string
+}) {
+  if (!yesterday) return null
+  const delta = pulse[kpi] - yesterday[kpi]
+  const good = delta > 0 === UP_IS_GOOD[kpi]
+  return (
+    <span
+      aria-label={
+        delta === 0
+          ? "No change since yesterday"
+          : `${delta > 0 ? "Up" : "Down"} ${Math.abs(delta)} since yesterday`
+      }
+      className={cn(
+        "inline-flex h-6 items-center gap-0.5 rounded-pill pr-2 pl-1.5 text-12 font-semibold tabular-nums",
+        delta === 0 ? "bg-surface text-fg-3" : good ? "bg-ok-soft text-ok" : "bg-bad-soft text-bad",
+        className,
+      )}
+    >
+      <Icon
+        name={delta === 0 ? "arrow_back" : "arrow_upward"}
+        size={15}
+        className={cn(delta <= 0 && "rotate-180")}
+      />
+      {Math.abs(delta)}
+    </span>
+  )
+}
+
+/**
+ * Phone pulse (Regency mockups): the "need you" count as a tall lead card, the other four
+ * counts in two rows beside it. Labels are the desktop KPI words, shortened to one line.
+ */
+export function PhoneStats({ pulse, yesterday }: { pulse: Pulse; yesterday: Pulse | null }) {
+  const small: [keyof Pulse, string][] = [
+    ["live", "Events live"],
+    ["onShift", "On shift"],
+    ["expected", "Expected"],
+    ["open", "Open slots"],
+  ]
+  return (
+    <div className="grid grid-cols-[minmax(0,1.1fr)_repeat(2,minmax(0,1fr))] gap-2">
+      <div className={cn(STAT_CARD, "row-span-2 justify-between gap-1 p-3.5")}>
+        <div className="flex items-center justify-between gap-1">
+          <LiveDot className="text-13" />
+          <Trend kpi="need" pulse={pulse} yesterday={yesterday} />
+        </div>
+        <span className="inline-flex overflow-hidden font-display text-72 leading-x090 font-bold tracking-n050 text-bad tabular-nums">
+          <span key={pulse.need} className="inline-block animate-roll">
+            {pulse.need}
+          </span>
+        </span>
+        <span className="text-15 font-medium">Need you</span>
+      </div>
+      {small.map(([kpi, label]) => (
+        <div key={label} className={cn(STAT_CARD, "gap-0.5 p-3")}>
+          <Trend kpi={kpi} pulse={pulse} yesterday={yesterday} className="absolute top-2 right-2" />
+          <span className="font-display text-24 leading-x110 font-bold tracking-n030 tabular-nums">
+            {pulse[kpi]}
+          </span>
+          <span className="truncate text-12 text-fg-2">{label}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -30,19 +129,17 @@ type SlotBarProps = {
   className?: string
 }
 
-/** One segment per person: on site, approval, late, expected; open slots are hatched. */
+/** One segment per person: on site, approval, late, expected; open slots are an empty track. */
 export function SlotBar({ bar, label, grow = true, className }: SlotBarProps) {
   return (
-    <div role="img" aria-label={label} className={cn("flex h-2.5 w-full gap-0.75", className)}>
+    <div role="img" aria-label={label} className={cn("flex h-1.5 w-full gap-1", className)}>
       {bar.map((state, i) => (
         <div
           key={i}
           style={grow ? { animationDelay: `${120 + i * 40}ms` } : undefined}
           className={cn(
-            "flex-1 rounded-r3 transition-colors duration-400",
-            state === "open"
-              ? "shadow-[inset_0_0_0_1.5px_var(--fg-3-line)] hatch-open"
-              : SEGMENT_FILL[state],
+            "flex-1 rounded-pill transition-colors duration-400",
+            state === "open" ? "bg-surface-2" : SEGMENT_FILL[state],
             grow && "origin-left animate-grow",
           )}
         />
@@ -131,7 +228,14 @@ export function SlotRow({ slot, onAssign, compact = false, onView }: SlotRowProp
   )
 }
 
-type CardAction = { label: string; onClick: () => void }
+type CardAction = { label: string; onClick: () => void; icon?: IconName }
+
+/** Reaching someone is a quick tap: these actions are round icon buttons on the card. */
+const ICON_ACTIONS: Partial<Record<ActionId, IconName>> = {
+  message: "chat_bubble",
+  "message-again": "chat_bubble",
+  call: "call",
+}
 
 /** The attention card's action tuple (first strong, then up to two secondary) for one item. */
 export function attentionActions(
@@ -141,6 +245,7 @@ export function attentionActions(
   const [a, b, c] = item.actions.map((action) => ({
     label: action.label,
     onClick: () => run(item, action.id),
+    icon: ICON_ACTIONS[action.id],
   }))
   if (!a) throw new Error(`Attention item ${item.key} has no actions`)
   return [a, b, c]
