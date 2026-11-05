@@ -9,6 +9,7 @@ import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shar
 import { useNotificationChime } from "@/lib/platform/use-notification-chime"
 
 import { useHome, useMarkNotificationsRead, useNotifications, useProfile } from "../data/queries"
+import { useStaffRealtime } from "../data/realtime"
 import { NotificationPanel } from "./notification-panel"
 import { BRAND_CREST } from "@/lib/brand"
 
@@ -45,6 +46,7 @@ export function StaffShell({ children }: { children: ReactNode }) {
   const nav = navItems(useHome().data?.open.count ?? 0)
   const unread = useNotifications().data?.unread ?? 0
   useNotificationChime(unread)
+  useStaffRealtime()
   const markRead = useMarkNotificationsRead()
 
   const mode =

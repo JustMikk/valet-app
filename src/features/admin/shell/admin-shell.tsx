@@ -9,6 +9,7 @@ import { AppShell, PwaInstallBanner, type ShellNavItem } from "@/components/shar
 import { useNotificationChime } from "@/lib/platform/use-notification-chime"
 
 import { useMarkNotificationsRead, useNotifications, useSession } from "../data/queries"
+import { useAdminRealtime } from "../data/realtime"
 import { AdminTopBar, TopBarSlotProvider } from "../common/top-bar"
 import { NotificationPanel } from "./notification-panel"
 import { BRAND_CREST } from "@/lib/brand"
@@ -89,6 +90,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const session = useSession().data
   const unread = useNotifications().data?.unread ?? 0
   useNotificationChime(unread)
+  useAdminRealtime()
   const markRead = useMarkNotificationsRead()
   const nav = navItems(session?.badges ?? { live: 0, hours: 0, inbox: 0 })
   const roots = nav.sidebar.map((item) => item.href)

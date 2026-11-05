@@ -18,6 +18,11 @@ const Env = z.object({
   VAPID_SUBJECT: z.optional(z.string()),
   /** Shared secret for the scheduled retention job (GET /api/cron/retention). */
   CRON_SECRET: z.optional(z.string()),
+  /** Pusher Channels (ADR-023). Without all four, realtime is off and the apps poll. */
+  PUSHER_APP_ID: z.optional(z.string()),
+  PUSHER_KEY: z.optional(z.string()),
+  PUSHER_SECRET: z.optional(z.string()),
+  PUSHER_CLUSTER: z.optional(z.string()),
 })
 export type Env = z.infer<typeof Env>
 

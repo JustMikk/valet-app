@@ -3,6 +3,7 @@
 import { rows, sql } from "../db/client"
 import { unauthorized } from "../http/handler"
 import { notifyStaff } from "../notify"
+import { adminChannel, publish, staffChannel } from "../realtime/pusher"
 
 export { notifyStaff }
 
@@ -46,6 +47,8 @@ export async function messageStaff(
                 (tenant_id, staff_id, sender, sender_name, body, ref_label, delivered_at, sender_admin_id, admin_read_at)
               values (${ctx.tenantId}, ${staffId}, 'dispatch', ${`${firstName(ctx.name)} · Admin`},
                       ${text}, ${options.refLabel ?? null}, now(), ${ctx.adminId}, now())`
+  // The valet's inbox, and every admin's copy of the thread.
+  await publish([staffChannel(staffId), adminChannel(ctx.tenantId)], "message")
   const [prefs] = await rows<{ notify_msg: boolean }>(
     sql()`select notify_msg from staff where id = ${staffId}`,
   )

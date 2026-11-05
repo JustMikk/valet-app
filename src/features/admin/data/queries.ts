@@ -18,6 +18,7 @@ import {
   type PayMarkPatch,
   type VenuePatch,
 } from "@/lib/data"
+import { useLiveInterval } from "@/lib/realtime/use-realtime"
 
 export const keys = {
   all: ["admin"],
@@ -50,11 +51,12 @@ export function useRefresh() {
 export const useSession = () =>
   useQuery({ queryKey: keys.session, queryFn: () => adminRepo.session(), refetchInterval: 30_000 })
 
+// While realtime is connected (ADR-023) changes arrive at once, so these poll only as a backstop.
 export const useNotifications = () =>
   useQuery({
     queryKey: keys.notifications,
     queryFn: () => adminRepo.notifications(),
-    refetchInterval: 15_000,
+    refetchInterval: useLiveInterval("admin", 15_000, 60_000),
   })
 
 export function useMarkNotificationsRead() {
@@ -264,13 +266,17 @@ export function useSendInvoice() {
 }
 
 export const useInbox = () =>
-  useQuery({ queryKey: keys.inbox, queryFn: () => adminRepo.inbox(), refetchInterval: 5000 })
+  useQuery({
+    queryKey: keys.inbox,
+    queryFn: () => adminRepo.inbox(),
+    refetchInterval: useLiveInterval("admin", 5000, 30_000),
+  })
 
 export const useThread = (id: string | undefined) =>
   useQuery({
     queryKey: keys.thread(id),
     queryFn: () => adminRepo.thread(id),
-    refetchInterval: 4000,
+    refetchInterval: useLiveInterval("admin", 4000, 30_000),
   })
 
 export function useReply() {

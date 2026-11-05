@@ -11,6 +11,7 @@ import { formatStamp, formatTime } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
 import { badRequest, conflict, notFound } from "../http/handler"
+import { adminChannel, publish, staffChannel } from "../realtime/pusher"
 import { adminCtx, firstName, initialsOf, messageStaff, notifyStaff, type AdminCtx } from "./common"
 
 const clip = (text: string, max = 56) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
@@ -289,6 +290,8 @@ export async function announce(
               select ${ctx.tenantId}, id::uuid, 'broadcast', ${heading}, ${input.text}, now(),
                      ${created.id}, ${ctx.adminId}, now(), ${now.toISOString()}
               from jsonb_array_elements_text(${payload}::jsonb) as id`
+  // Every recipient's open inbox, and the admins' announcement list.
+  await publish([...people.map((p) => staffChannel(p.id)), adminChannel(ctx.tenantId)], "message")
   // A push goes to everyone with notifications on; the rest see it in their inbox.
   await notifyStaff(
     people

@@ -14,6 +14,7 @@ import {
   type ShiftTab,
   type StaffProfile,
 } from "@/lib/data"
+import { useLiveInterval } from "@/lib/realtime/use-realtime"
 
 export const keys = {
   me: ["staff", "me"],
@@ -29,7 +30,7 @@ export const keys = {
   lastPunch: ["staff", "last", "punch"],
 } as const
 
-const invalidateShifts = (qc: QueryClient) =>
+export const invalidateShifts = (qc: QueryClient) =>
   Promise.all([
     qc.invalidateQueries({ queryKey: ["staff", "shifts"] }),
     qc.invalidateQueries({ queryKey: ["staff", "shift"] }),
@@ -52,18 +53,20 @@ export const useShift = (id: string | undefined) =>
 export const useOpenShifts = () =>
   useQuery({ queryKey: keys.open, queryFn: () => staffRepo.openShifts() })
 
+// While realtime is connected (ADR-023) new messages arrive at once; the slower poll still
+// moves the demo's "Delivered → Read" marker along.
 export const useMessages = () =>
   useQuery({
     queryKey: keys.messages,
     queryFn: () => staffRepo.messages(),
-    refetchInterval: 3000,
+    refetchInterval: useLiveInterval("staff", 3000, 15_000),
   })
 
 export const useNotifications = () =>
   useQuery({
     queryKey: keys.notifications,
     queryFn: () => staffRepo.notifications(),
-    refetchInterval: 15_000,
+    refetchInterval: useLiveInterval("staff", 15_000, 60_000),
   })
 
 export function useUpdateProfile() {

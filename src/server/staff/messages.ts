@@ -5,6 +5,7 @@ import { formatCompactRange, formatDate, formatTime, calendarDaysBetween } from 
 
 import { rows, sql } from "../db/client"
 import { snippet, tellDispatch } from "../notify/dispatch"
+import { adminChannel, publish, staffChannel } from "../realtime/pusher"
 import { tenantTimezone } from "./tenant"
 
 type MessageRow = {
@@ -99,12 +100,14 @@ export async function getMessages(staffId: string, now: Date): Promise<ChatItem[
 }
 
 export async function sendMessage(staffId: string, text: string): Promise<ChatItem> {
-  const [created] = await rows<{ id: string; created_at: Date }>(
+  const [created] = await rows<{ id: string; created_at: Date; tenant_id: string }>(
     sql()`insert into messages (tenant_id, staff_id, sender, sender_name, body, delivered_at)
           select s.tenant_id, s.id, 'staff', s.name, ${text}, now() from staff s
           where s.id = ${staffId}
-          returning id, created_at`,
+          returning id, created_at, tenant_id`,
   )
+  // The admins' inbox and thread, and the sender's other devices.
+  await publish([adminChannel(created.tenant_id), staffChannel(staffId)], "message")
   const tz = await tenantTimezone(staffId)
   await tellDispatch(staffId, (who) => ({
     icon: "chat_bubble",

@@ -384,3 +384,19 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - **Payroll** shows each person's pending amount and which shifts are paid.
 
 **Consequences.** The spreadsheet's "Total Pay After Tax" ($2,350.94 on its sample) does not equal subtotal plus tax ($4,350.94); the app computes subtotal + tax. Tax is one rate per tenant; per-venue or per-state rates would be a later change.
+
+## ADR-023 — Realtime chat and notifications over Pusher Channels (WebSocket)
+
+**Date:** 2026-11-06 · **Status:** accepted (owner; answers open question H2)
+
+**Context.** Chat, announcements and notifications reached the apps by polling every 3–15 s. The owner asked for realtime over WebSocket. The server runs as Vercel functions, which cannot hold WebSocket connections, so the socket side needs a host that can.
+
+**Decision.**
+
+- **Pusher Channels** (managed WebSocket) carries the connections. The server publishes with Pusher's signed REST API from `src/server/realtime/pusher.ts` (node:crypto, no server SDK); the apps use `pusher-js` 8.6.0, loaded on demand only when the server has keys.
+- **Private channels, server-authorized.** Each staff member listens on `private-staff-{staffId}`, a tenant's admins on `private-admins-{tenantId}`. `GET /api/{staff|admin}/realtime` tells a signed-in app its channel (or null when realtime is off); `POST` signs the subscription only for the caller's own channel.
+- **Signals, not content.** Events are `message` and `notification` with an empty payload. On one, the app refetches the matching queries through the normal signed-in API, so nothing private travels over Pusher. Published after: a message to a valet, a valet's message, an announcement (every recipient), `notifyStaff` and `notifyAdmins`.
+- **Polling stays as a backstop**, slowed while connected (chat 15–30 s, notifications 60 s), and returns to the old intervals if the connection drops. On every (re)connect the apps refetch once to catch up. Publishing never fails a write and waits at most 2 s.
+- **Off without keys.** Without the four `PUSHER_*` variables, and in the static export, nothing connects and the apps poll as before.
+
+**Consequences.** Free plan limits: 200k messages/day, 100 concurrent connections; a busy tenant needs a paid plan. The keys live in `.env.local` and the Vercel project's environment.

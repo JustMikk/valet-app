@@ -8,7 +8,7 @@ Owner for all items: product owner (Mikiyas) unless noted. Dates are when the it
 | #   | Question                                                 | Status   | Logged     | Notes                                                                   |
 | --- | -------------------------------------------------------- | -------- | ---------- | ----------------------------------------------------------------------- |
 | H1  | Backend stack, API contract and auth provider            | open     | 2026-10-22 | Building against `lib/data` interfaces + mock layer until decided       |
-| H2  | Realtime transport (SSE / WebSocket / managed)           | open     | 2026-10-22 | `RealtimeClient` interface + mock emitter until decided                 |
+| H2  | Realtime transport (SSE / WebSocket / managed)           | answered | 2026-10-22 | 2026-11-06: WebSocket via Pusher Channels (ADR-023)                     |
 | H3  | Staff sign-in method without SMS                         | open     | 2026-10-22 | Same as Product spec §13.1; blocks slice 1                              |
 | H4  | Map and geocoding provider (+ licensing/storage terms)   | open     | 2026-10-22 | Blocks venue pin/fence UI (slice 2)                                     |
 | H5  | Dynamic-route strategy under static export               | open     | 2026-10-22 | Proposal to come as an ADR in Phase 2                                   |

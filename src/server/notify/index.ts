@@ -1,6 +1,8 @@
 // Every notification has two halves: a row in the person's notification center, and a push to the
-// devices they allowed. Callers say who and what; this decides delivery.
+// devices they allowed. Callers say who and what; this decides delivery. Open apps also hear it at
+// once over realtime (ADR-023).
 import { rows, sql } from "../db/client"
+import { publishToAdmins, publishToStaff } from "../realtime/pusher"
 import { pushTo, type PushMessage } from "./push"
 
 export type Tone = "accent" | "info" | "ok" | "warn"
@@ -27,7 +29,13 @@ export async function notifyStaff(notices: StaffNotice[]): Promise<void> {
               select staff_id, icon, tone, title, body, href
               from jsonb_to_recordset(${payload}::jsonb)
                 as x(staff_id uuid, icon text, tone text, title text, body text, href text)`
-  await pushToStaff(notices)
+  await Promise.all([
+    pushToStaff(notices),
+    publishToStaff(
+      notices.map((n) => n.staffId),
+      "notification",
+    ),
+  ])
 }
 
 /** Pushes to the staff who have push on; people with it off still get the row. */
@@ -65,9 +73,12 @@ export async function notifyAdmins(tenantId: string, notice: AdminNotice): Promi
           on conflict (admin_id, dedupe_key) where dedupe_key is not null do nothing
           returning admin_id`,
   )
-  await pushTo(
-    "admin",
-    created.map((row) => row.admin_id),
-    messageOf(notice),
-  )
+  await Promise.all([
+    pushTo(
+      "admin",
+      created.map((row) => row.admin_id),
+      messageOf(notice),
+    ),
+    created.length > 0 ? publishToAdmins(tenantId, "notification") : Promise.resolve(),
+  ])
 }
