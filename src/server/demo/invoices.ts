@@ -2,11 +2,14 @@
 // today, with the design's mix: two drafts, one sent and overdue, one paid, one sent.
 import { randomUUID } from "node:crypto"
 
+import { taxCents } from "@/lib/pay/pay-sheet"
 import { formatDate, zonedInstant } from "@/lib/time/labels"
 
 import { TENANT_ID, TZ, VENUES, type VenueKey } from "./cast"
 
 const DAY = 24 * 60 * 60_000
+// The tenant default (migration 013): 6.25 %.
+const SALES_TAX_BP = 625
 type Wall = { year: number; month: number; day: number }
 
 /** [start, end] dates of the half-month containing `offsetHalves` halves before today's. */
@@ -72,6 +75,8 @@ export function buildInvoices(now: Date, today: Wall, venueIds: Record<VenueKey,
       status,
       billed_to: VENUES[venue].billing,
       total_cents: total,
+      tax_bp: SALES_TAX_BP,
+      tax_cents: taxCents(total, SALES_TAX_BP),
       minutes,
       ...extra,
     })

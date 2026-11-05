@@ -1,5 +1,6 @@
 import type { InvoiceDetail } from "@/lib/data"
 import { formatHoursDecimal, formatMoney, formatRate } from "@/lib/money/format"
+import { formatTaxRate } from "@/lib/pay/pay-sheet"
 import { buildPdf, PAGE, type PdfPage, type TextItem } from "@/lib/pdf/text-pdf"
 
 const LEFT = PAGE.margin
@@ -57,6 +58,14 @@ export function invoicePages(invoice: InvoiceDetail, company: string): PdfPage[]
   }
 
   y -= 6
+  if (invoice.taxBp > 0) {
+    put({ text: "Subtotal", x: LEFT, size: 10 })
+    put({ text: formatMoney(invoice.subtotalCents), x: RIGHT, size: 10, align: "right" })
+    y -= 18
+    put({ text: `Sales tax (${formatTaxRate(invoice.taxBp)})`, x: LEFT, size: 10 })
+    put({ text: formatMoney(invoice.taxCents), x: RIGHT, size: 10, align: "right" })
+    y -= 24
+  }
   put({ text: "Total due", x: LEFT, size: 13, bold: true })
   put({ text: formatMoney(invoice.totalCents), x: RIGHT, size: 16, bold: true, align: "right" })
   if (invoice.notice) {

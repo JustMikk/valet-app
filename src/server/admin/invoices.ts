@@ -8,6 +8,7 @@ import type {
   PayrollLine,
 } from "@/lib/data/admin/ops-schemas"
 import { amountCents, formatHoursDecimal } from "@/lib/money/format"
+import { taxCents } from "@/lib/pay/pay-sheet"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import type { StatusSpec } from "@/lib/status/presets"
 import { formatDate } from "@/lib/time/labels"
@@ -33,6 +34,8 @@ type InvoiceDbRow = {
   billed_to: string
   due_at: Date | null
   total_cents: number
+  tax_bp: number
+  tax_cents: number
   minutes: number
   /** Set for an invoice drafted from one event; period invoices have none. */
   event_id: string | null
@@ -63,7 +66,7 @@ async function loadInvoices(tenantId: string, id?: string): Promise<InvoiceDbRow
   return rows<InvoiceDbRow>(
     sql()`select i.id, i.number, v.name as venue, v.id as venue_id, v.timezone as tz,
             i.period_start::text, i.period_end::text, i.status, i.billed_to, i.due_at,
-            i.total_cents, i.minutes, i.event_id, i.label, i.summary
+            i.total_cents, i.tax_bp, i.tax_cents, i.minutes, i.event_id, i.label, i.summary
           from invoices i join venues v on v.id = i.venue_id
           where i.tenant_id = ${tenantId} and (${id ?? null}::uuid is null or i.id = ${id ?? null}::uuid)
           order by i.period_start desc, case i.status when 'draft' then 0 else 1 end, v.name`,
@@ -80,7 +83,7 @@ export async function listInvoices(adminId: string, now: Date): Promise<InvoiceR
     period: row.label ?? periodLabel(row.period_start, row.period_end),
     status: statusOf(row, now),
     hours: formatHoursDecimal(row.minutes),
-    amountCents: row.total_cents,
+    amountCents: row.total_cents + row.tax_cents,
   }))
 }
 
@@ -131,7 +134,10 @@ export async function getInvoice(
       row.summary ??
       `${periodLabel(row.period_start, row.period_end)}, ${row.period_end.slice(0, 4)} · from approved hours`,
     eventId: row.event_id ?? undefined,
-    totalCents: row.total_cents,
+    subtotalCents: row.total_cents,
+    taxBp: row.tax_bp,
+    taxCents: row.tax_cents,
+    totalCents: row.total_cents + row.tax_cents,
     notice: row.status === "draft" && !row.event_id ? await pendingNotice(row) : null,
     billedTo: row.billed_to,
     sent: row.status !== "draft",
@@ -239,13 +245,17 @@ export async function createInvoice(
     amount_cents: amountCents(event.minutes, venue.bill_rate_cents),
   }))
   const { total, minutes } = totalsOf(lines)
+  const [{ sales_tax_bp: taxBp }] = await rows<{ sales_tax_bp: number }>(
+    sql()`select sales_tax_bp from tenants where id = ${ctx.tenantId}`,
+  )
   const number = await nextInvoiceNumber(ctx.tenantId, now)
 
   const [created] = await rows<{ id: string }>(
     sql()`insert into invoices (tenant_id, venue_id, number, period_start, period_end, status,
-                                billed_to, total_cents, minutes)
+                                billed_to, total_cents, minutes, tax_bp, tax_cents)
           values (${ctx.tenantId}, ${venue.id}, ${number}, ${input.periodStart}::date,
-                  ${input.periodEnd}::date, 'draft', ${venue.billing_email}, ${total}, ${minutes})
+                  ${input.periodEnd}::date, 'draft', ${venue.billing_email}, ${total}, ${minutes},
+                  ${taxBp}, ${taxCents(total, taxBp)})
           returning id`,
   )
   await writeLines(created.id, lines)
@@ -263,6 +273,7 @@ type PayrollDbRow = {
   shifts: string
   minutes: string
   amount_cents: string
+  paid_cents: string
 }
 
 type PayrollLineDbRow = {
@@ -271,6 +282,7 @@ type PayrollLineDbRow = {
   date: string
   minutes: string
   amount_cents: string
+  paid: boolean
 }
 
 function payrollPeriod(now: Date): { start: string; end: string; label: string } {
@@ -285,8 +297,9 @@ function payrollPeriod(now: Date): { start: string; end: string; label: string }
 }
 
 /**
- * Payroll summary: approved hours per staff member in the current billing half-month,
- * with per-event breakdown lines. Uses the venue's bill rate as the rate proxy.
+ * Payroll summary: approved hours per staff member in the current billing half-month, with
+ * per-event breakdown lines, at each event's valet pay rate (ADR-022). A shift marked paid on
+ * its event's pay sheet counts at what was paid.
  */
 export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
   const ctx = await adminCtx(adminId)
@@ -299,14 +312,14 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
               coalesce(sum(
                 round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
               ), 0)::text as minutes,
-              coalesce(sum(
+              coalesce(sum(coalesce(a.paid_cents,
                 round(round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
-                      * v.bill_rate_cents / 60)
-              ), 0)::text as amount_cents
+                      * e.pay_rate_cents / 60))
+              ), 0)::text as amount_cents,
+              coalesce(sum(a.paid_cents), 0)::text as paid_cents
             from staff s
             join assignments a on a.staff_id = s.id
             join events e on e.id = a.event_id
-            join venues v on v.id = e.venue_id
             where s.tenant_id = ${ctx.tenantId}
               and a.hours_status = 'approved'
               and a.clocked_in_at is not null and a.clocked_out_at is not null
@@ -320,11 +333,12 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
               coalesce(nullif(e.kind, ''), e.title) as event,
               to_char(e.starts_at at time zone ${ctx.tz}, 'Mon DD') as date,
               round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)::text as minutes,
-              round(round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
-                    * v.bill_rate_cents / 60)::text as amount_cents
+              coalesce(a.paid_cents,
+                round(round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
+                      * e.pay_rate_cents / 60))::text as amount_cents,
+              a.paid_cents is not null as paid
             from assignments a
             join events e on e.id = a.event_id
-            join venues v on v.id = e.venue_id
             join staff s on s.id = a.staff_id
             where s.tenant_id = ${ctx.tenantId}
               and a.hours_status = 'approved'
@@ -344,6 +358,7 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
       date: lr.date,
       hours: formatHoursDecimal(Number(lr.minutes)),
       amountCents: Number(lr.amount_cents),
+      paid: lr.paid,
     })
     linesByStaff.set(lr.staff_id, arr)
   }
@@ -365,6 +380,7 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
       shifts: Number(r.shifts),
       hours: formatHoursDecimal(Number(r.minutes)),
       amountCents: Number(r.amount_cents),
+      pendingCents: Number(r.amount_cents) - Number(r.paid_cents),
       lines: linesByStaff.get(r.staff_id) ?? [],
     })),
     totalCents,
@@ -387,9 +403,9 @@ export async function sendPayroll(adminId: string, now: Date): Promise<{ sent: n
         .join("\n")
       const body =
         `Pay summary for ${data.period}\n\n` +
-        `Shifts: ${row.shifts}  |  Hours: ${row.hours}  |  Est. pay: $${(row.amountCents / 100).toFixed(2)}\n\n` +
+        `Shifts: ${row.shifts}  |  Hours: ${row.hours}  |  Pay: $${(row.amountCents / 100).toFixed(2)}\n\n` +
         (lines ? `Breakdown:\n${lines}\n\n` : "") +
-        `Rates are estimated from the venue rate — your actual pay may differ.`
+        `Pay is at each event's hourly rate.`
       return messageStaff(ctx, row.staffId, body)
     }),
   )
@@ -413,9 +429,9 @@ export async function sendPayrollTo(
     .join("\n")
   const body =
     `Pay summary for ${data.period}\n\n` +
-    `Shifts: ${row.shifts}  |  Hours: ${row.hours}  |  Est. pay: $${(row.amountCents / 100).toFixed(2)}\n\n` +
+    `Shifts: ${row.shifts}  |  Hours: ${row.hours}  |  Pay: $${(row.amountCents / 100).toFixed(2)}\n\n` +
     (lines ? `Breakdown:\n${lines}\n\n` : "") +
-    `Rates are estimated from the venue rate — your actual pay may differ.`
+    `Pay is at each event's hourly rate.`
   await messageStaff(ctx, staffId, body)
   return { sent: 1 }
 }

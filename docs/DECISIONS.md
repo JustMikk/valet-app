@@ -368,3 +368,19 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - The demo (mock repo) has no history, so it reports today's counts less a fixed example change.
 
 **Consequences.** Real arrows appear one day after deploy. A scheduler must call `/api/cron/pulse` every 5 minutes for full coverage; without it, snapshots exist only for times someone had the board open.
+
+## ADR-022 — Event pay sheet, valet pay rate and invoice sales tax
+
+**Date:** 2026-11-06 · **Status:** accepted (owner, from the client's manual "event / valet schedule" spreadsheet)
+
+**Context.** The client tracks each event in a spreadsheet: date, address, start and end, an hourly rate ($21), then one row per valet with hours, amount, total, paid (yes/no), tips (yes/no), balance and status, and a summary of valets, hours, pay before tax, 6.25 % tax, pay after tax and pending. The app had per-event client invoices and a per-person payroll, but no valet pay rate (payroll borrowed the venue's client bill rate), no paid or tips tracking and no tax.
+
+**Decision.**
+
+- **Valet pay rate per event.** `events.pay_rate_cents`, copied from `tenants.pay_rate_cents` (Settings → Pay & billing, default $21.00) when the event is created and editable on the event's Pay tab. Client invoices keep the venue's bill rate; payroll now uses the event's pay rate. Bill rates still never reach staff types, and pay rates never reach venue or invoice types.
+- **Pay tab on each event.** One row per valet who clocked in: hours, total at the event's rate, Paid and Tips switches, balance and status (On shift, In review, Pending, Paid; icon and words). Only approved hours can be marked paid. Marking paid stores the amount (`assignments.paid_cents`, `paid_at`), so a later rate change does not move what was paid. "Mark all paid" pays every approved, unpaid row. Exports: CSV laid out like the spreadsheet (opens in Excel; names starting with `=`, `+`, `-`, `@` are defused) and PDF.
+- **Tips** are a yes/no mark per valet per event (`assignments.tips`), as on the spreadsheet; they do not change the balance.
+- **Sales tax on client invoices.** `tenants.sales_tax_bp` (basis points, default 625 = 6.25 %) is applied when an invoice is drafted or refreshed and stored on the invoice (`tax_bp`, `tax_cents`). The invoice shows subtotal, sales tax and total due; list totals include tax. Drafts picked up the tax in migration 013; invoices already sent keep what was sent.
+- **Payroll** shows each person's pending amount and which shifts are paid.
+
+**Consequences.** The spreadsheet's "Total Pay After Tax" ($2,350.94 on its sample) does not equal subtotal plus tax ($4,350.94); the app computes subtotal + tax. Tax is one rate per tenant; per-venue or per-state rates would be a later change.

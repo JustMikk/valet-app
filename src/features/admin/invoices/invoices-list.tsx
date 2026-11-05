@@ -125,7 +125,8 @@ function PayrollSummary({ data }: { data: Payroll }) {
         <div className="flex flex-col gap-0.5">
           <span className="text-15 font-semibold">{data.period}</span>
           <span className="text-14 text-fg-2 tabular-nums">
-            Total est. pay: {formatMoney(data.totalCents)}
+            Total pay: {formatMoney(data.totalCents)} · Pending:{" "}
+            {formatMoney(data.rows.reduce((sum, row) => sum + row.pendingCents, 0))}
           </span>
         </div>
       </div>
@@ -134,7 +135,7 @@ function PayrollSummary({ data }: { data: Payroll }) {
         <span>Staff member</span>
         <span className="w-12 text-right">Shifts</span>
         <span className="w-16 text-right">Hours</span>
-        <span className="w-20 text-right">Est. pay</span>
+        <span className="w-20 text-right">Pay</span>
         <span className="w-5" />
       </div>
 
@@ -148,7 +149,7 @@ function PayrollSummary({ data }: { data: Payroll }) {
       </div>
 
       <p className="text-13 text-fg-3">
-        Tap any row to view the full pay stub. Estimated at the venue bill rate.
+        Tap any row to view the full pay stub. At each event&apos;s valet pay rate.
       </p>
     </div>
   )

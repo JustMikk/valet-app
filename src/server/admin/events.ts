@@ -524,12 +524,12 @@ export async function createEvent(
     sql()`with ev as (
             insert into events (tenant_id, venue_id, title, kind, starts_at, ends_at, crew_size,
                                 clock_in_window_min, contact_text, contact_name, contact_tel,
-                                dress_code, instructions, status)
+                                dress_code, instructions, status, pay_rate_cents)
             select ${ctx.tenantId}, ${venue.id}, ${`${venue.name} · ${input.name}`}, ${input.name},
                    ${starts.toISOString()}, ${ends.toISOString()}, ${input.headcount},
                    t.clock_window_min, ${`Ask for ${venue.contact_name}`}, ${venue.contact_name},
                    ${venue.contact_tel}, ${venue.dress_code}, ${input.instructions ?? ""},
-                   ${input.publish ? "published" : "draft"}
+                   ${input.publish ? "published" : "draft"}, t.pay_rate_cents
             from tenants t where t.id = ${ctx.tenantId}
             returning id
           ), slots as (

@@ -30,12 +30,24 @@ export const ClockRules = z.object({
   selfie: bool,
   earlyOut: bool,
 })
-export const SettingsDto = z.object({ company: str, accent: str, rules: ClockRules })
+/** Pay and billing defaults (ADR-022): valets' hourly pay for new events, and invoice sales tax. */
+export const BillingRules = z.object({
+  payRateCents: z.int().check(z.minimum(0), z.maximum(100_000)),
+  /** Basis points: 625 is 6.25 %. */
+  salesTaxBp: z.int().check(z.minimum(0), z.maximum(5_000)),
+})
+export const SettingsDto = z.object({
+  company: str,
+  accent: str,
+  rules: ClockRules,
+  billing: BillingRules,
+})
 export type Settings = z.infer<typeof SettingsDto>
 
 export const SettingsPatch = z.object({
   accent: z.optional(z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/))),
   rules: z.optional(z.partial(ClockRules)),
+  billing: z.optional(z.partial(BillingRules)),
 })
 export type SettingsPatch = z.infer<typeof SettingsPatch>
 

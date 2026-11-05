@@ -9,6 +9,7 @@ import type {
   AudienceKey,
   BroadcastResult,
   DecideResult,
+  EventPay,
   Hours,
   Inbox,
   InvoiceDetail,
@@ -16,6 +17,7 @@ import type {
   Live,
   NewInvoiceRequest,
   NudgeResult,
+  PayMarkPatch,
   Payroll,
   RemoveResult,
   ThreadDetail,
@@ -79,6 +81,12 @@ export interface AdminRepo {
   assign(eventId: string, staffIds?: string[]): Promise<AssignResult>
   addSlot(eventId: string): Promise<AddSlotResult>
   broadcastOpen(eventId: string): Promise<BroadcastResult>
+  /** The event's pay sheet: each valet's hours at the event's rate, paid or pending (ADR-022). */
+  eventPay(eventId: string): Promise<EventPay>
+  /** Changes the event's valet rate; shifts already paid keep what was paid. */
+  setEventPayRate(eventId: string, rateCents: number): Promise<EventPay>
+  markEventPay(eventId: string, assignmentId: string, patch: PayMarkPatch): Promise<EventPay>
+  markAllEventPaid(eventId: string): Promise<EventPay>
 
   live(): Promise<Live>
   decide(punchId: string, decision: "approve" | "reject"): Promise<DecideResult>

@@ -37,7 +37,7 @@ export function printPayStub(row: PayrollRow, period: string): void {
       `<tr class="total"><td colspan="2">Total</td>` +
       `<td class="num">${row.hours}h</td><td class="num">${formatMoney(row.amountCents)}</td></tr>` +
       `</tbody></table>` +
-      `<p class="footer">Estimated at the venue bill rate — adjust for your actual pay rate.</p>` +
+      `<p class="footer">At each event's valet pay rate.</p>` +
       `<script>window.onload=()=>{window.print();window.close()}<\/script>` +
       `</body></html>`,
   )

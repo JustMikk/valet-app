@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 import { ConfirmSheet, GlassCard, Icon, PersonAvatar, StatusBadge } from "@/components/shared"
 import { Badge } from "@/components/ui/badge"
@@ -11,9 +11,9 @@ import type { EventDetail as EventData, RosterRow } from "@/lib/data"
 import type { LiveSlot } from "@/lib/data/admin/ops-schemas"
 import { cn } from "@/lib/utils"
 
-import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
-import { ErrorNotice, QueryState } from "../data/query-state"
-import { useCancelEvent, useEvent } from "../data/queries"
+import { SectionTitle, SPLIT } from "../common/admin-page"
+import { ErrorNotice } from "../data/query-state"
+import { useCancelEvent } from "../data/queries"
 import { StaffLocationModal } from "../live/staff-location-modal"
 import { EditEventSheet } from "./edit-event-sheet"
 import { EditInstructionsSheet } from "./edit-instructions-sheet"
@@ -36,19 +36,6 @@ function toModalSlot(person: RosterRow): LiveSlot {
 const STAT_TONE = { ok: "text-ok", warn: "text-warn", fg: "text-fg" } as const
 const SIDE_BUTTON = "h-13.5 gap-2 text-16"
 
-/** One event: coverage stats, crew roster with in-place actions, instructions and shortcuts. */
-export function EventDetail() {
-  const id = useSearchParams().get("id") ?? undefined
-  const event = useEvent(id)
-  return (
-    <AdminPage>
-      <QueryState query={event} rows={4}>
-        {(data) => <EventBody event={data} />}
-      </QueryState>
-    </AdminPage>
-  )
-}
-
 function RosterAction({ person }: { person: RosterRow }) {
   const router = useRouter()
   if (!person.action) return null
@@ -63,7 +50,8 @@ function RosterAction({ person }: { person: RosterRow }) {
   )
 }
 
-function EventBody({ event }: { event: EventData }) {
+/** The Overview tab: coverage stats, crew roster with in-place actions, instructions and shortcuts. */
+export function EventOverview({ event }: { event: EventData }) {
   const router = useRouter()
   const [fillOpen, setFillOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)

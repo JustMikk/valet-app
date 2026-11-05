@@ -9,6 +9,9 @@ const invoice: InvoiceDetail = {
   number: "INV-2026-0142 · DRAFT",
   venue: "Harbor Pavilion",
   period: "Oct 16 – 31, 2026 · from approved hours",
+  subtotalCents: 528_200,
+  taxBp: 0,
+  taxCents: 0,
   totalCents: 528_200,
   notice: "2 entries from Oct 24 are still in review and not included.",
   billedTo: "billing@harborpavilion.com",
@@ -62,6 +65,25 @@ describe("invoicePages", () => {
     expect(texts(invoicePages(event, "Regency"))).toEqual(
       expect.arrayContaining(["Ana Ruiz", "6:00 PM – 10:30 PM"]),
     )
+  })
+
+  it("adds the subtotal and the sales tax line when the invoice is taxed", () => {
+    const taxed = { ...invoice, taxBp: 625, taxCents: 33_013, totalCents: 561_213 }
+    expect(texts(invoicePages(taxed, "Regency"))).toEqual(
+      expect.arrayContaining([
+        "Subtotal",
+        "$5,282.00",
+        "Sales tax (6.25%)",
+        "$330.13",
+        "$5,612.13",
+      ]),
+    )
+  })
+
+  it("prints no tax line on an invoice sent before tax was added", () => {
+    expect(
+      texts(invoicePages(invoice, "Regency")).some((text) => text.startsWith("Sales tax")),
+    ).toBe(false)
   })
 
   it("leaves the notice off a sent invoice", () => {

@@ -47,7 +47,10 @@ export function PayStubModal({
             <PersonAvatar name={row.name} />
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-17 font-bold">{row.name}</DialogTitle>
-              <span className="text-13 text-fg-3">{row.email}</span>
+              <span className="truncate text-13 text-fg-3">
+                {row.pendingCents === 0 ? "All paid" : `${formatMoney(row.pendingCents)} pending`} ·{" "}
+                {row.email}
+              </span>
             </div>
           </div>
         </DialogHeader>
@@ -68,7 +71,10 @@ export function PayStubModal({
               key={i}
               className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 border-b border-line px-3 py-2.5 text-14 last:border-0"
             >
-              <span className="truncate font-medium">{line.event}</span>
+              <span className="truncate font-medium">
+                {line.event}
+                {line.paid && <span className="ml-1.5 text-12 text-ok">· Paid</span>}
+              </span>
               <span className="font-mono text-13 text-fg-2">{line.date}</span>
               <span className="text-right font-mono text-fg-2">{line.hours}h</span>
               <span className="text-right font-mono font-semibold">
@@ -142,7 +148,9 @@ export function PayrollStaffRow({ row, period }: { row: PayrollRow; period: stri
         <PersonAvatar name={row.name} />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-15 font-semibold">{row.name}</span>
-          <span className="text-13 text-fg-3">{row.email}</span>
+          <span className="truncate text-13 text-fg-3">
+            {row.pendingCents === 0 ? "All paid" : `${formatMoney(row.pendingCents)} pending`}
+          </span>
         </span>
         <span className="hidden w-12 text-right font-mono text-14 text-fg-2 tablet:block">
           {row.shifts}

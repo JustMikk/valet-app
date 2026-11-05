@@ -7,6 +7,7 @@ import { Icon, StatusBadge } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import type { InvoiceDetail as InvoiceData } from "@/lib/data"
 import { formatHoursDecimal, formatRate } from "@/lib/money/format"
+import { formatTaxRate } from "@/lib/pay/pay-sheet"
 import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
@@ -117,6 +118,23 @@ function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
               </li>
             ))}
           </ul>
+
+          {invoice.taxBp > 0 && (
+            <dl className="m-0 flex flex-col gap-1.5 px-1 text-15">
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-fg-2">Subtotal</dt>
+                <dd className="m-0">
+                  <Money cents={invoice.subtotalCents} className="font-medium" />
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-fg-2">Sales tax ({formatTaxRate(invoice.taxBp)})</dt>
+                <dd className="m-0">
+                  <Money cents={invoice.taxCents} className="font-medium" />
+                </dd>
+              </div>
+            </dl>
+          )}
 
           <div className="flex items-center justify-between gap-3 rounded-r16 bg-surface px-4.5 py-4">
             <span className="text-18 font-semibold">Total Due</span>

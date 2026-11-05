@@ -15,6 +15,7 @@ import {
   type NewInvoiceRequest,
   type NewVenueRequest,
   type SettingsPatch,
+  type PayMarkPatch,
   type VenuePatch,
 } from "@/lib/data"
 
@@ -29,6 +30,7 @@ export const keys = {
   person: (id: string | undefined) => ["admin", "person", id ?? "none"],
   events: (tab: EventTab) => ["admin", "events", tab],
   event: (id: string | undefined) => ["admin", "event", id ?? "none"],
+  eventPay: (id: string) => ["admin", "event-pay", id],
   available: (id: string) => ["admin", "available", id],
   live: ["admin", "live"],
   hours: ["admin", "hours"],
@@ -181,6 +183,29 @@ export function useAssign() {
       adminRepo.assign(input.eventId, input.staffIds),
     onSuccess: refresh,
   })
+}
+
+export const useEventPay = (eventId: string) =>
+  useQuery({ queryKey: keys.eventPay(eventId), queryFn: () => adminRepo.eventPay(eventId) })
+
+/** Rate, paid and tips changes on an event's pay sheet; payroll and hours refresh with it. */
+export function useEventPayActions(eventId: string) {
+  const refresh = useRefresh()
+  return {
+    setRate: useMutation({
+      mutationFn: (rateCents: number) => adminRepo.setEventPayRate(eventId, rateCents),
+      onSuccess: refresh,
+    }),
+    mark: useMutation({
+      mutationFn: (input: { assignmentId: string; patch: PayMarkPatch }) =>
+        adminRepo.markEventPay(eventId, input.assignmentId, input.patch),
+      onSuccess: refresh,
+    }),
+    markAll: useMutation({
+      mutationFn: () => adminRepo.markAllEventPaid(eventId),
+      onSuccess: refresh,
+    }),
+  }
 }
 
 export const useLive = () =>

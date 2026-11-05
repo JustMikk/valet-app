@@ -11,6 +11,7 @@ import {
   AudienceDto,
   BroadcastResultDto,
   DecideResultDto,
+  EventPayDto,
   HoursDto,
   InboxDto,
   InvoiceDetailDto,
@@ -87,6 +88,16 @@ export const httpAdminRepo: AdminRepo = {
     api(`admin/events/${id}/assign`, AssignResultDto, post(staffIds ? { staffIds } : undefined)),
   addSlot: (id) => api(`admin/events/${id}/slots`, AddSlotResultDto, post()),
   broadcastOpen: (id) => api(`admin/events/${id}/broadcast`, BroadcastResultDto, post()),
+  eventPay: (id) => api(`admin/events/${id}/pay`, EventPayDto, call),
+  setEventPayRate: (id, rateCents) =>
+    api(`admin/events/${id}/pay`, EventPayDto, { ...call, method: "PATCH", body: { rateCents } }),
+  markEventPay: (id, assignmentId, patch) =>
+    api(`admin/events/${id}/pay/${assignmentId}`, EventPayDto, {
+      ...call,
+      method: "PATCH",
+      body: patch,
+    }),
+  markAllEventPaid: (id) => api(`admin/events/${id}/pay/paid-all`, EventPayDto, post()),
 
   live: () => api("admin/live", LiveDto, call),
   decide: (punchId, decision) =>

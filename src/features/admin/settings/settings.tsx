@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { AdminHead, AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useSettings, useUpdateSettings } from "../data/queries"
+import { BillingSettings } from "./billing-settings"
 import { BRAND_CREST } from "@/lib/brand"
 
 const ROW = "box-content flex min-h-16.5 w-full items-center gap-3 border-0 border-b border-line"
@@ -153,6 +154,14 @@ function SettingsBody({ settings }: { settings: SettingsData }) {
               </li>
             ))}
           </ul>
+        </section>
+        <section className="flex flex-col gap-3">
+          <SectionTitle>Pay &amp; billing</SectionTitle>
+          <BillingSettings
+            billing={settings.billing}
+            saving={update.isPending}
+            onSave={(billing) => update.mutate({ billing })}
+          />
         </section>
         <Button
           variant="ghost"

@@ -34,5 +34,7 @@ export const ADMIN_STATUS = {
     label: `Overdue ${days}d`,
   }),
   paid: { tone: "ok", icon: "check_circle", filled: true, label: "Paid" },
+  payPending: { tone: "warn", icon: "hourglass_top", filled: true, label: "Pending" },
+  payInReview: { tone: "info", icon: "schedule", filled: true, label: "In review" },
   sent: { tone: "ok", icon: "north_east", filled: true, label: "Sent" },
 } as const satisfies Record<string, StatusSpec | ((n: number) => StatusSpec)>

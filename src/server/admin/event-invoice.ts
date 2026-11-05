@@ -3,6 +3,7 @@
 // that is the step that emails the venue and locks the hours. A draft follows its event: it is
 // rebuilt if the crew's hours change and withdrawn if the event is no longer ready to bill.
 import { formatMoney } from "@/lib/money/format"
+import { taxCents } from "@/lib/pay/pay-sheet"
 
 import { rows, sql } from "../db/client"
 import { notifyAdmins } from "../notify"
@@ -19,6 +20,7 @@ type EventRow = InvoiceEvent & {
   venue_id: string
   venue: string
   billing_email: string
+  sales_tax_bp: number
 }
 
 /** Drafts, refreshes or withdraws the invoice of one event. Safe to call as often as hours change. */
@@ -29,8 +31,10 @@ export async function syncEventInvoice(
 ): Promise<void> {
   const [event] = await rows<EventRow>(
     sql()`select e.id, e.tenant_id, e.venue_id, e.title, e.kind, e.starts_at, e.ends_at, e.crew_size,
-                 e.status, v.name as venue, v.timezone as tz, v.bill_rate_cents, v.billing_email
-          from events e join venues v on v.id = e.venue_id where e.id = ${eventId}`,
+                 e.status, v.name as venue, v.timezone as tz, v.bill_rate_cents, v.billing_email,
+                 t.sales_tax_bp
+          from events e join venues v on v.id = e.venue_id join tenants t on t.id = e.tenant_id
+          where e.id = ${eventId}`,
   )
   if (!event) return
   const [existing] = await rows<{ id: string; status: string }>(
@@ -57,8 +61,10 @@ export async function syncEventInvoice(
   }
 
   const { total, minutes } = totalsOf(plan.lines)
+  const tax = taxCents(total, event.sales_tax_bp)
   if (existing) {
     await sql()`update invoices set total_cents = ${total}, minutes = ${minutes},
+                       tax_bp = ${event.sales_tax_bp}, tax_cents = ${tax},
                        label = ${plan.label}, summary = ${plan.summary}, billed_to = ${event.billing_email}
                 where id = ${existing.id}`
     await writeLines(existing.id, plan.lines)
@@ -68,11 +74,12 @@ export async function syncEventInvoice(
   const number = await nextInvoiceNumber(event.tenant_id, now)
   const [created] = await rows<{ id: string }>(
     sql()`insert into invoices (tenant_id, venue_id, event_id, number, period_start, period_end, status,
-                                billed_to, total_cents, minutes, label, summary)
+                                billed_to, total_cents, minutes, label, summary, tax_bp, tax_cents)
           values (${event.tenant_id}, ${event.venue_id}, ${eventId}, ${number},
                   (${event.starts_at.toISOString()}::timestamptz at time zone ${event.tz})::date,
                   (${event.starts_at.toISOString()}::timestamptz at time zone ${event.tz})::date,
-                  'draft', ${event.billing_email}, ${total}, ${minutes}, ${plan.label}, ${plan.summary})
+                  'draft', ${event.billing_email}, ${total}, ${minutes}, ${plan.label}, ${plan.summary},
+                  ${event.sales_tax_bp}, ${tax})
           on conflict (event_id) where event_id is not null do nothing
           returning id`,
   )
@@ -85,7 +92,7 @@ export async function syncEventInvoice(
       icon: "receipt_long",
       tone: "info",
       title: `Invoice drafted · ${event.venue}`,
-      body: `${plan.label} · ${formatMoney(total)}. Review and send.`,
+      body: `${plan.label} · ${formatMoney(total + tax)}. Review and send.`,
       href: `/admin/invoices/detail?id=${created.id}`,
     })
   }

@@ -1,7 +1,9 @@
 // In-memory AdminRepo over the design's fixtures: what the static (fixture-only) build runs on. It
 // mirrors the server's rules closely enough for the same screens: actions change state in memory
 // and reset on reload.
+import { ApiError } from "@/lib/data/api-client"
 import { deriveBoard, first, type Pulse } from "@/lib/live/model"
+import { paySheet, taxCents, type PayInput } from "@/lib/pay/pay-sheet"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import {
   ADJUSTED,
@@ -26,7 +28,7 @@ import { LIVE_EVENTS, TIMELINE } from "@/mocks/admin-live"
 
 import type { Notifications } from "../staff/schemas"
 import type { AdminRepo } from "./repo"
-import type { Live, LiveEvent, ThreadMessage } from "./ops-schemas"
+import type { EventPay, Live, LiveEvent, ThreadMessage } from "./ops-schemas"
 import type {
   EventCard,
   EventDetail,
@@ -44,6 +46,47 @@ const settings: Settings = {
   company: ADMIN_USER.company,
   accent: "#C9A24A",
   rules: { windowMin: 15, radiusM: 150, accuracyM: 75, selfie: true, earlyOut: true },
+  billing: { payRateCents: 2100, salesTaxBp: 625 },
+}
+
+/** Each event's pay sheet: the design's crew, 6:00 – 11:00 PM, one still in review. */
+const payStore = new Map<string, { rateCents: number; shifts: PayInput[] }>()
+
+function payState(eventId: string) {
+  let state = payStore.get(eventId)
+  if (!state) {
+    state = {
+      rateCents: settings.billing.payRateCents,
+      shifts: STAFF_ROWS.slice(0, 6).map((row, i) => ({
+        assignmentId: `pay-${i}`,
+        staffId: row.email,
+        name: row.name,
+        clockedInAt: new Date("2026-10-24T01:00:00Z"),
+        clockedOutAt: new Date(Date.UTC(2026, 9, 24, 6, -i * 5)),
+        approved: i !== 5,
+        paidCents: null,
+        tips: i % 2 === 0,
+      })),
+    }
+    payStore.set(eventId, state)
+  }
+  return state
+}
+
+function payView(eventId: string): EventPay {
+  const state = payState(eventId)
+  const sheet = paySheet(state.shifts, state.rateCents)
+  return structuredClone({
+    eventId,
+    venue: EVENT_DETAIL.venue,
+    name: "Corporate dinner",
+    date: EVENT_DETAIL.when,
+    start: "6:00 PM",
+    end: "11:00 PM",
+    rateCents: state.rateCents,
+    rows: sheet.rows,
+    totals: sheet.totals,
+  })
 }
 
 /** Every venue, seeded from the design and growing as venues are added or edited. */
@@ -176,6 +219,7 @@ export const mockAdminRepo: AdminRepo = {
   updateSettings: async (patch) => {
     if (patch.accent) settings.accent = patch.accent
     Object.assign(settings.rules, patch.rules)
+    Object.assign(settings.billing, patch.billing)
     return structuredClone(settings)
   },
 
@@ -298,6 +342,32 @@ export const mockAdminRepo: AdminRepo = {
     return { headcount: liveEvents.find((e) => e.id === eventId)?.slots.length ?? 0 }
   },
   broadcastOpen: async () => ({ recipients: 31 }),
+  eventPay: async (eventId) => payView(eventId),
+  setEventPayRate: async (eventId, rateCents) => {
+    payState(eventId).rateCents = rateCents
+    return payView(eventId)
+  },
+  markEventPay: async (eventId, assignmentId, patch) => {
+    const state = payState(eventId)
+    const shift = state.shifts.find((candidate) => candidate.assignmentId === assignmentId)
+    const row = payView(eventId).rows.find((candidate) => candidate.assignmentId === assignmentId)
+    if (!shift || !row) throw new ApiError(404, "not_found", "That valet isn't on this pay sheet.")
+    if (patch.paid === true && row.state === "in_review") {
+      throw new ApiError(409, "hours_in_review", `Approve ${row.name}'s hours first.`)
+    }
+    if (patch.paid === true && row.state === "pending") shift.paidCents = row.amountCents
+    if (patch.paid === false) shift.paidCents = null
+    if (patch.tips !== undefined) shift.tips = patch.tips
+    return payView(eventId)
+  },
+  markAllEventPaid: async (eventId) => {
+    const state = payState(eventId)
+    for (const row of payView(eventId).rows.filter((candidate) => candidate.state === "pending")) {
+      const shift = state.shifts.find((candidate) => candidate.assignmentId === row.assignmentId)
+      if (shift) shift.paidCents = row.amountCents
+    }
+    return payView(eventId)
+  },
 
   live: async (): Promise<Live> =>
     structuredClone({
@@ -414,7 +484,12 @@ export const mockAdminRepo: AdminRepo = {
       number: INVOICE_DETAIL.number,
       venue: INVOICE_DETAIL.venue,
       period: INVOICE_DETAIL.period,
-      totalCents: cents(INVOICE_DETAIL.total),
+      subtotalCents: cents(INVOICE_DETAIL.total),
+      taxBp: settings.billing.salesTaxBp,
+      taxCents: taxCents(cents(INVOICE_DETAIL.total), settings.billing.salesTaxBp),
+      totalCents:
+        cents(INVOICE_DETAIL.total) +
+        taxCents(cents(INVOICE_DETAIL.total), settings.billing.salesTaxBp),
       notice: INVOICE_DETAIL.notice,
       billedTo: INVOICE_DETAIL.sentTo,
       sent: sentInvoice,
@@ -458,10 +533,23 @@ export const mockAdminRepo: AdminRepo = {
         shifts: 3,
         hours: "14.5",
         amountCents: 82650,
+        pendingCents: 54150,
         lines: [
-          { event: "Grand Gala", date: "Oct 17", hours: "5.0", amountCents: 28500 },
-          { event: "Corporate Dinner", date: "Oct 21", hours: "4.5", amountCents: 25650 },
-          { event: "Wedding Reception", date: "Oct 28", hours: "5.0", amountCents: 28500 },
+          { event: "Grand Gala", date: "Oct 17", hours: "5.0", amountCents: 28500, paid: true },
+          {
+            event: "Corporate Dinner",
+            date: "Oct 21",
+            hours: "4.5",
+            amountCents: 25650,
+            paid: false,
+          },
+          {
+            event: "Wedding Reception",
+            date: "Oct 28",
+            hours: "5.0",
+            amountCents: 28500,
+            paid: false,
+          },
         ],
       },
       {
@@ -472,9 +560,16 @@ export const mockAdminRepo: AdminRepo = {
         shifts: 2,
         hours: "9.8",
         amountCents: 55860,
+        pendingCents: 55860,
         lines: [
-          { event: "Grand Gala", date: "Oct 17", hours: "5.0", amountCents: 28500 },
-          { event: "Corporate Dinner", date: "Oct 21", hours: "4.8", amountCents: 27360 },
+          { event: "Grand Gala", date: "Oct 17", hours: "5.0", amountCents: 28500, paid: false },
+          {
+            event: "Corporate Dinner",
+            date: "Oct 21",
+            hours: "4.8",
+            amountCents: 27360,
+            paid: false,
+          },
         ],
       },
     ],

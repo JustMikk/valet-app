@@ -163,6 +163,12 @@ export const InvoiceDetailDto = z.object({
   number: str,
   venue: str,
   period: str,
+  /** Hours billed, before tax. */
+  subtotalCents: int,
+  /** Sales tax rate in basis points (625 is 6.25 %); 0 on invoices sent before tax was added. */
+  taxBp: int,
+  taxCents: int,
+  /** What the client owes: subtotal plus tax. */
   totalCents: int,
   notice: z.nullable(str),
   billedTo: str,
@@ -198,6 +204,8 @@ export const PayrollLineDto = z.object({
   date: str,
   hours: str,
   amountCents: int,
+  /** Marked paid on the event's pay sheet. */
+  paid: bool,
 })
 export type PayrollLine = z.infer<typeof PayrollLineDto>
 
@@ -209,6 +217,8 @@ export const PayrollRowDto = z.object({
   shifts: int,
   hours: str,
   amountCents: int,
+  /** The part of amountCents not yet marked paid. */
+  pendingCents: int,
   lines: z.array(PayrollLineDto),
 })
 export type PayrollRow = z.infer<typeof PayrollRowDto>
@@ -221,6 +231,53 @@ export const PayrollDto = z.object({
 export type Payroll = z.infer<typeof PayrollDto>
 
 export const SendPayrollResultDto = z.object({ sent: int })
+
+// ---- Event pay sheet (ADR-022) ---------------------------------------------------------------
+
+export const PayState = z.enum(["on_shift", "in_review", "pending", "paid"])
+export type PayState = z.infer<typeof PayState>
+
+export const EventPayRowDto = z.object({
+  assignmentId: str,
+  staffId: str,
+  name: str,
+  minutes: int,
+  amountCents: int,
+  balanceCents: int,
+  state: PayState,
+  tips: bool,
+})
+export type EventPayRow = z.infer<typeof EventPayRowDto>
+
+/** One event's valets, hours and pay at the event's own rate: the client's "valet schedule". */
+export const EventPayDto = z.object({
+  eventId: str,
+  venue: str,
+  name: str,
+  /** Venue-local: "Tue Sep 15", "8:00 AM", "3:30 PM". */
+  date: str,
+  start: str,
+  end: str,
+  /** The valets' hourly pay for this event. */
+  rateCents: int,
+  rows: z.array(EventPayRowDto),
+  totals: z.object({
+    valets: int,
+    minutes: int,
+    amountCents: int,
+    paidCents: int,
+    pendingCents: int,
+  }),
+})
+export type EventPay = z.infer<typeof EventPayDto>
+
+export const PayRatePatch = z.object({
+  rateCents: z.int().check(z.minimum(0), z.maximum(100_000)),
+})
+export type PayRatePatch = z.infer<typeof PayRatePatch>
+
+export const PayMarkPatch = z.object({ paid: z.optional(bool), tips: z.optional(bool) })
+export type PayMarkPatch = z.infer<typeof PayMarkPatch>
 
 // ---- Inbox -----------------------------------------------------------------------------------
 
