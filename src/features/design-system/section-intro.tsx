@@ -5,7 +5,7 @@ import { SectionTitle, SheetPanel } from "./primitives"
 import { BRAND_LOGO } from "@/lib/brand"
 
 const SPECS = [
-  ["Type", "Prompt (display, UI and numbers)"],
+  ["Type", "Bricolage Grotesque · Onest · Geist Mono"],
   ["Icons", "Material Symbols Rounded, filled"],
   ["Grid", "4 pt · 20 px mobile gutter"],
   ["Targets", "48 px min · 56 px primary"],
