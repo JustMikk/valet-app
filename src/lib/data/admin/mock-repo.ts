@@ -2,6 +2,7 @@
 // mirrors the server's rules closely enough for the same screens: actions change state in memory
 // and reset on reload.
 import { ApiError } from "@/lib/data/api-client"
+import { reliability } from "@/lib/insights/valet-stats"
 import { deriveBoard, first, type Pulse } from "@/lib/live/model"
 import { eventPayState, paySheet, taxCents, type PayInput } from "@/lib/pay/pay-sheet"
 import { ADMIN_STATUS } from "@/lib/status/admin"
@@ -35,6 +36,7 @@ import type {
   EventList,
   EventTab,
   Settings,
+  StaffNote,
   StaffRow,
   VenueDetail,
 } from "./schemas"
@@ -149,6 +151,14 @@ let unreadNotices = 2
 let threadMessages: ThreadMessage[] = THREAD_MESSAGES.map((m, i) => ({ id: `m${i}`, ...m }))
 /** Conversations started from the inbox's "New message" picker, keyed by staff id. */
 const newThreadMessages = new Map<string, ThreadMessage[]>()
+let staffNotes: StaffNote[] = [
+  {
+    id: "n1",
+    body: "Great with VIP guests at the Grand. Prefers evening shifts.",
+    author: ADMIN_USER.name,
+    when: "Oct 12 · 4:10 PM",
+  },
+]
 
 const eventCards: EventCard[] = EVENT_DAYS.flatMap((day) => day.items)
 
@@ -301,6 +311,88 @@ export const mockAdminRepo: AdminRepo = {
       })
     }
     return { invited: emails.length, skipped: [] }
+  },
+  personInsights: async (_id, days) => {
+    const scale = days / 90
+    const counts = {
+      onTime: Math.round(11 * scale),
+      late: Math.round(2 * scale),
+      noShows: days >= 90 ? 1 : 0,
+      drops: Math.round(scale),
+      lateDrops: 0,
+    }
+    return structuredClone({
+      rangeDays: days,
+      score: reliability(counts),
+      stats: {
+        ...counts,
+        shifts: counts.onTime + counts.late,
+        minutes: (counts.onTime + counts.late) * 290,
+        avgLateMin: counts.late ? 9 : null,
+        removed: 0,
+        claimed: Math.round(8 * scale),
+        assigned: Math.round(5 * scale),
+        outsideFence: 1,
+        flagged: 0,
+        adjustments: 1,
+        tipsShifts: Math.round(6 * scale),
+        earnedCents: (counts.onTime + counts.late) * 10_150,
+        paidCents: (counts.onTime + counts.late - 2) * 10_150,
+        pendingCents: 20_300,
+      },
+      upcoming: [{ event: "The Grand Hotel · Corporate dinner", when: "Fri Oct 30 · 6:00 PM" }],
+      months: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"].map((month, i) => ({
+        label: `${month} 2026`,
+        shifts: [3, 4, 2, 5, 4, 6][i] ?? 0,
+        minutes: ([3, 4, 2, 5, 4, 6][i] ?? 0) * 290,
+        late: i === 4 ? 1 : 0,
+        noShows: i === 2 ? 1 : 0,
+      })),
+      venues: [
+        { venue: "The Grand Hotel", shifts: 7, minutes: 2030 },
+        { venue: "Harbor Pavilion", shifts: 4, minutes: 1160 },
+      ],
+      activity: [
+        {
+          id: "m1",
+          when: "Fri Oct 23 · 5:51 PM",
+          kind: "clock_in" as const,
+          title: "Clocked in · The Grand Hotel · Corporate dinner",
+          detail: "On time · Inside the fence",
+          issue: false,
+        },
+        {
+          id: "m2",
+          when: "Wed Oct 21 · 9:02 AM",
+          kind: "claimed" as const,
+          title: "Claimed The Grand Hotel · Corporate dinner",
+          detail: "For Fri Oct 23 · 6:00 PM",
+          issue: false,
+        },
+        {
+          id: "m3",
+          when: "Sat Oct 17 · 6:14 PM",
+          kind: "clock_in" as const,
+          title: "Clocked in · Harbor Pavilion · Wedding",
+          detail: "14 min late · 212 m outside the fence · Approved by an admin",
+          issue: true,
+        },
+      ],
+      notes: staffNotes,
+    })
+  },
+  addStaffNote: async (_id, body) => {
+    staffNotes.unshift({
+      id: `n${staffNotes.length + 1}`,
+      body,
+      author: ADMIN_USER.name,
+      when: "Just now",
+    })
+    return structuredClone(staffNotes)
+  },
+  deleteStaffNote: async (_id, noteId) => {
+    staffNotes = staffNotes.filter((note) => note.id !== noteId)
+    return structuredClone(staffNotes)
   },
   deactivate: async () => {},
   deleteStaff: async () => {},

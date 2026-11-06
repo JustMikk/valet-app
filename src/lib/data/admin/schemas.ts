@@ -146,6 +146,72 @@ export const PersonDto = z.object({
 })
 export type Person = z.infer<typeof PersonDto>
 
+// ---- Valet insights (ADR-024) -----------------------------------------------------------------
+
+export const INSIGHT_RANGES = [30, 90, 365] as const
+export const InsightRange = z.union([z.literal(30), z.literal(90), z.literal(365)])
+export type InsightRange = z.infer<typeof InsightRange>
+
+export const ActivityKind = z.enum([
+  "invited",
+  "joined",
+  "claimed",
+  "assigned",
+  "dropped",
+  "removed",
+  "clock_in",
+  "clock_out",
+  "adjusted",
+  "paid",
+  "no_show",
+])
+export type ActivityKind = z.infer<typeof ActivityKind>
+
+export const StaffNoteDto = z.object({ id: str, body: str, author: str, when: str })
+export type StaffNote = z.infer<typeof StaffNoteDto>
+
+export const NewStaffNoteRequest = z.object({
+  body: z.string().check(z.trim(), z.minLength(1), z.maxLength(2000)),
+})
+
+/** Everything about one valet over a period: score, numbers, where/when, log and notes. */
+export const PersonInsightsDto = z.object({
+  rangeDays: int,
+  score: z.object({
+    value: z.nullable(int),
+    band: z.enum(["excellent", "good", "watch", "risk", "new"]),
+    reasons: z.array(str),
+  }),
+  stats: z.object({
+    shifts: int,
+    minutes: int,
+    onTime: int,
+    late: int,
+    avgLateMin: z.nullable(int),
+    noShows: int,
+    drops: int,
+    lateDrops: int,
+    removed: int,
+    claimed: int,
+    assigned: int,
+    outsideFence: int,
+    flagged: int,
+    adjustments: int,
+    tipsShifts: int,
+    earnedCents: int,
+    paidCents: int,
+    pendingCents: int,
+  }),
+  upcoming: z.array(z.object({ event: str, when: str })),
+  months: z.array(z.object({ label: str, shifts: int, minutes: int, late: int, noShows: int })),
+  venues: z.array(z.object({ venue: str, shifts: int, minutes: int })),
+  activity: z.array(
+    z.object({ id: str, when: str, kind: ActivityKind, title: str, detail: str, issue: bool }),
+  ),
+  notes: z.array(StaffNoteDto),
+})
+export type PersonInsights = z.infer<typeof PersonInsightsDto>
+
 export const InviteRequest = z.object({
   emails: z.array(z.email()).check(z.minLength(1), z.maxLength(50)),
 })

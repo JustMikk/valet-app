@@ -34,13 +34,16 @@ import type {
   EventList,
   EventPatch,
   EventTab,
+  InsightRange,
   InviteResult,
   NewEventRequest,
   NewVenueRequest,
   Person,
+  PersonInsights,
   Settings,
   SettingsPatch,
   StaffList,
+  StaffNote,
   VenueDetail,
   VenuePatch,
   VenueRow,
@@ -64,6 +67,10 @@ export interface AdminRepo {
 
   staff(): Promise<StaffList>
   person(id: string | undefined): Promise<Person>
+  /** Score, numbers, activity log and notes for one valet over the last `days` (ADR-024). */
+  personInsights(id: string, days: InsightRange): Promise<PersonInsights>
+  addStaffNote(id: string, body: string): Promise<StaffNote[]>
+  deleteStaffNote(id: string, noteId: string): Promise<StaffNote[]>
   invite(emails: string[]): Promise<InviteResult>
   deactivate(id: string): Promise<void>
   /** Hard-delete a staff record, active or not. */

@@ -35,8 +35,10 @@ import {
   IdDto,
   InviteResultDto,
   PersonDto,
+  PersonInsightsDto,
   SettingsDto,
   StaffListDto,
+  StaffNoteDto,
   VenueDetailDto,
   VenueRowDto,
 } from "./schemas"
@@ -66,6 +68,11 @@ export const httpAdminRepo: AdminRepo = {
 
   staff: () => api("admin/staff", StaffListDto, call),
   person: (id) => needsId(id, (v) => api(`admin/staff/${v}`, PersonDto, call)),
+  personInsights: (id, days) =>
+    api(`admin/staff/${id}/insights?days=${days}`, PersonInsightsDto, call),
+  addStaffNote: (id, body) => api(`admin/staff/${id}/notes`, z.array(StaffNoteDto), post({ body })),
+  deleteStaffNote: (id, noteId) =>
+    api(`admin/staff/${id}/notes/${noteId}`, z.array(StaffNoteDto), { ...call, method: "DELETE" }),
   invite: (emails) => api("admin/staff/invite", InviteResultDto, post({ emails })),
   deactivate: async (id) => {
     await api(`admin/staff/${id}/deactivate`, Ack, post())

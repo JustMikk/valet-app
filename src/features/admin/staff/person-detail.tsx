@@ -2,32 +2,20 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 import { ConfirmSheet, Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import type { Person } from "@/lib/data"
 
-import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
-import { ErrorNotice, QueryState } from "../data/query-state"
-import { useDeactivate, useDeleteStaff, usePerson } from "../data/queries"
+import { SectionTitle, SPLIT } from "../common/admin-page"
+import { ErrorNotice } from "../data/query-state"
+import { useDeactivate, useDeleteStaff } from "../data/queries"
 
 const CONTACT = "h-13 flex-1 gap-2 text-16"
 
-/** One staff member: contact actions, profile facts and recent shifts. `?id=` picks the person. */
-export function PersonDetail() {
-  const id = useSearchParams().get("id") ?? undefined
-  const person = usePerson(id)
-  return (
-    <AdminPage>
-      <QueryState query={person} rows={4}>
-        {(data) => <PersonBody person={data} />}
-      </QueryState>
-    </AdminPage>
-  )
-}
-
-function PersonBody({ person }: { person: Person }) {
+/** The Overview tab's profile: contact actions, profile facts, recent shifts, deactivate/delete. */
+export function PersonOverview({ person }: { person: Person }) {
   const router = useRouter()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)

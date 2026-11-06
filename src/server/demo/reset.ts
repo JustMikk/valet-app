@@ -25,7 +25,10 @@ const TABLES = [
   "invoice_lines",
 ] as const satisfies readonly (keyof Fixtures)[]
 
+// Every table that points at one being emptied must be emptied with it, or TRUNCATE refuses.
 const WIPE = [
+  "staff_notes",
+  "pulse_snapshots",
   "hours_adjustments",
   "invoice_events",
   "invoice_lines",

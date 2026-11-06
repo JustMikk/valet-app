@@ -401,3 +401,16 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - **Demo keys built in (owner, 2026-11-06).** The demo's Pusher app id, key, secret and cluster are in the code, so a deploy needs no variables. The four `PUSHER_*` variables override them. The static export never connects.
 
 **Consequences.** Free plan limits: 200k messages/day, 100 concurrent connections; a busy tenant needs a paid plan. The repository is public, so the built-in secret is public: anyone can sign a subscription to any channel (they would see only "something changed" signals, never content) or publish fake signals (extra refetches, and the daily quota could run out, which drops the apps back to polling). The owner accepted this for the demo. To retire the key, regenerate it in Pusher and set the `PUSHER_*` variables. The CI secrets-history scan reports this secret.
+
+## ADR-024 — Valet insights: activity log, performance, reliability score and notes
+
+**Date:** 2026-11-06 · **Status:** accepted (owner asked for a per-valet log, performance and an organized overview to support decisions)
+
+**Decision.**
+
+- **One place per valet.** The staff person page has four tabs: Overview (profile, reliability card, key numbers, upcoming shifts), Activity, Performance and Notes. Activity and Performance cover the last 30 days, 90 days or 12 months.
+- **The activity log is derived, not stored.** It is built from what the app already records: invitation and sign-up, claims, assignments (and by whom), drops (with notice or within 24 h, reason and note), removals by an admin, every clock-in (minutes late, fence result and distance, approval, offline) and clock-out (flags), hours corrections (by whom and why), payments and no-shows (a past, uncancelled shift never clocked into). Anything that needs a look (late, outside the fence, waiting or rejected, flagged, late drop, no-show) is marked with an icon and words.
+- **Reliability score (0–100).** Out of what they committed to in the period: a shift on time (clock-in within 5 minutes of the start) counts 1, a late arrival 0.7, a drop with more than 24 h notice 0.8, a later drop 0.3, a no-show 0; removals by an admin don't count. Bands: 90+ Excellent, 75+ Good, 60+ Watch, below At risk; "New" until there are three commitments. The card lists the facts behind the number so a decision can be explained.
+- **Performance** shows attendance, commitments (claimed vs assigned, drops, removals), clock-in quality (outside the fence, flagged, corrected), pay (earned at each event's rate, paid, pending, shifts with tips), month by month for six months, and the venues worked most.
+- **Notes** (`staff_notes`, migration 014) are private to admins, with author and time; any admin can delete one.
+- The demo reset now also empties `staff_notes` and `pulse_snapshots`, which TRUNCATE requires (the reset failed since migration 012).
