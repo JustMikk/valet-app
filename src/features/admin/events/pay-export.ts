@@ -2,6 +2,7 @@
 // "event / valet schedule", and a printable PDF.
 import type { EventPay, PayState } from "@/lib/data"
 import { formatHoursDecimal, formatMoney, formatRate } from "@/lib/money/format"
+import { formatTaxRate } from "@/lib/pay/pay-sheet"
 import { buildPdf, PAGE, type PdfPage, type TextItem } from "@/lib/pdf/text-pdf"
 
 export const PAY_STATE_WORD: Record<PayState, string> = {
@@ -28,9 +29,12 @@ export function payCsv(sheet: EventPay): string {
   const rate = dollars(sheet.rateCents)
   return [
     csvRow(["Event", `${sheet.venue} · ${sheet.name}`]),
+    csvRow(["Event address", sheet.address]),
     csvRow(["Date", sheet.date]),
     csvRow(["Time", `${sheet.start} – ${sheet.end}`]),
     csvRow(["Per hour", rate]),
+    csvRow(["Total hours", hours(sheet.totals.minutes)]),
+    csvRow(["Total event amount", dollars(sheet.totals.amountCents)]),
     "",
     csvRow(["No.", "Valet name", "Hours", "Rate", "Total", "Paid", "Tips", "Balance", "Status"]),
     ...sheet.rows.map((row, i) =>
@@ -49,7 +53,9 @@ export function payCsv(sheet: EventPay): string {
     "",
     csvRow(["Total valets", sheet.totals.valets]),
     csvRow(["Total hours", hours(sheet.totals.minutes)]),
-    csvRow(["Total pay", dollars(sheet.totals.amountCents)]),
+    csvRow(["Total pay before tax", dollars(sheet.totals.amountCents)]),
+    csvRow([`Total tax (${formatTaxRate(sheet.taxBp)})`, dollars(sheet.totals.taxCents)]),
+    csvRow(["Total pay after tax", dollars(sheet.totals.afterTaxCents)]),
     csvRow(["Total paid", dollars(sheet.totals.paidCents)]),
     csvRow(["Total pending", dollars(sheet.totals.pendingCents)]),
   ].join("\r\n")
@@ -96,7 +102,9 @@ export function payPages(sheet: EventPay, company: string): PdfPage[] {
     x: LEFT,
     size: 10,
   })
-  y -= 36
+  y -= 16
+  put({ text: sheet.address, x: LEFT, size: 10 })
+  y -= 34
   header()
 
   for (const row of sheet.rows) {
@@ -122,7 +130,9 @@ export function payPages(sheet: EventPay, company: string): PdfPage[] {
   const totals: [string, string][] = [
     ["Valets", String(sheet.totals.valets)],
     ["Total hours", formatHoursDecimal(sheet.totals.minutes)],
-    ["Total pay", formatMoney(sheet.totals.amountCents)],
+    ["Total pay before tax", formatMoney(sheet.totals.amountCents)],
+    [`Tax (${formatTaxRate(sheet.taxBp)})`, formatMoney(sheet.totals.taxCents)],
+    ["Total pay after tax", formatMoney(sheet.totals.afterTaxCents)],
     ["Paid", formatMoney(sheet.totals.paidCents)],
     ["Pending", formatMoney(sheet.totals.pendingCents)],
   ]

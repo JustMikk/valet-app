@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 
-import { formatTaxRate, paySheet, taxCents, type PayInput } from "./pay-sheet"
+import {
+  eventPayState,
+  formatTaxRate,
+  paySheet,
+  payStubText,
+  taxCents,
+  type PayInput,
+  type PayRow,
+} from "./pay-sheet"
 
 const shift = (over: Partial<PayInput> = {}): PayInput => ({
   assignmentId: "a1",
@@ -93,5 +101,65 @@ describe("formatTaxRate", () => {
     expect(formatTaxRate(625)).toBe("6.25%")
     expect(formatTaxRate(800)).toBe("8%")
     expect(formatTaxRate(0)).toBe("0%")
+  })
+})
+
+const row = (over: Partial<PayRow> = {}): PayRow => ({
+  assignmentId: "a1",
+  staffId: "s1",
+  name: "Sebah Idris",
+  minutes: 450,
+  amountCents: 15_750,
+  balanceCents: 15_750,
+  state: "pending",
+  tips: true,
+  ...over,
+})
+
+describe("payStubText", () => {
+  const event = {
+    venue: "Post Oak Hotel",
+    name: "Gala",
+    date: "Tue Sep 15",
+    start: "8:00 AM",
+    end: "3:30 PM",
+    rateCents: 2100,
+  }
+
+  it("spells out one valet's pay for the event, line by line", () => {
+    expect(payStubText(event, row())).toBe(
+      [
+        "Pay stub · Post Oak Hotel · Gala",
+        "Tue Sep 15 · 8:00 AM – 3:30 PM",
+        "Hours: 7.5 h × $21.00 / h = $157.50",
+        "Paid: No · Tips: Yes",
+        "Balance: $157.50",
+      ].join("\n"),
+    )
+  })
+
+  it("says when it's paid, and when hours are still being reviewed", () => {
+    expect(payStubText(event, row({ state: "paid", balanceCents: 0, tips: false }))).toContain(
+      "Paid: Yes · Tips: No",
+    )
+    expect(payStubText(event, row({ state: "in_review" }))).toContain("Paid: No (hours in review)")
+  })
+})
+
+describe("eventPayState", () => {
+  it("is in review while any hours wait for approval", () => {
+    expect(eventPayState([row({ state: "paid" }), row({ state: "in_review" })])).toBe("in_review")
+  })
+
+  it("is pending while anyone approved is unpaid", () => {
+    expect(eventPayState([row({ state: "paid" }), row({ state: "pending" })])).toBe("pending")
+  })
+
+  it("is paid once everyone is", () => {
+    expect(eventPayState([row({ state: "paid" }), row({ state: "paid" })])).toBe("paid")
+  })
+
+  it("is on shift while someone hasn't clocked out and the rest are paid", () => {
+    expect(eventPayState([row({ state: "paid" }), row({ state: "on_shift" })])).toBe("on_shift")
   })
 })

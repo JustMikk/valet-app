@@ -36,12 +36,15 @@ export const initialsOf = (name: string) =>
     .map((word) => word[0]?.toUpperCase() ?? "")
     .join("")
 
-/** A message from dispatch into one staff member's thread, plus the "new message" notification. */
+/**
+ * A message from dispatch into one staff member's thread, plus the "new message" notification
+ * (`notify: false` when the caller sends its own, more specific one).
+ */
 export async function messageStaff(
   ctx: AdminCtx,
   staffId: string,
   text: string,
-  options: { refLabel?: string } = {},
+  options: { refLabel?: string; notify?: boolean } = {},
 ): Promise<void> {
   await sql()`insert into messages
                 (tenant_id, staff_id, sender, sender_name, body, ref_label, delivered_at, sender_admin_id, admin_read_at)
@@ -49,6 +52,7 @@ export async function messageStaff(
                       ${text}, ${options.refLabel ?? null}, now(), ${ctx.adminId}, now())`
   // The valet's inbox, and every admin's copy of the thread.
   await publish([staffChannel(staffId), adminChannel(ctx.tenantId)], "message")
+  if (options.notify === false) return
   const [prefs] = await rows<{ notify_msg: boolean }>(
     sql()`select notify_msg from staff where id = ${staffId}`,
   )

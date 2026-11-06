@@ -48,7 +48,7 @@ export function ChatBubble({ message: m, onClaim }: ChatBubbleProps) {
             {m.img}
           </div>
         )}
-        <span>{m.text}</span>
+        <span className="whitespace-pre-line">{m.text}</span>
         {m.event && (
           <button
             type="button"

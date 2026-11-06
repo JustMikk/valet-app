@@ -258,13 +258,19 @@ export const EventPayDto = z.object({
   date: str,
   start: str,
   end: str,
+  /** The venue's street address. */
+  address: str,
   /** The valets' hourly pay for this event. */
   rateCents: int,
+  /** The tenant's sales tax (basis points), applied to the pay total as on the client's sheet. */
+  taxBp: int,
   rows: z.array(EventPayRowDto),
   totals: z.object({
     valets: int,
     minutes: int,
     amountCents: int,
+    taxCents: int,
+    afterTaxCents: int,
     paidCents: int,
     pendingCents: int,
   }),
@@ -278,6 +284,26 @@ export type PayRatePatch = z.infer<typeof PayRatePatch>
 
 export const PayMarkPatch = z.object({ paid: z.optional(bool), tips: z.optional(bool) })
 export type PayMarkPatch = z.infer<typeof PayMarkPatch>
+
+/** A finished event on Payroll's "By event" list. */
+export const PayrollEventRowDto = z.object({
+  eventId: str,
+  venue: str,
+  name: str,
+  /** Venue-local: "Tue Sep 15" and "8:00 AM – 3:30 PM". */
+  date: str,
+  time: str,
+  valets: int,
+  minutes: int,
+  amountCents: int,
+  pendingCents: int,
+  status: StatusSpecDto,
+})
+export type PayrollEventRow = z.infer<typeof PayrollEventRowDto>
+
+/** Without `staffId`, the pay stub goes to every valet who worked the event. */
+export const SendEventPayRequest = z.object({ staffId: z.optional(str) })
+export type SendEventPayRequest = z.infer<typeof SendEventPayRequest>
 
 // ---- Inbox -----------------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 // The event pay sheet (ADR-022), shared by the server and the static build's mock: what each valet
 // is owed for one event at the event's rate, and what is paid or still pending.
-import { amountCents } from "@/lib/money/format"
+import { amountCents, formatHoursDecimal, formatMoney, formatRate } from "@/lib/money/format"
 
 export type PayState = "on_shift" | "in_review" | "pending" | "paid"
 
@@ -93,3 +93,38 @@ export const taxCents = (subtotalCents: number, rateBp: number) =>
 
 /** 625 → "6.25%", 800 → "8%". */
 export const formatTaxRate = (rateBp: number) => `${Number((rateBp / 100).toFixed(2))}%`
+
+/** Where an event's pay stands, worst first: hours to review, then pay owed, then still on shift. */
+export function eventPayState(rows: PayRow[]): PayState {
+  for (const state of ["in_review", "pending", "on_shift"] as const) {
+    if (rows.some((row) => row.state === state)) return state
+  }
+  return "paid"
+}
+
+type PayStubEvent = {
+  venue: string
+  name: string
+  date: string
+  start: string
+  end: string
+  rateCents: number
+}
+
+const PAID_LINE: Record<PayState, string> = {
+  paid: "Paid: Yes",
+  pending: "Paid: No",
+  in_review: "Paid: No (hours in review)",
+  on_shift: "Paid: No (still on shift)",
+}
+
+/** One valet's pay for one event, as the inbox message their pay stub arrives in. */
+export function payStubText(event: PayStubEvent, row: PayRow): string {
+  return [
+    `Pay stub · ${event.venue} · ${event.name}`,
+    `${event.date} · ${event.start} – ${event.end}`,
+    `Hours: ${formatHoursDecimal(row.minutes)} × ${formatRate(event.rateCents)} = ${formatMoney(row.amountCents)}`,
+    `${PAID_LINE[row.state]} · Tips: ${row.tips ? "Yes" : "No"}`,
+    `Balance: ${formatMoney(row.balanceCents)}`,
+  ].join("\n")
+}

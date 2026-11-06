@@ -19,6 +19,7 @@ import type {
   NudgeResult,
   PayMarkPatch,
   Payroll,
+  PayrollEventRow,
   RemoveResult,
   ThreadDetail,
   ThreadMessage,
@@ -87,6 +88,8 @@ export interface AdminRepo {
   setEventPayRate(eventId: string, rateCents: number): Promise<EventPay>
   markEventPay(eventId: string, assignmentId: string, patch: PayMarkPatch): Promise<EventPay>
   markAllEventPaid(eventId: string): Promise<EventPay>
+  /** Pay stub for the event as a message and notification: one valet, or everyone who finished. */
+  sendEventPay(eventId: string, staffId?: string): Promise<{ sent: number }>
 
   live(): Promise<Live>
   decide(punchId: string, decision: "approve" | "reject"): Promise<DecideResult>
@@ -106,6 +109,8 @@ export interface AdminRepo {
   sendInvoice(id: string): Promise<{ billedTo: string }>
   /** Payroll summary: hours worked per staff member over the current billing period. */
   payroll(): Promise<Payroll>
+  /** Payroll by event: the latest finished events where someone clocked in. */
+  payrollEvents(): Promise<PayrollEventRow[]>
   /** Send each staff member their pay stub as an inbox message. */
   sendPayroll(): Promise<{ sent: number }>
   /** Send one staff member their pay stub. */

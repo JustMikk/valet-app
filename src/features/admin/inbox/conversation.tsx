@@ -63,7 +63,7 @@ export function Conversation({ id, onBack }: ConversationProps) {
                     : "self-start rounded-[20px_20px_20px_6px] bg-surface text-fg",
                 )}
               >
-                {message.text}
+                <span className="whitespace-pre-line">{message.text}</span>
                 <span className="text-12 font-medium opacity-60">{message.meta}</span>
               </div>
             ))}

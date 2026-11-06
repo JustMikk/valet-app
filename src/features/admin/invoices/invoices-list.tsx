@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { Icon, PillTabs } from "@/components/shared"
 import { Button } from "@/components/ui/button"
-import { formatMoney } from "@/lib/money/format"
-import type { InvoiceRow, Payroll } from "@/lib/data/admin/ops-schemas"
+import type { InvoiceRow } from "@/lib/data/admin/ops-schemas"
 import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
@@ -16,7 +15,7 @@ import { SummaryBar } from "../common/summary-bar"
 import { QueryState } from "../data/query-state"
 import { useInvoices, usePayroll, useSendPayroll } from "../data/queries"
 import { Money } from "./invoice-parts"
-import { PayrollStaffRow } from "./pay-stub-modal"
+import { PayrollPanel } from "./payroll-panel"
 
 type Tab = "client" | "payroll"
 
@@ -118,52 +117,6 @@ function InvoiceTable({ list }: { list: InvoiceRow[] }) {
   )
 }
 
-function PayrollSummary({ data }: { data: Payroll }) {
-  return (
-    <div className="flex flex-col gap-3.5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-15 font-semibold">{data.period}</span>
-          <span className="text-14 text-fg-2 tabular-nums">
-            Total pay: {formatMoney(data.totalCents)} · Pending:{" "}
-            {formatMoney(data.rows.reduce((sum, row) => sum + row.pendingCents, 0))}
-          </span>
-        </div>
-      </div>
-
-      <div className="hidden grid-cols-[1fr_auto_auto_auto_auto] gap-x-3 border-b border-line pb-2 text-13 font-medium text-fg-3 tablet:grid">
-        <span>Staff member</span>
-        <span className="w-12 text-right">Shifts</span>
-        <span className="w-16 text-right">Hours</span>
-        <span className="w-20 text-right">Pay</span>
-        <span className="w-5" />
-      </div>
-
-      <div className="flex flex-col">
-        {data.rows.length === 0 && (
-          <p className="py-8 text-center text-15 text-fg-2">No approved hours this period yet.</p>
-        )}
-        {data.rows.map((row) => (
-          <PayrollStaffRow key={row.staffId} row={row} period={data.period} />
-        ))}
-      </div>
-
-      <p className="text-13 text-fg-3">
-        Tap any row to view the full pay stub. At each event&apos;s valet pay rate.
-      </p>
-    </div>
-  )
-}
-
-function PayrollLoader() {
-  const payroll = usePayroll()
-  return (
-    <QueryState query={payroll} rows={4}>
-      {(data) => <PayrollSummary data={data} />}
-    </QueryState>
-  )
-}
-
 /** Payroll's one action, beside the tabs: send every pay stub, then say so. */
 function SendToAll() {
   const send = useSendPayroll()
@@ -234,7 +187,7 @@ export function InvoicesList() {
       {/* Desktop: the list in one white card (Regency mockup); phone: flat on the page. */}
       <div className="flex flex-col gap-5 desktop:rounded-r24 desktop:border desktop:border-line desktop:bg-elev desktop:p-6">
         <div className="flex items-center justify-between gap-3 tablet:hidden">{controls}</div>
-        {tab === "client" ? <ClientInvoices /> : <PayrollLoader />}
+        {tab === "client" ? <ClientInvoices /> : <PayrollPanel />}
       </div>
     </AdminPage>
   )

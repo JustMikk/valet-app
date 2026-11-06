@@ -11,7 +11,9 @@ const sheet: EventPay = {
   date: "Tue Sep 15",
   start: "8:00 AM",
   end: "3:30 PM",
+  address: "2001 Post Oak Blvd, Houston",
   rateCents: 2100,
+  taxBp: 625,
   rows: [
     {
       assignmentId: "a1",
@@ -38,6 +40,8 @@ const sheet: EventPay = {
     valets: 2,
     minutes: 900,
     amountCents: 31_500,
+    taxCents: 1_969,
+    afterTaxCents: 33_469,
     paidCents: 15_750,
     pendingCents: 15_750,
   },
@@ -47,11 +51,14 @@ const lines = (csv: string) => csv.split("\r\n")
 
 describe("payCsv", () => {
   it("opens with the event facts, as on the client's valet schedule", () => {
-    expect(lines(payCsv(sheet)).slice(0, 4)).toEqual([
+    expect(lines(payCsv(sheet)).slice(0, 7)).toEqual([
       "Event,Post Oak Hotel · Gala",
+      'Event address,"2001 Post Oak Blvd, Houston"',
       "Date,Tue Sep 15",
       "Time,8:00 AM – 3:30 PM",
       "Per hour,21.00",
+      "Total hours,15.00",
+      "Total event amount,315.00",
     ])
   })
 
@@ -62,11 +69,13 @@ describe("payCsv", () => {
     expect(all).toContain("2,Kibrom Alemu,7.50,21.00,157.50,No,No,157.50,Pending")
   })
 
-  it("ends with the summary", () => {
-    expect(lines(payCsv(sheet)).slice(-5)).toEqual([
+  it("ends with the summary, tax included", () => {
+    expect(lines(payCsv(sheet)).slice(-7)).toEqual([
       "Total valets,2",
       "Total hours,15.00",
-      "Total pay,315.00",
+      "Total pay before tax,315.00",
+      "Total tax (6.25%),19.69",
+      "Total pay after tax,334.69",
       "Total paid,157.50",
       "Total pending,157.50",
     ])
@@ -104,12 +113,17 @@ describe("payPages", () => {
         "VALET PAY SHEET",
         "Post Oak Hotel · Gala",
         "Tue Sep 15 · 8:00 AM – 3:30 PM · $21.00 / h",
+        "2001 Post Oak Blvd, Houston",
         "Sebah Idris",
         "Kibrom Alemu",
         "7.5 h",
         "$157.50",
-        "Total pay",
+        "Total pay before tax",
         "$315.00",
+        "Tax (6.25%)",
+        "$19.69",
+        "Total pay after tax",
+        "$334.69",
         "Pending",
       ]),
     )

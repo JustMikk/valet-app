@@ -3,7 +3,7 @@
 // and reset on reload.
 import { ApiError } from "@/lib/data/api-client"
 import { deriveBoard, first, type Pulse } from "@/lib/live/model"
-import { paySheet, taxCents, type PayInput } from "@/lib/pay/pay-sheet"
+import { eventPayState, paySheet, taxCents, type PayInput } from "@/lib/pay/pay-sheet"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import {
   ADJUSTED,
@@ -76,6 +76,7 @@ function payState(eventId: string) {
 function payView(eventId: string): EventPay {
   const state = payState(eventId)
   const sheet = paySheet(state.shifts, state.rateCents)
+  const tax = taxCents(sheet.totals.amountCents, settings.billing.salesTaxBp)
   return structuredClone({
     eventId,
     venue: EVENT_DETAIL.venue,
@@ -83,11 +84,20 @@ function payView(eventId: string): EventPay {
     date: EVENT_DETAIL.when,
     start: "6:00 PM",
     end: "11:00 PM",
+    address: "400 Market St",
     rateCents: state.rateCents,
+    taxBp: settings.billing.salesTaxBp,
     rows: sheet.rows,
-    totals: sheet.totals,
+    totals: { ...sheet.totals, taxCents: tax, afterTaxCents: sheet.totals.amountCents + tax },
   })
 }
+
+const PAY_LIST_STATUS = {
+  in_review: ADMIN_STATUS.payInReview,
+  pending: ADMIN_STATUS.payPending,
+  on_shift: ADMIN_STATUS.onShift,
+  paid: ADMIN_STATUS.paid,
+} as const
 
 /** Every venue, seeded from the design and growing as venues are added or edited. */
 const venueStore = new Map<string, VenueDetail>(
@@ -368,6 +378,11 @@ export const mockAdminRepo: AdminRepo = {
     }
     return payView(eventId)
   },
+  sendEventPay: async (eventId, staffId) => ({
+    sent: payView(eventId).rows.filter(
+      (row) => row.state !== "on_shift" && (staffId === undefined || row.staffId === staffId),
+    ).length,
+  }),
 
   live: async (): Promise<Live> =>
     structuredClone({
@@ -518,6 +533,23 @@ export const mockAdminRepo: AdminRepo = {
       ],
     }),
   createInvoice: async () => ({ id: "inv-0" }),
+  payrollEvents: async () => {
+    const sheet = payView("evt-grand")
+    return [
+      {
+        eventId: sheet.eventId,
+        venue: sheet.venue,
+        name: sheet.name,
+        date: sheet.date,
+        time: `${sheet.start} – ${sheet.end}`,
+        valets: sheet.totals.valets,
+        minutes: sheet.totals.minutes,
+        amountCents: sheet.totals.amountCents,
+        pendingCents: sheet.totals.pendingCents,
+        status: PAY_LIST_STATUS[eventPayState(sheet.rows)],
+      },
+    ]
+  },
   sendInvoice: async () => {
     sentInvoice = true
     return { billedTo: INVOICE_DETAIL.sentTo }

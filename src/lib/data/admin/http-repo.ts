@@ -19,6 +19,7 @@ import {
   LiveDto,
   NudgeResultDto,
   PayrollDto,
+  PayrollEventRowDto,
   RemoveResultDto,
   SendInvoiceResultDto,
   SendPayrollResultDto,
@@ -98,6 +99,8 @@ export const httpAdminRepo: AdminRepo = {
       body: patch,
     }),
   markAllEventPaid: (id) => api(`admin/events/${id}/pay/paid-all`, EventPayDto, post()),
+  sendEventPay: (id, staffId) =>
+    api(`admin/events/${id}/pay/send`, SendPayrollResultDto, post(staffId ? { staffId } : {})),
 
   live: () => api("admin/live", LiveDto, call),
   decide: (punchId, decision) =>
@@ -123,6 +126,7 @@ export const httpAdminRepo: AdminRepo = {
   createInvoice: (request) => api("admin/invoices", IdDto, post(request)),
   sendInvoice: (id) => api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post()),
   payroll: () => api("admin/payroll", PayrollDto, call),
+  payrollEvents: () => api("admin/payroll/events", z.array(PayrollEventRowDto), call),
   sendPayroll: () => api("admin/payroll/send", SendPayrollResultDto, post()),
   sendPayrollTo: (staffId: string) =>
     api("admin/payroll/send-to", SendPayrollResultDto, post({ staffId })),
