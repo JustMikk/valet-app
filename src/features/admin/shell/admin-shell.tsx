@@ -18,7 +18,7 @@ type Badges = { live: number; hours: number; inbox: number }
 
 const count = (n: number) => (n > 0 ? { text: String(n) } : undefined)
 
-/** The eight sections; badges are what needs the admin right now. */
+/** The nine sections; badges are what needs the admin right now. */
 function navItems(badges: Badges) {
   const LIVE: ShellNavItem = {
     key: "live",
@@ -35,6 +35,12 @@ function navItems(badges: Badges) {
     href: "/admin/events",
   }
   const STAFF: ShellNavItem = { key: "staff", label: "Staff", icon: "group", href: "/admin/staff" }
+  const PERFORMANCE: ShellNavItem = {
+    key: "performance",
+    label: "Performance",
+    icon: "timeline",
+    href: "/admin/performance",
+  }
   const VENUES: ShellNavItem = {
     key: "venues",
     label: "Venues",
@@ -68,9 +74,9 @@ function navItems(badges: Badges) {
     href: "/admin/settings",
   }
   return {
-    sidebar: [LIVE, EVENTS, STAFF, VENUES, HOURS, INVOICES, INBOX, SETTINGS],
+    sidebar: [LIVE, EVENTS, STAFF, PERFORMANCE, VENUES, HOURS, INVOICES, INBOX, SETTINGS],
     tabs: [LIVE, EVENTS, HOURS, INBOX],
-    more: [STAFF, VENUES, INVOICES, SETTINGS],
+    more: [STAFF, PERFORMANCE, VENUES, INVOICES, SETTINGS],
   }
 }
 

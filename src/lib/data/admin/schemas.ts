@@ -212,6 +212,23 @@ export const PersonInsightsDto = z.object({
 })
 export type PersonInsights = z.infer<typeof PersonInsightsDto>
 
+/** One valet on the Performance list: score and the numbers behind it for the period. */
+export const TeamPerformanceRowDto = z.object({
+  staffId: str,
+  name: str,
+  initials: str,
+  score: z.nullable(int),
+  band: z.enum(["excellent", "good", "watch", "risk", "new"]),
+  shifts: int,
+  minutes: int,
+  onTimePct: z.nullable(int),
+  late: int,
+  noShows: int,
+  lateDrops: int,
+  earnedCents: int,
+})
+export type TeamPerformanceRow = z.infer<typeof TeamPerformanceRowDto>
+
 export const InviteRequest = z.object({
   emails: z.array(z.email()).check(z.minLength(1), z.maxLength(50)),
 })

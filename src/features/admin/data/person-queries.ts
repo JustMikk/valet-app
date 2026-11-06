@@ -13,6 +13,12 @@ export const usePersonInsights = (id: string, days: InsightRange) =>
     queryFn: () => adminRepo.personInsights(id, days),
   })
 
+export const useTeamPerformance = (days: InsightRange) =>
+  useQuery({
+    queryKey: ["admin", "team-performance", days],
+    queryFn: () => adminRepo.teamPerformance(days),
+  })
+
 /** Adding or removing a note updates every cached range of this person's insights in place. */
 export function useStaffNoteActions(id: string) {
   const qc = useQueryClient()

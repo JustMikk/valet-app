@@ -139,7 +139,8 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 /**
  * 0–100 from what they committed to: a shift on time is worth 1, a late arrival 0.7, a drop with
- * more than 24 hours' notice 0.8, a later drop 0.3 and a no-show 0. Needs three commitments.
+ * more than 24 hours' notice 0.8, a later drop 0.3 and a no-show 0. Needs three commitments,
+ * except that any no-show is scored at once, so it never hides behind "New".
  */
 export function reliability(input: {
   onTime: number
@@ -157,7 +158,7 @@ export function reliability(input: {
   if (noShows) reasons.push(plural(noShows, "no-show", "no-shows"))
   if (lateDrops) reasons.push(plural(lateDrops, "drop within 24 hours", "drops within 24 hours"))
   if (earlyDrops) reasons.push(plural(earlyDrops, "drop with notice", "drops with notice"))
-  if (committed < 3) {
+  if (committed < 3 && noShows === 0) {
     return { value: null, band: "new", reasons: [...reasons, "Not enough shifts to score yet"] }
   }
   const points = onTime + late * 0.7 + earlyDrops * 0.8 + lateDrops * 0.3

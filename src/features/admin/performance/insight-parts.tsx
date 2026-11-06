@@ -6,7 +6,7 @@ import { formatHoursDecimal, formatMoney } from "@/lib/money/format"
 import type { StatusSpec } from "@/lib/status/presets"
 import { cn } from "@/lib/utils"
 
-const BAND: Record<PersonInsights["score"]["band"], StatusSpec> = {
+export const BAND: Record<PersonInsights["score"]["band"], StatusSpec> = {
   excellent: { tone: "ok", icon: "verified", filled: true, label: "Excellent" },
   good: { tone: "ok", icon: "check_circle", filled: true, label: "Good" },
   watch: { tone: "warn", icon: "error", filled: true, label: "Watch" },

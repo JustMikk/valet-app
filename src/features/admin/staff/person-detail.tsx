@@ -2,19 +2,32 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { ConfirmSheet, Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import type { Person } from "@/lib/data"
 
-import { SectionTitle, SPLIT } from "../common/admin-page"
-import { ErrorNotice } from "../data/query-state"
-import { useDeactivate, useDeleteStaff } from "../data/queries"
+import { AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
+import { ErrorNotice, QueryState } from "../data/query-state"
+import { useDeactivate, useDeleteStaff, usePerson } from "../data/queries"
 
 const CONTACT = "h-13 flex-1 gap-2 text-16"
 
-/** The Overview tab's profile: contact actions, profile facts, recent shifts, deactivate/delete. */
+/** One staff member: contact actions, profile facts and recent shifts. `?id=` picks the person. */
+export function PersonDetail() {
+  const id = useSearchParams().get("id") ?? undefined
+  const person = usePerson(id)
+  return (
+    <AdminPage>
+      <QueryState query={person} rows={4}>
+        {(data) => <PersonOverview person={data} />}
+      </QueryState>
+    </AdminPage>
+  )
+}
+
+/** The profile: contact actions, profile facts, recent shifts, deactivate/delete. */
 export function PersonOverview({ person }: { person: Person }) {
   const router = useRouter()
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -61,6 +74,15 @@ export function PersonOverview({ person }: { person: Person }) {
               Message
             </Button>
           </div>
+          <Button
+            variant="secondary"
+            className="h-13 gap-2 text-16"
+            nativeButton={false}
+            render={<Link href={`/admin/performance/valet?id=${person.id}`} />}
+          >
+            <Icon name="timeline" size={22} />
+            View performance &amp; activity
+          </Button>
           <dl className="m-0 flex flex-col border-t border-line">
             {person.rows.map((row) => (
               <div

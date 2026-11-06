@@ -93,6 +93,10 @@ describe("reliability", () => {
     ])
   })
 
+  it("scores a no-show at once instead of waiting for three commitments", () => {
+    expect(reliability({ ...base, noShows: 2 })).toMatchObject({ value: 0, band: "risk" })
+  })
+
   it("puts repeated no-shows at risk", () => {
     expect(reliability({ ...base, onTime: 2, noShows: 2, drops: 1, lateDrops: 1 }).band).toBe(
       "risk",

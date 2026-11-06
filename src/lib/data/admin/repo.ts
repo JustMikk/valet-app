@@ -44,6 +44,7 @@ import type {
   SettingsPatch,
   StaffList,
   StaffNote,
+  TeamPerformanceRow,
   VenueDetail,
   VenuePatch,
   VenueRow,
@@ -69,6 +70,8 @@ export interface AdminRepo {
   person(id: string | undefined): Promise<Person>
   /** Score, numbers, activity log and notes for one valet over the last `days` (ADR-024). */
   personInsights(id: string, days: InsightRange): Promise<PersonInsights>
+  /** Every active valet's score and key numbers for the period (the Performance list). */
+  teamPerformance(days: InsightRange): Promise<TeamPerformanceRow[]>
   addStaffNote(id: string, body: string): Promise<StaffNote[]>
   deleteStaffNote(id: string, noteId: string): Promise<StaffNote[]>
   invite(emails: string[]): Promise<InviteResult>

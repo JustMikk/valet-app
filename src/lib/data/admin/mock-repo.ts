@@ -381,6 +381,36 @@ export const mockAdminRepo: AdminRepo = {
       notes: staffNotes,
     })
   },
+  teamPerformance: async (days) => {
+    const scale = days / 90
+    return staffRows
+      .filter((row) => row.bucket !== "invited" && row.bucket !== "inactive")
+      .map((row, i) => {
+        const counts = {
+          onTime: Math.round((8 + (i % 5)) * scale),
+          late: i % 4,
+          noShows: i % 7 === 3 ? 1 : 0,
+          drops: i % 3 === 0 ? 1 : 0,
+          lateDrops: i % 6 === 0 ? 1 : 0,
+        }
+        const score = reliability(counts)
+        const shifts = counts.onTime + counts.late
+        return {
+          staffId: row.id,
+          name: row.name,
+          initials: row.initials,
+          score: score.value,
+          band: score.band,
+          shifts,
+          minutes: shifts * 290,
+          onTimePct: shifts ? Math.round((100 * counts.onTime) / shifts) : null,
+          late: counts.late,
+          noShows: counts.noShows,
+          lateDrops: counts.lateDrops,
+          earnedCents: shifts * 10_150,
+        }
+      })
+  },
   addStaffNote: async (_id, body) => {
     staffNotes.unshift({
       id: `n${staffNotes.length + 1}`,
