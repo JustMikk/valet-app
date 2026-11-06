@@ -76,6 +76,15 @@ describe("buildPdf with the Regency banner", () => {
     expect(pdf).not.toContain("(REGENCY) Tj")
   })
 
+  it("restores the colour after the banner, so the page body prints in black", () => {
+    const pdf = latin1(
+      buildPdf(pages, { banner: { title: "PAY STUB", subtitle: "Nov 1 – 15", logo: null } }),
+    )
+    const beforeBody = pdf.slice(0, pdf.indexOf("(Body one) Tj"))
+    // Every colour the banner sets is popped (Q) before the body is drawn.
+    expect(beforeBody.lastIndexOf("\nQ")).toBeGreaterThan(beforeBody.lastIndexOf(" rg "))
+  })
+
   it("keeps the cross-reference offsets right around the binary image", () => {
     const jpeg = new Uint8Array(Array.from({ length: 300 }, (_, i) => i % 256))
     const pdf = latin1(

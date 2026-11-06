@@ -110,7 +110,11 @@ function roundedRect(x: number, y: number, w: number, h: number, r: number): str
   ].join("\n")
 }
 
-/** The banner's drawing operators; `/Im1` is the logo when there is one. */
+/**
+ * The banner's drawing operators; `/Im1` is the logo when there is one. Wrapped in q … Q: the fill
+ * colour is graphics state that ET does not reset, so the white subtitle would otherwise paint
+ * the whole page body white.
+ */
 function bannerOf(banner: PdfBanner): string {
   const width = PAGE.width - BAR.x * 2
   const right = BAR.x + width - 20
@@ -133,7 +137,7 @@ function bannerOf(banner: PdfBanner): string {
       WHITE,
     ),
   )
-  return ops.join("\n")
+  return ["q", ...ops, "Q"].join("\n")
 }
 
 /** Bytes as a one-char-per-byte string, so binary streams survive the byte conversion below. */
