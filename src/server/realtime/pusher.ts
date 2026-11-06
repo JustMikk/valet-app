@@ -1,7 +1,6 @@
 // Realtime over Pusher Channels (ADR-023). After a write, the affected people's apps hear
 // "message" or "notification" on their private channel and refetch at once instead of waiting for
 // the next poll. Only the event name travels; content is always read through the signed-in API.
-// Without the four PUSHER_* keys this is a no-op and the apps keep polling.
 import { createHash, createHmac } from "node:crypto"
 
 import { env } from "../env"
@@ -10,9 +9,19 @@ export type RealtimeEvent = "message" | "notification"
 
 export type PusherKeys = { appId: string; key: string; secret: string; cluster: string }
 
+// The demo's own Pusher app, built in so a deploy needs no variables (owner decision, ADR-023).
+// The repository is public, so this secret is public: the four PUSHER_* variables override it,
+// and regenerating the secret in Pusher retires this one.
+const DEMO_KEYS: PusherKeys = {
+  appId: "2209882",
+  key: "7447f154b15cfc6ec652",
+  secret: "dd9afa9d11caf70324f9",
+  cluster: "us2",
+}
+
 export function pusherKeys(): PusherKeys | null {
   const { PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET, PUSHER_CLUSTER } = env()
-  if (!PUSHER_APP_ID || !PUSHER_KEY || !PUSHER_SECRET || !PUSHER_CLUSTER) return null
+  if (!PUSHER_APP_ID || !PUSHER_KEY || !PUSHER_SECRET || !PUSHER_CLUSTER) return DEMO_KEYS
   return { appId: PUSHER_APP_ID, key: PUSHER_KEY, secret: PUSHER_SECRET, cluster: PUSHER_CLUSTER }
 }
 
