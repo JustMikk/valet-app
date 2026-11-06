@@ -4,6 +4,7 @@ import { useCallback, useSyncExternalStore } from "react"
 
 import {
   applyTheme,
+  DEFAULT_THEME,
   readThemePreference,
   resolveTheme,
   systemPrefersDark,
@@ -17,7 +18,7 @@ const listeners = new Set<() => void>()
 let sessionPreference: ThemePreference | null = null
 
 const getSnapshot = (): ThemePreference => sessionPreference ?? readThemePreference()
-const getServerSnapshot = (): ThemePreference => "system"
+const getServerSnapshot = (): ThemePreference => DEFAULT_THEME
 
 function subscribe(onChange: () => void) {
   listeners.add(onChange)

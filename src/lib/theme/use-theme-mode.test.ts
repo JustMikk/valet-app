@@ -24,7 +24,7 @@ afterEach(() => {
 describe("useThemeMode", () => {
   it("follows a preference changed in another tab, including <html>", () => {
     const { result } = renderHook(() => useThemeMode())
-    expect(result.current.preference).toBe("system")
+    expect(result.current.preference).toBe("light")
     act(() => {
       localStorage.setItem(THEME_STORAGE_KEY, "dark")
       window.dispatchEvent(

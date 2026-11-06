@@ -36,8 +36,8 @@ describe("resolveTheme", () => {
 })
 
 describe("theme preference storage", () => {
-  it("defaults to 'system' when nothing is stored", () => {
-    expect(readThemePreference()).toBe("system")
+  it("defaults to 'light' when nothing is stored", () => {
+    expect(readThemePreference()).toBe("light")
   })
 
   it("round-trips a stored preference", () => {
@@ -48,14 +48,14 @@ describe("theme preference storage", () => {
 
   it("ignores an invalid stored value", () => {
     localStorage.setItem(THEME_STORAGE_KEY, "purple")
-    expect(readThemePreference()).toBe("system")
+    expect(readThemePreference()).toBe("light")
   })
 
-  it("falls back to 'system' when storage throws (private mode, blocked site data)", () => {
+  it("falls back to 'light' when storage throws (private mode, blocked site data)", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("SecurityError")
     })
-    expect(readThemePreference()).toBe("system")
+    expect(readThemePreference()).toBe("light")
     vi.restoreAllMocks()
   })
 })
@@ -70,8 +70,15 @@ describe("themeScript (runs before paint)", () => {
     expect(document.documentElement.dataset.theme).toBe("dark")
   })
 
-  it("follows the system when no preference is stored", () => {
+  it("opens in light when no preference is stored, even on a dark system", () => {
     mockSystemDark(true)
+    run()
+    expect(document.documentElement.dataset.theme).toBe("light")
+  })
+
+  it("follows a dark system only when 'system' was chosen", () => {
+    mockSystemDark(true)
+    localStorage.setItem(THEME_STORAGE_KEY, "system")
     run()
     expect(document.documentElement.dataset.theme).toBe("dark")
   })

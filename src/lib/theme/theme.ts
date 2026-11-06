@@ -14,13 +14,16 @@ export function resolveTheme(preference: ThemePreference, systemDark: boolean): 
   return preference
 }
 
-/** Stored preference, or "system" when storage is empty, invalid or unavailable. */
+/** The app opens in light until someone picks dark (or "system") themselves (owner decision). */
+export const DEFAULT_THEME: ThemePreference = "light"
+
+/** Stored preference, or the default when storage is empty, invalid or unavailable. */
 export function readThemePreference(): ThemePreference {
   try {
     const stored = ThemePreference.safeParse(localStorage.getItem(THEME_STORAGE_KEY))
-    return stored.success ? stored.data : "system"
+    return stored.success ? stored.data : DEFAULT_THEME
   } catch {
-    return "system"
+    return DEFAULT_THEME
   }
 }
 
@@ -48,6 +51,6 @@ export function applyTheme(mode: ThemeMode): void {
  */
 export const themeScript = `(function(){var p=null;try{p=localStorage.getItem(${JSON.stringify(
   THEME_STORAGE_KEY,
-)})}catch(e){p=null}var d=p==="dark"||(p!=="light"&&window.matchMedia(${JSON.stringify(
+)})}catch(e){p=null}var d=p==="dark"||(p==="system"&&window.matchMedia(${JSON.stringify(
   DARK_QUERY,
 )}).matches);document.documentElement.dataset.theme=d?"dark":"light"})()`
