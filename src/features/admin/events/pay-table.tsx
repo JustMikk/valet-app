@@ -17,8 +17,10 @@ const STATUS: Record<PayState, StatusSpec> = {
   on_shift: ADMIN_STATUS.onShift,
 }
 
+// Every column sized to its content so the whole row, Send included, fits a desktop page
+// (57 rem); narrower screens scroll the table sideways.
 const GRID =
-  "grid grid-cols-[2.5rem_minmax(10rem,2fr)_4.5rem_6.5rem_6rem_4.5rem_4.5rem_6rem_8.5rem_5.5rem] items-center gap-3 px-4"
+  "grid grid-cols-[2rem_minmax(8rem,1fr)_4rem_6rem_5.5rem_3.5rem_3.5rem_5.5rem_7.5rem_5rem] items-center gap-2 px-4"
 
 const HEADINGS = ["No.", "Valet", "Hours", "Rate", "Total", "Paid", "Tips", "Balance", "Status", ""]
 
@@ -65,7 +67,7 @@ function Switch({
 export function PayTable({ rows, rateCents, busy, onPaid, onTips, onSend }: PayTableProps) {
   return (
     <div className={cn(TABLE_CARD, "overflow-x-auto")}>
-      <div className="min-w-248">
+      <div className="min-w-228">
         <div
           aria-hidden="true"
           className={cn(

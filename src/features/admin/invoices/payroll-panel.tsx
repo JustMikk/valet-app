@@ -104,7 +104,7 @@ function PayrollByEvent() {
 }
 
 const EVENT_GRID =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 tablet:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] tablet:gap-4"
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 tablet:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(8.5rem,auto)] tablet:gap-4"
 
 function EventList({ list, onOpen }: { list: PayrollEventRow[]; onOpen: (id: string) => void }) {
   return (
@@ -133,7 +133,7 @@ function EventList({ list, onOpen }: { list: PayrollEventRow[]; onOpen: (id: str
           onClick={() => onOpen(event.eventId)}
           className={cn(
             EVENT_GRID,
-            "box-content min-h-17 w-full border-0 border-b border-line bg-transparent px-4 py-1.5 text-left text-fg transition-colors duration-160 last:border-b-0 hover:bg-surface/60 tablet:px-5",
+            "min-h-18 w-full border-0 border-b border-line bg-transparent px-4 py-2 text-left text-fg transition-colors duration-160 last:border-b-0 hover:bg-surface/60 tablet:px-5",
           )}
         >
           <span className="flex min-w-0 flex-col gap-0.5">
