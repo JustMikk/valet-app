@@ -1,11 +1,19 @@
 import type { InvoiceDetail } from "@/lib/data"
 import { formatHoursDecimal, formatMoney, formatRate } from "@/lib/money/format"
 import { formatTaxRate } from "@/lib/pay/pay-sheet"
-import { buildPdf, PAGE, type PdfPage, type TextItem } from "@/lib/pdf/text-pdf"
+import {
+  buildPdf,
+  CONTENT_TOP,
+  PAGE,
+  type PdfImage,
+  type PdfPage,
+  type TextItem,
+} from "@/lib/pdf/text-pdf"
 
 const LEFT = PAGE.margin
 const RIGHT = PAGE.width - PAGE.margin
-const TOP = PAGE.height - PAGE.margin
+// Below the Regency banner, which carries "INVOICE" and the number on every page.
+const TOP = CONTENT_TOP
 const BOTTOM = PAGE.margin + 40
 const ROW = 34
 // Column right edges: staff, hours, rate; the amount ends at the page margin.
@@ -28,10 +36,8 @@ export function invoicePages(invoice: InvoiceDetail, company: string): PdfPage[]
     y -= ROW / 2
   }
 
-  put({ text: company, x: LEFT, size: 20, bold: true })
-  put({ text: "INVOICE", x: RIGHT, size: 12, bold: true, align: "right" })
+  put({ text: company, x: LEFT, size: 16, bold: true })
   y -= 22
-  put({ text: invoiceNumber(invoice.number), x: RIGHT, size: 10, align: "right" })
   put({ text: invoice.venue, x: LEFT, size: 14, bold: true })
   y -= 18
   put({ text: invoice.period, x: LEFT, size: 10 })
@@ -75,6 +81,8 @@ export function invoicePages(invoice: InvoiceDetail, company: string): PdfPage[]
   return pages
 }
 
-/** The PDF file for an invoice. */
-export const invoicePdf = (invoice: InvoiceDetail, company: string) =>
-  buildPdf(invoicePages(invoice, company))
+/** The PDF file for an invoice, with the Regency banner ("INVOICE" and its number) on every page. */
+export const invoicePdf = (invoice: InvoiceDetail, company: string, logo: PdfImage | null) =>
+  buildPdf(invoicePages(invoice, company), {
+    banner: { title: "INVOICE", subtitle: invoiceNumber(invoice.number), logo },
+  })

@@ -1,8 +1,27 @@
-// A small PDF writer for text documents (invoices): Letter pages, the built-in Helvetica and
-// Helvetica-Bold fonts, left- or right-aligned text at absolute positions. No dependency, no
-// images; enough to produce a real, openable, printable PDF in the browser.
+// A small PDF writer for text documents (invoices, pay sheets): Letter pages, the built-in
+// Helvetica and Helvetica-Bold fonts, left- or right-aligned text at absolute positions, and the
+// Regency banner on top of every page. No dependency; enough for a real, printable PDF.
 
 export const PAGE = { width: 612, height: 792, margin: 54 } as const
+
+/** A JPEG to draw (the banner logo), with its size in pixels. */
+export type PdfImage = { jpeg: Uint8Array; width: number; height: number }
+
+/** The Regency bar on every page: logo left, a gold label and a white line right. */
+export type PdfBanner = { title: string; subtitle: string; logo: PdfImage | null }
+
+/** The banner's dark ground (the brand's hero ink), 0–255 RGB: logos are rendered onto it. */
+export const BANNER_FILL = [14, 14, 16] as const
+// The brand gold and white, 0–1 for PDF colour operators.
+const GOLD = "0.788 0.635 0.29"
+const WHITE = "1 1 1"
+
+const BAR = { x: 36, top: PAGE.height - 36, height: 64, radius: 14 } as const
+const BAR_BOTTOM = BAR.top - BAR.height
+const LOGO_HEIGHT = 40
+
+/** Where page content starts below the banner. */
+export const CONTENT_TOP = BAR_BOTTOM - 34
 
 export type TextItem = {
   text: string
@@ -65,34 +84,99 @@ function literal(text: string): string {
 
 const num = (value: number) => String(Math.round(value * 100) / 100)
 
-function contentOf(page: PdfPage): string {
-  return page
-    .map((item) => {
-      const size = item.size ?? 11
-      const x = item.align === "right" ? item.x - textWidth(item.text, size) : item.x
-      return `BT /${item.bold ? "F2" : "F1"} ${num(size)} Tf ${num(x)} ${num(item.y)} Td (${literal(item.text)}) Tj ET`
-    })
-    .join("\n")
+function textOp(item: TextItem, color?: string): string {
+  const size = item.size ?? 11
+  const x = item.align === "right" ? item.x - textWidth(item.text, size) : item.x
+  const fill = color ? `${color} rg ` : ""
+  return `BT ${fill}/${item.bold ? "F2" : "F1"} ${num(size)} Tf ${num(x)} ${num(item.y)} Td (${literal(item.text)}) Tj ET`
 }
 
-/** The PDF file for these pages, as bytes. */
-export function buildPdf(pages: PdfPage[]): Uint8Array<ArrayBuffer> {
+const contentOf = (page: PdfPage) => page.map((item) => textOp(item)).join("\n")
+
+/** A filled rectangle with rounded corners (Bézier quarter circles). */
+function roundedRect(x: number, y: number, w: number, h: number, r: number): string {
+  const k = r * 0.5523
+  return [
+    `${num(x + r)} ${num(y)} m`,
+    `${num(x + w - r)} ${num(y)} l`,
+    `${num(x + w - r + k)} ${num(y)} ${num(x + w)} ${num(y + r - k)} ${num(x + w)} ${num(y + r)} c`,
+    `${num(x + w)} ${num(y + h - r)} l`,
+    `${num(x + w)} ${num(y + h - r + k)} ${num(x + w - r + k)} ${num(y + h)} ${num(x + w - r)} ${num(y + h)} c`,
+    `${num(x + r)} ${num(y + h)} l`,
+    `${num(x + r - k)} ${num(y + h)} ${num(x)} ${num(y + h - r + k)} ${num(x)} ${num(y + h - r)} c`,
+    `${num(x)} ${num(y + r)} l`,
+    `${num(x)} ${num(y + r - k)} ${num(x + r - k)} ${num(y)} ${num(x + r)} ${num(y)} c`,
+    "h f",
+  ].join("\n")
+}
+
+/** The banner's drawing operators; `/Im1` is the logo when there is one. */
+function bannerOf(banner: PdfBanner): string {
+  const width = PAGE.width - BAR.x * 2
+  const right = BAR.x + width - 20
+  const fill = BANNER_FILL.map((c) => num(c / 255)).join(" ")
+  const ops = [`q ${fill} rg`, roundedRect(BAR.x, BAR_BOTTOM, width, BAR.height, BAR.radius), "Q"]
+  const logoY = BAR_BOTTOM + (BAR.height - LOGO_HEIGHT) / 2
+  if (banner.logo) {
+    const logoWidth = (LOGO_HEIGHT * banner.logo.width) / banner.logo.height
+    ops.push(`q ${num(logoWidth)} 0 0 ${LOGO_HEIGHT} ${BAR.x + 20} ${num(logoY)} cm /Im1 Do Q`)
+  } else {
+    ops.push(textOp({ text: "REGENCY", x: BAR.x + 20, y: logoY + 13, size: 18, bold: true }, GOLD))
+  }
+  ops.push(
+    textOp(
+      { text: banner.title, x: right, y: BAR.top - 26, size: 9, bold: true, align: "right" },
+      GOLD,
+    ),
+    textOp(
+      { text: banner.subtitle, x: right, y: BAR.top - 45, size: 13, bold: true, align: "right" },
+      WHITE,
+    ),
+  )
+  return ops.join("\n")
+}
+
+/** Bytes as a one-char-per-byte string, so binary streams survive the byte conversion below. */
+const binary = (bytes: Uint8Array) => {
+  let out = ""
+  for (let i = 0; i < bytes.length; i += 8192) {
+    out += String.fromCharCode(...bytes.subarray(i, i + 8192))
+  }
+  return out
+}
+
+/** The PDF file for these pages, as bytes; with `banner`, every page opens with it. */
+export function buildPdf(
+  pages: PdfPage[],
+  options: { banner?: PdfBanner } = {},
+): Uint8Array<ArrayBuffer> {
   const objects: string[] = []
   const add = (body: string) => objects.push(body) // object number = index + 1
+  const logo = options.banner?.logo ?? null
 
-  // 1 catalog, 2 page tree, 3 regular font, 4 bold font, then (page, content) pairs.
-  const pageIds = pages.map((_, i) => 5 + i * 2)
+  // 1 catalog, 2 page tree, 3 regular font, 4 bold font, [5 logo], then (page, content) pairs.
+  const first = logo ? 6 : 5
+  const pageIds = pages.map((_, i) => first + i * 2)
   add("<< /Type /Catalog /Pages 2 0 R >>")
   add(
     `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pages.length} >>`,
   )
   add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>")
   add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>")
+  if (logo) {
+    add(
+      `<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} ` +
+        `/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logo.jpeg.length} >>\n` +
+        `stream\n${binary(logo.jpeg)}\nendstream`,
+    )
+  }
+  const images = logo ? " /XObject << /Im1 5 0 R >>" : ""
   pages.forEach((page, i) => {
-    const stream = contentOf(page)
+    const body = contentOf(page)
+    const stream = options.banner ? `${bannerOf(options.banner)}\n${body}` : body
     add(
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE.width} ${PAGE.height}] ` +
-        `/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${6 + i * 2} 0 R >>`,
+        `/Resources << /Font << /F1 3 0 R /F2 4 0 R >>${images} >> /Contents ${first + 1 + i * 2} 0 R >>`,
     )
     add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`)
   })

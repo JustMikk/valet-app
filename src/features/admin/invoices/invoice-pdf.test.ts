@@ -42,7 +42,6 @@ describe("invoicePages", () => {
     expect(all).toEqual(
       expect.arrayContaining([
         "Regency Valet Parking",
-        "INV-2026-0142",
         "Harbor Pavilion",
         "Billed to billing@harborpavilion.com",
         "Wedding · Sat Oct 24",
@@ -104,8 +103,21 @@ describe("invoicePages", () => {
 
 describe("invoicePdf", () => {
   it("produces a PDF", () => {
-    const bytes = invoicePdf(invoice, "Regency")
+    const bytes = invoicePdf(invoice, "Regency", null)
     expect(String.fromCharCode(...bytes.slice(0, 8))).toBe("%PDF-1.4")
+  })
+
+  it("opens every page with the Regency banner: INVOICE and the number", () => {
+    const many = {
+      ...invoice,
+      lines: Array.from({ length: 40 }, (_, i) => ({ ...invoice.lines[0], what: `Event ${i}` })),
+    }
+    const pdf = Array.from(invoicePdf(many, "Regency", null), (b) => String.fromCharCode(b)).join(
+      "",
+    )
+    const pages = invoicePages(many, "Regency").length
+    expect(pdf.split("(INVOICE) Tj").length - 1).toBe(pages)
+    expect(pdf.split("(INV-2026-0142) Tj").length - 1).toBe(pages)
   })
 
   it("names the file by the invoice number alone", () => {

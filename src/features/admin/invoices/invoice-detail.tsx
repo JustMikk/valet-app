@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import type { InvoiceDetail as InvoiceData } from "@/lib/data"
 import { formatHoursDecimal, formatRate } from "@/lib/money/format"
 import { formatTaxRate } from "@/lib/pay/pay-sheet"
+import { loadBannerLogo } from "@/lib/pdf/banner-logo"
 import { cn } from "@/lib/utils"
 
 import { AdminHead, AdminPage } from "../common/admin-page"
@@ -48,9 +49,10 @@ export function InvoiceDetail() {
   )
 }
 
-/** Saves the invoice as a PDF file named after its number. */
-function downloadPdf(invoice: InvoiceData, company: string) {
-  const blob = new Blob([invoicePdf(invoice, company)], { type: "application/pdf" })
+/** Saves the invoice as a PDF file named after its number, Regency banner on every page. */
+async function downloadPdf(invoice: InvoiceData, company: string) {
+  const logo = await loadBannerLogo()
+  const blob = new Blob([invoicePdf(invoice, company, logo)], { type: "application/pdf" })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.href = url
@@ -158,7 +160,7 @@ function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
           <Button
             variant="secondary"
             className="flex-1 gap-1.5 text-16"
-            onClick={() => downloadPdf(invoice, company)}
+            onClick={() => void downloadPdf(invoice, company)}
           >
             <Icon name="download" size={22} />
             PDF

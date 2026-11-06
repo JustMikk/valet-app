@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/dialog"
 import { formatMoney } from "@/lib/money/format"
 import type { PayrollRow } from "@/lib/data/admin/ops-schemas"
+import { loadBannerLogo } from "@/lib/pdf/banner-logo"
 import { cn } from "@/lib/utils"
 
-import { useSendPayrollTo } from "../data/queries"
-import { printPayStub } from "./print-pay-stub"
+import { useSendPayrollTo, useSession } from "../data/queries"
+import { saveFile } from "../events/pay-export"
+import { payStubFileName, payStubPdf } from "./pay-stub-pdf"
 
 export function PayStubModal({
   row,
@@ -29,6 +31,7 @@ export function PayStubModal({
   onClose: () => void
 }) {
   const send = useSendPayrollTo()
+  const company = useSession().data?.admin.company ?? "Pay stub"
   const [sent, setSent] = useState(false)
 
   return (
@@ -96,7 +99,15 @@ export function PayStubModal({
         <div className="flex items-center justify-between gap-3 pt-1">
           <button
             type="button"
-            onClick={() => printPayStub(row, period)}
+            onClick={() =>
+              void loadBannerLogo().then((logo) =>
+                saveFile(
+                  payStubPdf(row, period, company, logo),
+                  payStubFileName(row, period),
+                  "application/pdf",
+                ),
+              )
+            }
             className="flex items-center gap-2 rounded-pill border border-line bg-surface px-3.5 py-2 text-14 font-semibold"
           >
             <Icon name="download" size={16} className="text-fg-2" />

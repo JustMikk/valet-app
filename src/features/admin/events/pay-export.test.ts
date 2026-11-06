@@ -110,7 +110,6 @@ describe("payPages", () => {
     expect(texts).toEqual(
       expect.arrayContaining([
         "Regency Valet Parking",
-        "VALET PAY SHEET",
         "Post Oak Hotel · Gala",
         "Tue Sep 15 · 8:00 AM – 3:30 PM · $21.00 / h",
         "2001 Post Oak Blvd, Houston",
@@ -139,7 +138,15 @@ describe("payPages", () => {
 
 describe("payPdf", () => {
   it("produces a PDF", () => {
-    const bytes = payPdf(sheet, "Regency")
+    const bytes = payPdf(sheet, "Regency", null)
     expect(String.fromCharCode(...bytes.slice(0, 8))).toBe("%PDF-1.4")
+  })
+
+  it("opens every page with the Regency banner: VALET PAY SHEET and the date", () => {
+    const many = { ...sheet, rows: Array.from({ length: 40 }, () => sheet.rows[1]) }
+    const pdf = Array.from(payPdf(many, "Regency", null), (b) => String.fromCharCode(b)).join("")
+    const pages = payPages(many, "Regency").length
+    expect(pdf.split("(VALET PAY SHEET) Tj").length - 1).toBe(pages)
+    expect(pdf.split("(Tue Sep 15) Tj").length - 1).toBe(pages)
   })
 })

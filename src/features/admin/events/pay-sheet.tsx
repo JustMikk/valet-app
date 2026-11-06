@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Icon } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import type { EventPay } from "@/lib/data"
+import { loadBannerLogo } from "@/lib/pdf/banner-logo"
 import { cn } from "@/lib/utils"
 
 import { ErrorNotice, QueryState } from "../data/query-state"
@@ -117,7 +118,13 @@ function PayBody({ sheet }: { sheet: EventPay }) {
             variant="secondary"
             className={ACTION}
             onClick={() =>
-              saveFile(payPdf(sheet, company), payFileName(sheet, "pdf"), "application/pdf")
+              void loadBannerLogo().then((logo) =>
+                saveFile(
+                  payPdf(sheet, company, logo),
+                  payFileName(sheet, "pdf"),
+                  "application/pdf",
+                ),
+              )
             }
           >
             <Icon name="download" size={20} />

@@ -47,6 +47,50 @@ describe("buildPdf", () => {
   })
 })
 
+describe("buildPdf with the Regency banner", () => {
+  const pages = [[{ text: "Body one", x: 54, y: 600 }], [{ text: "Body two", x: 54, y: 600 }]]
+  const count = (text: string, part: string) => text.split(part).length - 1
+
+  it("draws the dark banner with its label and number on every page", () => {
+    const pdf = latin1(
+      buildPdf(pages, { banner: { title: "INVOICE", subtitle: "INV-2026-0151", logo: null } }),
+    )
+    expect(count(pdf, "(INVOICE) Tj")).toBe(2)
+    expect(count(pdf, "(INV-2026-0151) Tj")).toBe(2)
+    // The rounded bar is a closed, filled path; the wordmark stands in for a missing logo.
+    expect(count(pdf, "h f")).toBe(2)
+    expect(count(pdf, "(REGENCY) Tj")).toBe(2)
+  })
+
+  it("embeds the logo once and places it on every page", () => {
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0xff, 0xd9])
+    const pdf = latin1(
+      buildPdf(pages, {
+        banner: { title: "PAY STUB", subtitle: "Nov 1 – 15", logo: { jpeg, width: 2, height: 1 } },
+      }),
+    )
+    expect(count(pdf, "/Subtype /Image")).toBe(1)
+    expect(pdf).toContain("/Filter /DCTDecode")
+    expect(pdf).toContain(latin1(jpeg))
+    expect(count(pdf, "/Im1 Do")).toBe(2)
+    expect(pdf).not.toContain("(REGENCY) Tj")
+  })
+
+  it("keeps the cross-reference offsets right around the binary image", () => {
+    const jpeg = new Uint8Array(Array.from({ length: 300 }, (_, i) => i % 256))
+    const pdf = latin1(
+      buildPdf(pages, {
+        banner: { title: "T", subtitle: "S", logo: { jpeg, width: 3, height: 1 } },
+      }),
+    )
+    const start = Number(/startxref\n(\d+)/.exec(pdf)?.[1])
+    const entries = [...pdf.slice(start).matchAll(/(\d{10}) 00000 n /g)].map((m) => Number(m[1]))
+    entries.forEach((offset, i) => {
+      expect(pdf.slice(offset, offset + `${i + 1} 0 obj`.length)).toBe(`${i + 1} 0 obj`)
+    })
+  })
+})
+
 describe("textWidth", () => {
   it("measures digits at 0.556 em", () => {
     expect(textWidth("100", 10)).toBeCloseTo(16.68, 2)

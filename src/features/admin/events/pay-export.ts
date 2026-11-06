@@ -3,7 +3,14 @@
 import type { EventPay, PayState } from "@/lib/data"
 import { formatHoursDecimal, formatMoney, formatRate } from "@/lib/money/format"
 import { formatTaxRate } from "@/lib/pay/pay-sheet"
-import { buildPdf, PAGE, type PdfPage, type TextItem } from "@/lib/pdf/text-pdf"
+import {
+  buildPdf,
+  CONTENT_TOP,
+  PAGE,
+  type PdfImage,
+  type PdfPage,
+  type TextItem,
+} from "@/lib/pdf/text-pdf"
 
 export const PAY_STATE_WORD: Record<PayState, string> = {
   paid: "Paid",
@@ -72,7 +79,8 @@ export function payFileName(sheet: EventPay, extension: "csv" | "pdf"): string {
 
 const LEFT = PAGE.margin
 const RIGHT = PAGE.width - PAGE.margin
-const TOP = PAGE.height - PAGE.margin
+// Below the Regency banner, which carries "VALET PAY SHEET" and the date on every page.
+const TOP = CONTENT_TOP
 const BOTTOM = PAGE.margin + 40
 const ROW = 24
 // Right edges of the middle columns; the balance ends at the page margin.
@@ -92,9 +100,8 @@ export function payPages(sheet: EventPay, company: string): PdfPage[] {
     y -= ROW
   }
 
-  put({ text: company, x: LEFT, size: 20, bold: true })
-  put({ text: "VALET PAY SHEET", x: RIGHT, size: 12, bold: true, align: "right" })
-  y -= 26
+  put({ text: company, x: LEFT, size: 16, bold: true })
+  y -= 22
   put({ text: `${sheet.venue} · ${sheet.name}`, x: LEFT, size: 14, bold: true })
   y -= 18
   put({
@@ -148,7 +155,11 @@ export function payPages(sheet: EventPay, company: string): PdfPage[] {
   return pages
 }
 
-export const payPdf = (sheet: EventPay, company: string) => buildPdf(payPages(sheet, company))
+/** The PDF file, with the Regency banner ("VALET PAY SHEET" and the date) on every page. */
+export const payPdf = (sheet: EventPay, company: string, logo: PdfImage | null) =>
+  buildPdf(payPages(sheet, company), {
+    banner: { title: "VALET PAY SHEET", subtitle: sheet.date, logo },
+  })
 
 /** Saves a file the browser generated (CSV text gets a BOM so Excel reads it as UTF-8). */
 export function saveFile(contents: string | Uint8Array<ArrayBuffer>, name: string, type: string) {
