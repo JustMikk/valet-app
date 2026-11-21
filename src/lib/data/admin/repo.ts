@@ -35,6 +35,7 @@ import type {
   EventPatch,
   EventTab,
   InsightRange,
+  InviteEntry,
   InviteResult,
   NewEventRequest,
   NewVenueRequest,
@@ -74,7 +75,8 @@ export interface AdminRepo {
   teamPerformance(days: InsightRange): Promise<TeamPerformanceRow[]>
   addStaffNote(id: string, body: string): Promise<StaffNote[]>
   deleteStaffNote(id: string, noteId: string): Promise<StaffNote[]>
-  invite(emails: string[]): Promise<InviteResult>
+  /** By email, or by phone with a name (ADR-025). */
+  invite(invites: InviteEntry[]): Promise<InviteResult>
   deactivate(id: string): Promise<void>
   /** Hard-delete a staff record, active or not. */
   deleteStaff(id: string): Promise<void>

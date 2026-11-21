@@ -1,3 +1,4 @@
+import type { Login } from "@/lib/contact/contact"
 import type { ProfilePatch, StaffProfile } from "@/lib/data/staff/schemas"
 
 import { rows, sql } from "../db/client"
@@ -76,9 +77,12 @@ export async function patchProfile(staffId: string, patch: ProfilePatch): Promis
   return getProfile(staffId)
 }
 
-export async function findActiveStaffId(email: string): Promise<string | null> {
+/** The active valet with this email or phone number (any formatting), if any. */
+export async function findActiveStaffId(login: Login): Promise<string | null> {
   const [row] = await rows<{ id: string }>(
-    sql()`select id from staff where lower(email) = lower(${email}) and active`,
+    login.kind === "email"
+      ? sql()`select id from staff where lower(email) = ${login.email} and email <> '' and active`
+      : sql()`select id from staff where phone_key = ${login.key} and active`,
   )
   return row?.id ?? null
 }

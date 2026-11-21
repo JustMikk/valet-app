@@ -4,6 +4,6 @@ import { adminSignIn } from "@/server/auth/sign-in"
 import { ok, readBody, route } from "@/server/http/handler"
 
 export const POST = route(async ({ req }) => {
-  const { email, password } = await readBody(req, AdminLoginRequest)
-  return ok(SessionDto, await adminSignIn(email, password))
+  const { login, password } = await readBody(req, AdminLoginRequest)
+  return ok(SessionDto, await adminSignIn(login, password))
 })

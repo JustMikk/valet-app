@@ -307,7 +307,7 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
 
   const [staffRows, lineRows] = await Promise.all([
     rows<PayrollDbRow>(
-      sql()`select s.id as staff_id, s.name, s.email,
+      sql()`select s.id as staff_id, s.name, coalesce(nullif(s.email, ''), s.phone) as email,
               count(distinct a.id)::text as shifts,
               coalesce(sum(
                 round(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
@@ -325,7 +325,7 @@ export async function getPayroll(adminId: string, now: Date): Promise<Payroll> {
               and a.clocked_in_at is not null and a.clocked_out_at is not null
               and (e.starts_at at time zone ${ctx.tz})::date
                   between ${period.start}::date and ${period.end}::date
-            group by s.id, s.name, s.email
+            group by s.id, s.name, s.email, s.phone
             order by s.name`,
     ),
     rows<PayrollLineDbRow>(

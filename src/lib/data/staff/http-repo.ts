@@ -21,13 +21,13 @@ import {
 const Ack = z.object({})
 
 export const httpStaffRepo: StaffRepo = {
-  async requestCode(email) {
-    await api("auth/request-code", Ack, { method: "POST", body: { email }, auth: false })
+  async requestCode(login) {
+    await api("auth/request-code", Ack, { method: "POST", body: { login }, auth: false })
   },
-  async verifyCode(email, code) {
+  async verifyCode(login, code) {
     const session = await api("auth/verify", SessionDto, {
       method: "POST",
-      body: { email, code },
+      body: { login, code },
       auth: false,
     })
     setSession(session)

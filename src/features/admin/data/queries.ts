@@ -11,6 +11,7 @@ import {
   type AvailabilityQuery,
   type EventPatch,
   type EventTab,
+  type InviteEntry,
   type NewEventRequest,
   type NewInvoiceRequest,
   type NewVenueRequest,
@@ -116,7 +117,7 @@ export const usePerson = (id: string | undefined) =>
 export function useInvite() {
   const refresh = useRefresh()
   return useMutation({
-    mutationFn: (emails: string[]) => adminRepo.invite(emails),
+    mutationFn: (invites: InviteEntry[]) => adminRepo.invite(invites),
     onSuccess: refresh,
   })
 }

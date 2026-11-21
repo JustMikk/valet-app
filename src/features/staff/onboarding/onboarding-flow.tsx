@@ -32,7 +32,7 @@ export function OnboardingFlow() {
 
   const [step, setStep] = useState<OnboardingStep>(initial)
   const [os, setOs] = useState<InstallOs>("ios")
-  const [email, setEmail] = useState<string>(STAFF_USER.email)
+  const [login, setLogin] = useState<string>(STAFF_USER.email)
 
   /** Saves what the worker chose on a permission step, then moves on. */
   const choose = (permissions: Partial<StaffProfile["permissions"]>, next: OnboardingStep) => {
@@ -68,9 +68,9 @@ export function OnboardingFlow() {
       {step === "invite" && <InviteStep onNext={afterInvite} />}
       {step === "desktop" && <DesktopStep onContinue={() => go("signin")} />}
       {step === "signin" && (
-        <SigninStep email={email} onEmail={setEmail} onNext={() => go("code")} />
+        <SigninStep login={login} onLogin={setLogin} onNext={() => go("code")} />
       )}
-      {step === "code" && <CodeStep email={email} onNext={() => go("profile")} />}
+      {step === "code" && <CodeStep login={login} onNext={() => go("profile")} />}
       {step === "profile" && <ProfileStep onNext={() => go("location")} />}
       {step === "location" && (
         <LocationStep

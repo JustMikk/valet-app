@@ -6,22 +6,22 @@ import { SessionDto } from "./staff/schemas"
 
 const live = () => process.env.NEXT_PUBLIC_DATA_SOURCE === "api"
 
-/** A staff member signs in with their email alone; it must be on the team. */
-export async function signInStaff(email: string): Promise<void> {
+/** A staff member signs in with their email or phone number alone; it must be on the team. */
+export async function signInStaff(login: string): Promise<void> {
   if (!live()) return
   setSession(
-    await api("auth/staff", SessionDto, { method: "POST", body: { email }, auth: false }),
+    await api("auth/staff", SessionDto, { method: "POST", body: { login }, auth: false }),
     "staff",
   )
 }
 
-/** A dispatcher signs in with email and password. */
-export async function signInAdmin(email: string, password: string): Promise<void> {
+/** An admin signs in with their email or phone number and a password. */
+export async function signInAdmin(login: string, password: string): Promise<void> {
   if (!live()) return
   setSession(
     await api("auth/admin", SessionDto, {
       method: "POST",
-      body: { email, password },
+      body: { login, password },
       auth: false,
     }),
     "admin",

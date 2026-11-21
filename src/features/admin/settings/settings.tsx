@@ -13,6 +13,7 @@ import { AdminHead, AdminPage, SectionTitle, SPLIT } from "../common/admin-page"
 import { ErrorNotice, QueryState } from "../data/query-state"
 import { useSettings, useUpdateSettings } from "../data/queries"
 import { BillingSettings } from "./billing-settings"
+import { SignInPhone } from "./sign-in-phone"
 import { BRAND_CREST } from "@/lib/brand"
 
 const ROW = "box-content flex min-h-16.5 w-full items-center gap-3 border-0 border-b border-line"
@@ -161,6 +162,14 @@ function SettingsBody({ settings }: { settings: SettingsData }) {
             billing={settings.billing}
             saving={update.isPending}
             onSave={(billing) => update.mutate({ billing })}
+          />
+        </section>
+        <section className="flex flex-col gap-3">
+          <SectionTitle>Your sign-in</SectionTitle>
+          <SignInPhone
+            phone={settings.myPhone}
+            saving={update.isPending}
+            onSave={(myPhone) => update.mutate({ myPhone })}
           />
         </section>
         <Button

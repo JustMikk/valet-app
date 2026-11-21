@@ -19,28 +19,28 @@ const ROLES = [
 ]
 
 const COPY: Record<Role, string> = {
-  staff: "Enter the email your admin invited you with.",
-  admin: "Enter your admin email and password.",
+  staff: "Enter the email or phone number your admin invited you with.",
+  admin: "Enter your admin email or phone number, and your password.",
 }
 
-/** Sign in: staff with their email alone, admins with email and password. */
+/** Sign in: staff with their email or phone alone, admins with email or phone and a password. */
 export function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()
   const [role, setRole] = useState<Role>(params.get("role") === "admin" ? "admin" : "staff")
-  const [email, setEmail] = useState("")
+  const [login, setLogin] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | undefined>()
   const [busy, setBusy] = useState(false)
 
-  const ready = email.trim() !== "" && (role === "staff" || password !== "")
+  const ready = login.trim() !== "" && (role === "staff" || password !== "")
 
   const submit = async () => {
     setBusy(true)
     setError(undefined)
     try {
-      if (role === "staff") await signInStaff(email.trim())
-      else await signInAdmin(email.trim(), password)
+      if (role === "staff") await signInStaff(login.trim())
+      else await signInAdmin(login.trim(), password)
       router.replace(landingPath(role, params.get("next")))
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't sign in. Try again.")
@@ -85,13 +85,15 @@ export function LoginForm() {
           }}
         >
           <TextField
-            label="Email"
-            type="email"
-            autoComplete="email"
+            label="Email or phone number"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
             autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            value={login}
+            onChange={(e) => setLogin(e.target.value)}
+            placeholder="you@example.com or (713) 555-0120"
           />
           {role === "admin" && (
             <TextField

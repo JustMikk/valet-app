@@ -1,5 +1,12 @@
 // The staff directory (product spec §7.4): who works here, their status, invites, deactivation.
-import type { InviteResult, Person, StaffList, StaffRow } from "@/lib/data/admin/schemas"
+import { formatPhone, phoneKey } from "@/lib/contact/contact"
+import type {
+  InviteEntry,
+  InviteResult,
+  Person,
+  StaffList,
+  StaffRow,
+} from "@/lib/data/admin/schemas"
 import { formatHoursMinutes } from "@/lib/money/format"
 import { ADMIN_STATUS } from "@/lib/status/admin"
 import type { StatusSpec } from "@/lib/status/presets"
@@ -66,7 +73,8 @@ function nextLabel(row: ListRow, now: Date): string {
 export async function listStaff(adminId: string, now: Date): Promise<StaffList> {
   const ctx = await adminCtx(adminId)
   const list = await rows<ListRow>(
-    sql()`select s.id, s.name, s.email, s.active, s.push_enabled, s.onboarded_at,
+    sql()`select s.id, s.name, coalesce(nullif(s.email, ''), s.phone) as email, s.active,
+            s.push_enabled, s.onboarded_at,
             exists (select 1 from assignments a
                     where a.staff_id = s.id and a.clocked_in_at is not null and a.clocked_out_at is null) as on_shift,
             nx.title as next_title, nx.starts_at as next_starts, nx.timezone as next_tz,
@@ -161,7 +169,7 @@ export async function getPerson(adminId: string, staffId: string, now: Date): Pr
     active: p.active,
     rows: [
       { k: "Phone", v: p.phone || "—" },
-      { k: "Email", v: p.email },
+      { k: "Email", v: p.email || "—" },
       {
         k: "App installed",
         v: p.installed ? `Yes${p.device_label ? ` · ${p.device_label}` : ""}` : "No",
@@ -192,28 +200,44 @@ export function nameFromEmail(email: string): string {
   return (words.length ? words : [local]).map(titleCase).join(" ")
 }
 
-export async function inviteStaff(adminId: string, emails: string[]): Promise<InviteResult> {
+/**
+ * Adds people to the team by email or by phone (ADR-025); they then sign in with what they were
+ * invited with. Anyone already on the team (same email, or same number in any formatting) is
+ * skipped and named in `skipped`.
+ */
+export async function inviteStaff(adminId: string, invites: InviteEntry[]): Promise<InviteResult> {
   const ctx = await adminCtx(adminId)
-  const unique = [...new Set(emails.map((email) => email.trim().toLowerCase()))]
   const invited: string[] = []
   const skipped: string[] = []
   // In demo mode, immediately mark the new staff as onboarded so they appear in the
   // available-staff picker and can be assigned to events without waiting for sign-up.
   const demo = demoEnabled()
-  for (const email of unique) {
+  for (const entry of invites) {
+    if ("email" in entry) {
+      const email = entry.email.trim().toLowerCase()
+      const [created] = await rows<{ id: string }>(
+        sql()`insert into staff (tenant_id, name, email, invited_at, onboarded_at, installed)
+              values (${ctx.tenantId}, ${nameFromEmail(email)}, ${email}, now(),
+                      case when ${demo} then now() end, false)
+              on conflict (lower(email)) where email <> '' do nothing
+              returning id`,
+      )
+      ;(created ? invited : skipped).push(email)
+      continue
+    }
+    const phone = formatPhone(entry.phone)
+    if (!phoneKey(entry.phone)) {
+      skipped.push(`${entry.phone} (not a phone number)`)
+      continue
+    }
     const [created] = await rows<{ id: string }>(
-      demo
-        ? sql()`insert into staff (tenant_id, name, email, invited_at, onboarded_at, installed)
-                values (${ctx.tenantId}, ${nameFromEmail(email)}, ${email}, now(), now(), false)
-                on conflict (lower(email)) do nothing
-                returning id`
-        : sql()`insert into staff (tenant_id, name, email, invited_at, installed)
-                values (${ctx.tenantId}, ${nameFromEmail(email)}, ${email}, now(), false)
-                on conflict (lower(email)) do nothing
-                returning id`,
+      sql()`insert into staff (tenant_id, name, email, phone, invited_at, onboarded_at, installed)
+            values (${ctx.tenantId}, ${entry.name.trim()}, '', ${phone}, now(),
+                    case when ${demo} then now() end, false)
+            on conflict (phone_key) where phone_key is not null do nothing
+            returning id`,
     )
-    if (created) invited.push(email)
-    else skipped.push(email)
+    ;(created ? invited : skipped).push(phone)
   }
   return { invited: invited.length, skipped }
 }

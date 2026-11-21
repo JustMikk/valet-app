@@ -41,6 +41,8 @@ export const SettingsDto = z.object({
   accent: str,
   rules: ClockRules,
   billing: BillingRules,
+  /** The signed-in admin's own phone, which they can sign in with ("" when none, ADR-025). */
+  myPhone: str,
 })
 export type Settings = z.infer<typeof SettingsDto>
 
@@ -48,6 +50,8 @@ export const SettingsPatch = z.object({
   accent: z.optional(z.string().check(z.regex(/^#[0-9a-fA-F]{6}$/))),
   rules: z.optional(z.partial(ClockRules)),
   billing: z.optional(z.partial(BillingRules)),
+  /** "" removes it. */
+  myPhone: z.optional(z.string().check(z.trim(), z.maxLength(30))),
 })
 export type SettingsPatch = z.infer<typeof SettingsPatch>
 
@@ -229,8 +233,18 @@ export const TeamPerformanceRowDto = z.object({
 })
 export type TeamPerformanceRow = z.infer<typeof TeamPerformanceRowDto>
 
+/** One person to invite: by email, or by phone with their name (a number carries no name). */
+export const InviteEntry = z.union([
+  z.object({ email: z.email() }),
+  z.object({
+    phone: z.string().check(z.trim(), z.minLength(7), z.maxLength(30)),
+    name: z.string().check(z.trim(), z.minLength(1), z.maxLength(80)),
+  }),
+])
+export type InviteEntry = z.infer<typeof InviteEntry>
+
 export const InviteRequest = z.object({
-  emails: z.array(z.email()).check(z.minLength(1), z.maxLength(50)),
+  invites: z.array(InviteEntry).check(z.minLength(1), z.maxLength(50)),
 })
 export const InviteResultDto = z.object({ invited: int, skipped: z.array(str) })
 export type InviteResult = z.infer<typeof InviteResultDto>

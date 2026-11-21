@@ -48,9 +48,10 @@ export function InviteStep({ onNext }: { onNext: () => void }) {
   )
 }
 
-type SigninStepProps = { email: string; onEmail: (email: string) => void; onNext: () => void }
+type SigninStepProps = { login: string; onLogin: (login: string) => void; onNext: () => void }
 
-export function SigninStep({ email, onEmail, onNext }: SigninStepProps) {
+/** Sign in with the email or phone number the admin invited them with (ADR-025). */
+export function SigninStep({ login, onLogin, onNext }: SigninStepProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -58,7 +59,7 @@ export function SigninStep({ email, onEmail, onNext }: SigninStepProps) {
     setBusy(true)
     setError(null)
     try {
-      await staffRepo.requestCode(email.trim())
+      await staffRepo.requestCode(login.trim())
       onNext()
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't send the code. Try again.")
@@ -70,35 +71,37 @@ export function SigninStep({ email, onEmail, onNext }: SigninStepProps) {
   return (
     <OnboardingScreen className="gap-6">
       <div className="flex flex-col gap-2.5">
-        <h1 className={STEP_TITLE}>Sign in with your email</h1>
+        <h1 className={STEP_TITLE}>Sign in with your email or phone</h1>
         <p className={STEP_BODY}>
-          We&apos;ll email you a 6-digit code. No password to remember, and it works on a new phone
-          too.
+          Use the email or phone number your admin invited you with. No password to remember, and it
+          works on a new phone too.
         </p>
       </div>
       <TextField
-        label="Email"
-        value={email}
-        onChange={(e) => onEmail(e.target.value)}
-        type="email"
-        autoComplete="email"
+        label="Email or phone number"
+        value={login}
+        onChange={(e) => onLogin(e.target.value)}
+        type="text"
+        autoComplete="username"
+        autoCapitalize="none"
+        spellCheck={false}
       />
       {error && <ErrorNotice message={error} />}
       <Button
         variant="accent"
         size="xl"
         className={CTA}
-        disabled={busy || !email.trim()}
+        disabled={busy || !login.trim()}
         onClick={send}
       >
-        Email me a code
+        Send me a code
       </Button>
     </OnboardingScreen>
   )
 }
 
-/** Six boxes that fill in one digit at a time when "Paste code from email" is tapped. */
-export function CodeStep({ email, onNext }: { email: string; onNext: () => void }) {
+/** Six boxes that fill in one digit at a time when "Paste code" is tapped. */
+export function CodeStep({ login, onNext }: { login: string; onNext: () => void }) {
   const [typed, setTyped] = useState(0)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -114,7 +117,7 @@ export function CodeStep({ email, onNext }: { email: string; onNext: () => void 
     setBusy(true)
     setError(null)
     try {
-      await staffRepo.verifyCode(email.trim(), ONBOARDING_INVITE.code)
+      await staffRepo.verifyCode(login.trim(), ONBOARDING_INVITE.code)
       onNext()
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't verify the code. Try again.")
@@ -138,7 +141,7 @@ export function CodeStep({ email, onNext }: { email: string; onNext: () => void 
     <OnboardingScreen className="gap-6">
       <div className="flex flex-col gap-2.5">
         <h1 className={STEP_TITLE}>Enter the code</h1>
-        <p className={STEP_BODY}>Sent to {email}. It expires in 10 minutes.</p>
+        <p className={STEP_BODY}>Sent to {login}. It expires in 10 minutes.</p>
       </div>
       <div className="grid grid-cols-6 gap-2" role="group" aria-label="Six digit code">
         {ONBOARDING_INVITE.code.split("").map((digit, k) => (
@@ -156,7 +159,7 @@ export function CodeStep({ email, onNext }: { email: string; onNext: () => void 
       </div>
       {error && <ErrorNotice message={error} />}
       <Button variant="accent" size="xl" className={CTA} disabled={busy} onClick={run}>
-        {typed >= 6 ? "Verify" : "Paste code from email"}
+        {typed >= 6 ? "Verify" : "Paste code"}
       </Button>
       <Button variant="ghost" size="compact" className="text-15 text-fg-2">
         Resend code

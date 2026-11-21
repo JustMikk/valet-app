@@ -1,15 +1,21 @@
-// Creates (or updates the password of) a dispatcher account:
-//   tsx --env-file=.env.local scripts/create-admin.ts <email> <password> ["Full Name"]
-// The account joins the first tenant. Dispatchers sign in with this email and password.
+// Creates (or updates the password and phone of) an admin account:
+//   tsx --env-file=.env.local scripts/create-admin.ts <email> <password> ["Full Name"] ["Phone"]
+// The account joins the first tenant. Admins sign in with this email or phone, and the password.
+import { formatPhone, phoneKey } from "../src/lib/contact/contact"
 import { hashPassword, MIN_PASSWORD_LENGTH } from "../src/server/auth/password"
 import { rows, sql } from "../src/server/db/client"
 
 async function main() {
-  const [email, password, name = "Dispatcher"] = process.argv.slice(2)
+  const [email, password, name = "Dispatcher", phoneArg = ""] = process.argv.slice(2)
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !password) {
-    console.error('Usage: pnpm admin:create <email> <password> ["Full Name"]')
+    console.error('Usage: pnpm admin:create <email> <password> ["Full Name"] ["Phone"]')
     process.exit(2)
   }
+  if (phoneArg && !phoneKey(phoneArg)) {
+    console.error("That phone number is too short or too long.")
+    process.exit(2)
+  }
+  const phone = phoneArg ? formatPhone(phoneArg) : ""
   if (password.length < MIN_PASSWORD_LENGTH) {
     console.error(`Use a password of at least ${MIN_PASSWORD_LENGTH} characters.`)
     process.exit(2)
@@ -26,12 +32,14 @@ async function main() {
     sql()`select id from admins where lower(email) = lower(${email})`,
   )
   if (existing) {
-    await sql()`update admins set password_hash = ${hash} where id = ${existing.id}`
-    console.log(`Updated the password for ${email}.`)
+    await sql()`update admins set password_hash = ${hash},
+                       phone = case when ${phone} = '' then phone else ${phone} end
+                where id = ${existing.id}`
+    console.log(`Updated the password${phone ? " and phone" : ""} for ${email}.`)
     return
   }
-  await sql()`insert into admins (tenant_id, name, email, role_label, password_hash)
-              values (${tenant.id}, ${name}, ${email}, 'Owner · Admin', ${hash})`
+  await sql()`insert into admins (tenant_id, name, email, role_label, password_hash, phone)
+              values (${tenant.id}, ${name}, ${email}, 'Owner · Admin', ${hash}, ${phone})`
   console.log(`Created dispatcher ${email}.`)
 }
 

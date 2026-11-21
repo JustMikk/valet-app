@@ -296,9 +296,11 @@ export type Notifications = z.infer<typeof NotificationsDto>
 
 // ---- Auth ------------------------------------------------------------------------------------
 
-export const RequestCodeRequest = z.object({ email: z.email() })
+/** `login` is an email or a phone number (ADR-025). */
+const LoginId = z.string().check(z.trim(), z.minLength(3), z.maxLength(254))
+export const RequestCodeRequest = z.object({ login: LoginId })
 export const VerifyCodeRequest = z.object({
-  email: z.email(),
+  login: LoginId,
   code: z.string().check(z.regex(/^\d{6}$/)),
 })
 export const SessionDto = z.object({ token: str, expiresAt: iso })

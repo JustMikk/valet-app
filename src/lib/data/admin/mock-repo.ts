@@ -1,6 +1,7 @@
 // In-memory AdminRepo over the design's fixtures: what the static (fixture-only) build runs on. It
 // mirrors the server's rules closely enough for the same screens: actions change state in memory
 // and reset on reload.
+import { formatPhone } from "@/lib/contact/contact"
 import { ApiError } from "@/lib/data/api-client"
 import { reliability } from "@/lib/insights/valet-stats"
 import { deriveBoard, first, type Pulse } from "@/lib/live/model"
@@ -49,6 +50,7 @@ const settings: Settings = {
   accent: "#C9A24A",
   rules: { windowMin: 15, radiusM: 150, accuracyM: 75, selfie: true, earlyOut: true },
   billing: { payRateCents: 2100, salesTaxBp: 625 },
+  myPhone: "",
 }
 
 /** Each event's pay sheet: the design's crew, 6:00 – 11:00 PM, one still in review. */
@@ -240,6 +242,7 @@ export const mockAdminRepo: AdminRepo = {
     if (patch.accent) settings.accent = patch.accent
     Object.assign(settings.rules, patch.rules)
     Object.assign(settings.billing, patch.billing)
+    if (patch.myPhone !== undefined) settings.myPhone = patch.myPhone && formatPhone(patch.myPhone)
     return structuredClone(settings)
   },
 
@@ -296,21 +299,22 @@ export const mockAdminRepo: AdminRepo = {
       rows: PERSON.rows.map((r) => ({ ...r })),
       shifts: PERSON.shifts.map((s) => ({ ...s })),
     }),
-  invite: async (emails) => {
-    for (const email of emails) {
-      const name = email.split("@")[0].replace(/[._]/g, " ")
+  invite: async (invites) => {
+    for (const entry of invites) {
+      const contact = "email" in entry ? entry.email : formatPhone(entry.phone)
+      const name = "email" in entry ? entry.email.split("@")[0].replace(/[._]/g, " ") : entry.name
       staffRows.push({
-        id: email,
+        id: contact,
         initials: name.slice(0, 2).toUpperCase(),
         name,
-        email,
+        email: contact,
         status: ADMIN_STATUS.invited,
         bucket: "invited",
         next: "Not joined yet",
         hours: "—",
       })
     }
-    return { invited: emails.length, skipped: [] }
+    return { invited: invites.length, skipped: [] }
   },
   personInsights: async (_id, days) => {
     const scale = days / 90

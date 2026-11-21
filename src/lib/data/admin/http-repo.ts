@@ -76,7 +76,7 @@ export const httpAdminRepo: AdminRepo = {
   addStaffNote: (id, body) => api(`admin/staff/${id}/notes`, z.array(StaffNoteDto), post({ body })),
   deleteStaffNote: (id, noteId) =>
     api(`admin/staff/${id}/notes/${noteId}`, z.array(StaffNoteDto), { ...call, method: "DELETE" }),
-  invite: (emails) => api("admin/staff/invite", InviteResultDto, post({ emails })),
+  invite: (invites) => api("admin/staff/invite", InviteResultDto, post({ invites })),
   deactivate: async (id) => {
     await api(`admin/staff/${id}/deactivate`, Ack, post())
   },

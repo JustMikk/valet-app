@@ -414,3 +414,15 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - **Performance** shows attendance, commitments (claimed vs assigned, drops, removals), clock-in quality (outside the fence, flagged, corrected), pay (earned at each event's rate, paid, pending, shifts with tips), month by month for six months, and the venues worked most.
 - **Notes** (`staff_notes`, migration 014) are private to admins, with author and time; any admin can delete one.
 - The demo reset now also empties `staff_notes` and `pulse_snapshots`, which TRUNCATE requires (the reset failed since migration 012).
+
+## ADR-025 — Sign in and invite with an email or a phone number
+
+**Date:** 2026-11-21 · **Status:** accepted (owner; answers the staff part of open question H3)
+
+**Decision.**
+
+- **One field, "Email or phone number",** on the sign-in page and in onboarding, for valets and admins. Text with an "@" is an email; anything else is read as a phone number. Valets still need nothing else (no password, no code: the owner chose this over SMS codes for now). Admins still give their password.
+- **Phone numbers are matched by their digits,** so "(713) 555-0120", "713-555-0120" and "+1 713 555 0120" are the same person; a 10-digit number is taken as +1. `src/lib/contact/contact.ts` and the generated `phone_key` columns on `staff` and `admins` (migration 015) compute the same key, and each key is unique.
+- **Invites by phone:** the invite sheet has "By email" and "By phone"; by phone takes a name with the number, because a number carries no name. A valet invited by phone has no email (the email index now ignores blanks); lists and payroll show their phone where an email would be.
+- **Admins add their own sign-in phone** in Settings → Your sign-in (or `pnpm admin:create … "Full Name" "Phone"`).
+- **Risk, accepted by the owner:** without a code, anyone who knows a valet's email or number can sign in as them. An SMS or email code can be added later behind the same field without changing what valets see except the code step.

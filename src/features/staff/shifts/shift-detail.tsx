@@ -45,6 +45,17 @@ function DetailBody({ shift: D }: { shift: ShiftDetailData }) {
           <span className="text-16 text-fg-2">{D.when}</span>
           <Countdown startsAt={D.startsAt} endsAt={D.endsAt} className="mt-1 text-16" />
         </div>
+        {/* Right under the time, so a valet who can't make it finds it without scrolling. */}
+        {D.canDrop && (
+          <ActionButton
+            variant="ghost"
+            icon="event_busy"
+            className="text-bad shadow-[inset_0_0_0_1.5px_var(--line)]"
+            onClick={() => router.push(`/staff/shifts/drop?id=${D.id}`)}
+          >
+            Drop shift
+          </ActionButton>
+        )}
         {D.clockNotice && (
           <div className="flex items-center gap-2.5 rounded-r18 bg-surface px-4 py-3.5 text-15 leading-x135 font-medium">
             <Icon name="lock_clock" size={22} className="text-fg-2" />
@@ -98,15 +109,6 @@ function DetailBody({ shift: D }: { shift: ShiftDetailData }) {
         >
           Message admin
         </ActionButton>
-        {D.canDrop && (
-          <ActionButton
-            variant="ghost"
-            className="text-bad shadow-[inset_0_0_0_1.5px_var(--line)]"
-            onClick={() => router.push(`/staff/shifts/drop?id=${D.id}`)}
-          >
-            Can&apos;t make it
-          </ActionButton>
-        )}
       </div>
     </div>
   )

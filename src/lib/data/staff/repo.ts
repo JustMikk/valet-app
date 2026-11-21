@@ -23,8 +23,9 @@ import type {
 } from "./schemas"
 
 export interface StaffRepo {
-  requestCode(email: string): Promise<void>
-  verifyCode(email: string, code: string): Promise<Session>
+  /** `login` is the valet's email or phone number. */
+  requestCode(login: string): Promise<void>
+  verifyCode(login: string, code: string): Promise<Session>
 
   me(): Promise<StaffProfile>
   updateMe(patch: ProfilePatch): Promise<StaffProfile>
