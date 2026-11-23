@@ -5,6 +5,7 @@ import type { Settings, SettingsPatch } from "@/lib/data/admin/schemas"
 
 import { rows, sql } from "../db/client"
 import { badRequest, conflict } from "../http/handler"
+import { smsConfig } from "../sms/config"
 import { adminCtx } from "./common"
 
 type Row = {
@@ -41,7 +42,17 @@ export async function getSettings(adminId: string): Promise<Settings> {
     },
     billing: { payRateCents: row.pay_rate_cents, salesTaxBp: row.sales_tax_bp },
     myPhone: row.my_phone,
+    texts: textsLabel(),
   }
+}
+
+/** Read-only: whether texts go out, and from which sender (ADR-026). */
+function textsLabel(): string {
+  const cfg = smsConfig()
+  if (!cfg) return "Off: not set up"
+  return cfg.sender.kind === "number"
+    ? `On · from ${formatPhone(cfg.sender.from)}`
+    : "On · from your Twilio Messaging Service"
 }
 
 /** The admin's own sign-in phone: "" clears it; a number already used by an admin is refused. */

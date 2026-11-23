@@ -51,6 +51,7 @@ const settings: Settings = {
   rules: { windowMin: 15, radiusM: 150, accuracyM: 75, selfie: true, earlyOut: true },
   billing: { payRateCents: 2100, salesTaxBp: 625 },
   myPhone: "",
+  texts: "Off: not set up",
 }
 
 /** Each event's pay sheet: the design's crew, 6:00 – 11:00 PM, one still in review. */

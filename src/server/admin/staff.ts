@@ -23,6 +23,8 @@ import { rows, sql } from "../db/client"
 import { notFound } from "../http/handler"
 import { demoEnabled } from "../env"
 import { textInvite, type InviteTextResult } from "../sms"
+import { smsConfig } from "../sms/config"
+import { textReach } from "../sms/policy"
 import { adminCtx, firstName, initialsOf } from "./common"
 
 type ListRow = {
@@ -130,6 +132,7 @@ type PersonRow = {
   push_enabled: boolean
   created_at: Date
   week_minutes: number
+  sms_last: string | null
 }
 
 export async function getPerson(adminId: string, staffId: string, now: Date): Promise<Person> {
@@ -137,6 +140,9 @@ export async function getPerson(adminId: string, staffId: string, now: Date): Pr
   const [p] = await rows<PersonRow>(
     sql()`select s.id, s.name, s.email, s.phone, s.active, s.installed, s.device_label,
             s.push_enabled, s.created_at,
+            (select m.status from sms_messages m
+              where m.staff_id = s.id and m.status <> 'skipped'
+              order by m.created_at desc limit 1) as sms_last,
             coalesce((select sum(extract(epoch from (a.clocked_out_at - a.clocked_in_at)) / 60)
                       from assignments a
                       where a.staff_id = s.id and a.clocked_out_at is not null
@@ -176,6 +182,7 @@ export async function getPerson(adminId: string, staffId: string, now: Date): Pr
         v: p.installed ? `Yes${p.device_label ? ` · ${p.device_label}` : ""}` : "No",
       },
       { k: "Notifications", v: p.push_enabled ? "On" : "Off" },
+      { k: "Text messages", v: textReach(smsConfig() !== null, p.phone, p.sms_last) },
       { k: "Hours this pay period", v: formatHoursMinutes(p.week_minutes) },
     ],
     shifts: recent.map((shift) => ({

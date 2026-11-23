@@ -155,6 +155,11 @@ function SettingsBody({ settings }: { settings: SettingsData }) {
               </li>
             ))}
           </ul>
+          {/* Read-only: set by the Twilio variables on the server (ADR-026). */}
+          <div className={ROW}>
+            <RuleText label="Text messages" note="Invites, shift reminders and shift changes" />
+            <span className="text-15 font-semibold text-fg-2">{settings.texts}</span>
+          </div>
         </section>
         <section className="flex flex-col gap-3">
           <SectionTitle>Pay &amp; billing</SectionTitle>

@@ -112,7 +112,7 @@ SC = the spec's success criteria.
 
 ## Phase C: visibility, copy, docs
 
-- [ ] **T12: What admins see** (SC 5, 6)
+- [x] **T12: What admins see** (SC 5, 6)
   - Acceptance:
     - The person page gains a "Text messages" fact: On, Opted out (replied STOP), Not a US number, No phone number, or Not set up. It is derived from the phone and the latest `sms_messages` row.
     - Settings gains a read-only "Text messages: On · from …" or "Off: not set up" row.

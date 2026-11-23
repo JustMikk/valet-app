@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest"
 
-import { dedupeKey, inviteLink, shiftLink, smsTarget } from "./policy"
+import { dedupeKey, inviteLink, shiftLink, smsTarget, textReach } from "./policy"
 
 describe("smsTarget", () => {
   it("texts a US number, keeping only its last 4 digits for the log", () => {
@@ -58,5 +58,16 @@ describe("links", () => {
     expect(shiftLink("https://valet.example.com", "staff/shifts/detail?id=abc")).toBe(
       "https://valet.example.com/staff/shifts/detail?id=abc",
     )
+  })
+})
+
+describe("textReach", () => {
+  it("says whether texts reach a valet, in the admin's words", () => {
+    expect(textReach(true, "(713) 555-0144", null)).toBe("On")
+    expect(textReach(true, "(713) 555-0144", "delivered")).toBe("On")
+    expect(textReach(true, "(713) 555-0144", "opted_out")).toBe("Opted out (replied STOP)")
+    expect(textReach(true, "+251 91 123 4567", null)).toBe("Not a US number")
+    expect(textReach(true, "", null)).toBe("No phone number")
+    expect(textReach(false, "(713) 555-0144", null)).toBe("Not set up")
   })
 })

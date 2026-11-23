@@ -296,6 +296,7 @@ export const PERSON = {
     { k: "Email", v: "jordan.ellis@gmail.com" },
     { k: "App installed", v: "Yes · iPhone" },
     { k: "Notifications", v: "On" },
+    { k: "Text messages", v: "On" },
     { k: "Hours this pay period", v: "17h 30m" },
   ],
   shifts: [

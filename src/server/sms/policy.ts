@@ -38,3 +38,21 @@ export function inviteLink(appUrl: string, to: E164): string {
 export function shiftLink(appUrl: string, path: string): string {
   return `${appUrl}/${path.replace(/^\/+/, "")}`
 }
+
+/**
+ * The "Text messages" fact on a valet's page. `lastStatus` is their latest text's status: one that
+ * Twilio refused because they replied STOP means texts no longer reach them, until they reply START.
+ */
+export function textReach(
+  configured: boolean,
+  phone: string | null | undefined,
+  lastStatus: string | null,
+): string {
+  const target = smsTarget(configured, phone)
+  if (!target.ok) {
+    return { not_configured: "Not set up", no_phone: "No phone number", not_us: "Not a US number" }[
+      target.reason
+    ]
+  }
+  return lastStatus === "opted_out" ? "Opted out (replied STOP)" : "On"
+}

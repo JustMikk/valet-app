@@ -43,6 +43,8 @@ export const SettingsDto = z.object({
   billing: BillingRules,
   /** The signed-in admin's own phone, which they can sign in with ("" when none, ADR-025). */
   myPhone: str,
+  /** Read-only: whether texts go out and from which sender (ADR-026). */
+  texts: str,
 })
 export type Settings = z.infer<typeof SettingsDto>
 
