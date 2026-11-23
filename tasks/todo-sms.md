@@ -48,7 +48,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm test -- src/server/sms`; `pnpm db:migrate` on the dev database
   - Files: `db/migrations/016_sms_and_reminders.sql`, `src/server/sms/policy.ts`, `policy.test.ts`, `src/server/sms/index.ts`
 
-- [ ] **T6: Status callback** (SC 6)
+- [x] **T6: Status callback** (SC 6)
   - Acceptance:
     - `POST /api/sms/status` returns 403 without a valid `X-Twilio-Signature` computed over `APP_URL` plus the path.
     - A valid callback updates `status` and `error_code` by `MessageSid`.
