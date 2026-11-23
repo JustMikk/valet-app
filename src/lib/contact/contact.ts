@@ -33,3 +33,17 @@ export function formatPhone(text: string): string {
   }
   return `+${key}`
 }
+
+/** A phone number in E.164 ("+17135550120"), the only form an SMS provider accepts. */
+export type E164 = string & { readonly __brand: "E164" }
+
+/** Any typed phone number as E.164, keyed exactly as `phoneKey`; null when it is not one. */
+export function e164(text: string): E164 | null {
+  const key = phoneKey(text)
+  return key ? (`+${key}` as E164) : null
+}
+
+/** US/Canada (+1 and ten digits): the only numbers the registered SMS sender texts. */
+export function isUsNumber(number: E164 | null): number is E164 {
+  return number !== null && /^\+1\d{10}$/.test(number)
+}

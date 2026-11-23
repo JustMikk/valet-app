@@ -5,7 +5,7 @@ SC = the spec's success criteria.
 
 ## Phase A: SMS core
 
-- [ ] **T1: `e164()` from a phone key**
+- [x] **T1: `e164()` from a phone key**
   - Acceptance: `e164("(713) 555-0120")` returns `"+17135550120"`; non-US or invalid input returns null; `isUsNumber()` covers this. Branded `E164` type.
   - Verify: `pnpm test -- src/lib/contact`
   - Files: `src/lib/contact/contact.ts`, `contact.test.ts`
