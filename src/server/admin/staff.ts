@@ -22,7 +22,8 @@ import {
 import { rows, sql } from "../db/client"
 import { notFound } from "../http/handler"
 import { demoEnabled } from "../env"
-import { adminCtx, initialsOf } from "./common"
+import { textInvite, type InviteTextResult } from "../sms"
+import { adminCtx, firstName, initialsOf } from "./common"
 
 type ListRow = {
   id: string
@@ -209,6 +210,9 @@ export async function inviteStaff(adminId: string, invites: InviteEntry[]): Prom
   const ctx = await adminCtx(adminId)
   const invited: string[] = []
   const skipped: string[] = []
+  let texted = 0
+  const notTexted: InviteResult["notTexted"] = []
+  let tenant: string | undefined
   // In demo mode, immediately mark the new staff as onboarded so they appear in the
   // available-staff picker and can be assigned to events without waiting for sign-up.
   const demo = demoEnabled()
@@ -238,8 +242,32 @@ export async function inviteStaff(adminId: string, invites: InviteEntry[]): Prom
             returning id`,
     )
     ;(created ? invited : skipped).push(phone)
+    if (!created) continue
+    // A phone invite also goes out by text with the sign-in link (ADR-026).
+    const result = await textInvite({
+      tenantId: ctx.tenantId,
+      staffId: created.id,
+      adminFirst: firstName(ctx.name),
+      tenantName: (tenant ??= await tenantName(ctx.tenantId)),
+      phone,
+    })
+    if (result.texted) texted += 1
+    else notTexted.push({ who: phone, reason: NOT_TEXTED[result.reason] })
   }
-  return { invited: invited.length, skipped }
+  return { invited: invited.length, skipped, texted, notTexted }
+}
+
+/** Why a phone invite was not texted, as the invite sheet says it. */
+const NOT_TEXTED: Record<Exclude<InviteTextResult, { texted: true }>["reason"], string> = {
+  not_configured: "texts aren't set up yet",
+  not_us: "not a US number",
+  no_phone: "not a phone number",
+  failed: "the text didn't go through",
+}
+
+async function tenantName(tenantId: string): Promise<string> {
+  const [row] = await rows<{ name: string }>(sql()`select name from tenants where id = ${tenantId}`)
+  return row?.name ?? ""
 }
 
 /**

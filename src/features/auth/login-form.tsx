@@ -28,7 +28,8 @@ export function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()
   const [role, setRole] = useState<Role>(params.get("role") === "admin" ? "admin" : "staff")
-  const [login, setLogin] = useState("")
+  // An invite text links here with the number filled in (ADR-026).
+  const [login, setLogin] = useState(params.get("login") ?? "")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | undefined>()
   const [busy, setBusy] = useState(false)

@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Icon, PillTabs, ResponsiveSheet, TextField } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 import { formatPhone, phoneKey } from "@/lib/contact/contact"
-import type { InviteEntry } from "@/lib/data"
+import type { InviteEntry, InviteResult } from "@/lib/data"
 
 import { ErrorNotice } from "../data/query-state"
 import { useInvite } from "../data/queries"
@@ -37,6 +37,7 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [skipped, setSkipped] = useState<string[]>([])
+  const [texts, setTexts] = useState<Pick<InviteResult, "texted" | "notTexted"> | null>(null)
   const invite = useInvite()
 
   const push = (entry: InviteEntry) =>
@@ -61,7 +62,10 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
       onSuccess: (result) => {
         setEntries([])
         setSkipped(result.skipped)
-        if (result.skipped.length === 0) onOpenChange(false)
+        // Stay open to say what was texted (ADR-026) or skipped; otherwise there is nothing to add.
+        const texted = result.texted > 0 || result.notTexted.length > 0
+        setTexts(texted ? { texted: result.texted, notTexted: result.notTexted } : null)
+        if (result.skipped.length === 0 && !texted) onOpenChange(false)
       },
     })
 
@@ -69,7 +73,10 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
     <ResponsiveSheet
       open={open}
       onOpenChange={(next) => {
-        if (!next) setSkipped([])
+        if (!next) {
+          setSkipped([])
+          setTexts(null)
+        }
         onOpenChange(next)
       }}
       title="Invite staff"
@@ -158,6 +165,22 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
         <p role="status" className="m-0 text-14 leading-x140 font-medium text-fg-2">
           {skipped.join(", ")} {skipped.length === 1 ? "is" : "are"} already on your team.
         </p>
+      )}
+      {texts && (
+        <div role="status" className="flex flex-col gap-1 text-14 leading-x140 font-medium">
+          {texts.texted > 0 && (
+            <span className="flex items-center gap-1.5 text-ok">
+              <Icon name="check_circle" filled size={18} />
+              Texted {texts.texted} invite{texts.texted > 1 ? "s" : ""}.
+            </span>
+          )}
+          {texts.notTexted.map((miss) => (
+            <span key={miss.who} className="flex items-center gap-1.5 text-warn">
+              <Icon name="error" filled size={18} />
+              Not texted to {miss.who}: {miss.reason}.
+            </span>
+          ))}
+        </div>
       )}
       {invite.error && <ErrorNotice message={invite.error.message} />}
       <Button

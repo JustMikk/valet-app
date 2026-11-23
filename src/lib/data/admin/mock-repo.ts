@@ -314,7 +314,7 @@ export const mockAdminRepo: AdminRepo = {
         hours: "—",
       })
     }
-    return { invited: invites.length, skipped: [] }
+    return { invited: invites.length, skipped: [], texted: 0, notTexted: [] }
   },
   personInsights: async (_id, days) => {
     const scale = days / 90

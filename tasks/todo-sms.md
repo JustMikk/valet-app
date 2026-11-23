@@ -61,7 +61,7 @@ SC = the spec's success criteria.
 
 ## Phase B: senders
 
-- [ ] **T7: Invite texts** (SC 1)
+- [x] **T7: Invite texts** (SC 1)
   - Acceptance:
     - `inviteStaff` texts each newly created phone invite: an `invite` text with `APP_URL/login?role=staff&login=+1…`.
     - `InviteResultDto` gains `texted: int` and `notTexted: {who, reason}[]`.

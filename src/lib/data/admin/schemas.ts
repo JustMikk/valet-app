@@ -246,7 +246,14 @@ export type InviteEntry = z.infer<typeof InviteEntry>
 export const InviteRequest = z.object({
   invites: z.array(InviteEntry).check(z.minLength(1), z.maxLength(50)),
 })
-export const InviteResultDto = z.object({ invited: int, skipped: z.array(str) })
+export const InviteResultDto = z.object({
+  invited: int,
+  skipped: z.array(str),
+  /** Phone invites that went out by text (ADR-026). */
+  texted: int,
+  /** Phone invites that could not be texted, and why, in words. */
+  notTexted: z.array(z.object({ who: str, reason: str })),
+})
 export type InviteResult = z.infer<typeof InviteResultDto>
 
 // ---- Events ----------------------------------------------------------------------------------
