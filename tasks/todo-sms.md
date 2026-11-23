@@ -18,7 +18,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm test -- src/server/sms/config`; `pnpm check:fast`
   - Files: `src/server/env.ts`, `src/server/sms/config.ts`, `config.test.ts`
 
-- [ ] **T3: Twilio REST client**
+- [x] **T3: Twilio REST client**
   - Acceptance:
     - `sendSms(to, body)` posts form-encoded `To`, `Body` and `StatusCallback`, with `MessagingServiceSid` or `From`, Basic auth with the API key, and a 3 s timeout.
     - Responses are Zod-parsed into `{ok, sid, status}` or `{ok: false, code, message}`. 21610 is mapped to `optedOut`.
@@ -142,6 +142,6 @@ SC = the spec's success criteria.
       - the cron-job.org job (URL, header, every 5 minutes);
       - a test checklist mapped to the SC.
   - Verify: `pnpm check:task`; `pnpm secrets`
-  - Files: `docs/DECISIONS.md`, `docs/OPEN_QUESTIONS.md`, `docs/guides/twilio-setup.md`, `.env.example`
+  - Files: `docs/DECISIONS.md`, `docs/OPEN_QUESTIONS.md`, `docs/guides/twilio-setup.md`
 
 **Checkpoint C (done):** `pnpm check:task` · SC 1–9 walked through · end-to-end texts with the owner after the guide.
