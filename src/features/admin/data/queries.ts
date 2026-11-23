@@ -158,6 +158,11 @@ export function useUpdateEvent() {
   })
 }
 
+export function usePublishEvent() {
+  const refresh = useRefresh()
+  return useMutation({ mutationFn: (id: string) => adminRepo.publishEvent(id), onSuccess: refresh })
+}
+
 export function useCancelEvent() {
   const refresh = useRefresh()
   return useMutation({ mutationFn: (id: string) => adminRepo.cancelEvent(id), onSuccess: refresh })

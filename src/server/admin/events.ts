@@ -30,6 +30,7 @@ import {
 import { rows, sql } from "../db/client"
 import { isUniqueViolation } from "../db/errors"
 import { badRequest, conflict, notFound } from "../http/handler"
+import type { StaffNotice } from "../notify"
 import { textStaff, type StaffText } from "../sms"
 import { adminCtx, initialsOf, notifyStaff, type AdminCtx } from "./common"
 import { classifySlot, loadSlots } from "./slots"
@@ -240,6 +241,7 @@ export async function getEvent(adminId: string, eventId: string, now: Date): Pro
     openSlots,
     confirmedCount: slots.filter(({ slot }) => slot.staffId).length,
     cancelled: event.status === "cancelled",
+    draft: event.status === "draft",
     editable:
       event.status !== "cancelled"
         ? {
@@ -411,24 +413,9 @@ export async function assign(
       )
       if (!done) break
       names.push(done.name)
-      notices.push({
-        staffId,
-        icon: "event_available",
-        tone: "info" as const,
-        title: "You were assigned",
-        body: `${event.title}, ${formatDate(event.starts_at, event.tz)}`,
-        href: "/staff/shifts",
-      })
-      texts.push({
-        staffId,
-        path: `/staff/shifts/detail?id=${done.assignment_id}`,
-        copy: {
-          kind: "assigned",
-          title: event.title,
-          date: formatDate(event.starts_at, event.tz),
-          range: formatRange(event.starts_at, event.ends_at, event.tz),
-        },
-      })
+      const told = assignedNotice(staffId, done.assignment_id, event)
+      notices.push(told.notice)
+      texts.push(told.text)
     } catch (error) {
       // Already on this event: skip them rather than fail the whole batch.
       if (!isUniqueViolation(error)) throw error
@@ -438,6 +425,65 @@ export async function assign(
   if (event.status !== "draft") await Promise.all([notifyStaff(notices), textStaff(texts)])
   if (names.length === 0) throw conflict("no_open_spot", "There is no open spot left to fill.")
   return { assigned: names.length, names }
+}
+
+type ShiftWhen = { title: string; starts_at: Date; ends_at: Date; tz: string }
+
+/** "You were assigned": the in-app notice and the text, for an assignment or a publish. */
+function assignedNotice(staffId: string, assignmentId: string, event: ShiftWhen) {
+  const date = formatDate(event.starts_at, event.tz)
+  const notice: StaffNotice = {
+    staffId,
+    icon: "event_available",
+    tone: "info",
+    title: "You were assigned",
+    body: `${event.title}, ${date}`,
+    href: "/staff/shifts",
+  }
+  const text: StaffText = {
+    staffId,
+    path: `/staff/shifts/detail?id=${assignmentId}`,
+    copy: {
+      kind: "assigned",
+      title: event.title,
+      date,
+      range: formatRange(event.starts_at, event.ends_at, event.tz),
+    },
+  }
+  return { notice, text }
+}
+
+/**
+ * Publishes a draft: it becomes visible, everyone already assigned is told (in the app, by push
+ * and by text) and its open spots are posted to staff. Reminders follow from the published state.
+ */
+export async function publishEvent(adminId: string, eventId: string, now: Date): Promise<void> {
+  const ctx = await adminCtx(adminId)
+  const [event] = await rows<{ status: string; ends_at: Date }>(
+    sql()`select status, ends_at from events where id = ${eventId} and tenant_id = ${ctx.tenantId}`,
+  )
+  if (!event) throw notFound("Event not found.")
+  if (event.status !== "draft") throw conflict("not_draft", "That event is not a draft.")
+  if (event.ends_at <= now) throw badRequest("This event has already ended.", "ended")
+
+  const [published] = await rows<ShiftWhen>(
+    sql()`update events e set status = 'published' from venues v
+          where e.id = ${eventId} and e.status = 'draft' and v.id = e.venue_id
+          returning e.title, e.starts_at, e.ends_at, v.timezone as tz`,
+  )
+  if (!published) throw conflict("not_draft", "That event is not a draft.")
+
+  const crew = await rows<{ id: string; staff_id: string }>(
+    sql()`select id, staff_id from assignments where event_id = ${eventId} and staff_id is not null`,
+  )
+  const told = crew.map((row) => assignedNotice(row.staff_id, row.id, published))
+  await Promise.all([
+    notifyStaff(told.map((t) => t.notice)),
+    textStaff(told.map((t) => t.text)),
+    broadcastOpen(adminId, eventId).catch(() => {
+      // Nothing open (everyone is assigned): there is nobody to tell.
+    }),
+  ])
 }
 
 export async function addSlot(adminId: string, eventId: string): Promise<AddSlotResult> {

@@ -87,6 +87,7 @@ export interface AdminRepo {
   /** Edits what the crew is told; the crew is notified when it changes. */
   updateEvent(id: string, patch: EventPatch): Promise<EventDetail>
   cancelEvent(id: string): Promise<void>
+  publishEvent(id: string): Promise<void>
   availableStaff(eventId: string): Promise<AvailableStaff>
   /** Who is free for a venue and time, before the event exists. */
   availableForWindow(query: AvailabilityQuery): Promise<AvailableStaff>

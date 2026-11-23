@@ -89,7 +89,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm test -- src/server/reminders` covering windows, DST, late assignment, cancelled events, `notify_remind` off, and two concurrent sweeps (one send); `pnpm build:server`
   - Files: `src/server/reminders.ts`, `reminders.test.ts`, `src/app/api/cron/reminders/route.api.ts`, `src/server/admin/live.ts`, `src/server/staff/clock.ts`
 
-- [ ] **T10: Publish a draft, server and API** (SC 9)
+- [x] **T10: Publish a draft, server and API** (SC 9)
   - Acceptance:
     - `publishEvent(adminId, id, now)` sets `draft` to `published` conditionally. It returns 409 if not a draft and 400 if the draft has already ended.
     - It notifies and texts everyone assigned (`assigned`), and calls `broadcastOpen` when there are open spots.

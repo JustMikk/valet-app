@@ -92,6 +92,9 @@ export const httpAdminRepo: AdminRepo = {
   cancelEvent: async (id) => {
     await api(`admin/events/${id}/cancel`, Ack, post())
   },
+  publishEvent: async (id) => {
+    await api(`admin/events/${id}/publish`, Ack, post())
+  },
   availableForWindow: (query) =>
     api(`admin/events/available?${new URLSearchParams(query)}`, AvailableStaffDto, call),
   availableStaff: (id) => api(`admin/events/${id}/available`, AvailableStaffDto, call),

@@ -204,6 +204,7 @@ function eventDetail(): EventDetail {
     openSlots: [...EVENT_DETAIL.openSlots],
     confirmedCount: 6,
     cancelled: false,
+    draft: false,
     editable: {
       date: "2026-11-07",
       start: "18:00",
@@ -439,6 +440,7 @@ export const mockAdminRepo: AdminRepo = {
     return eventDetail()
   },
   cancelEvent: async () => {},
+  publishEvent: async () => {},
   availableForWindow: () =>
     wait(
       AVAILABLE_STAFF.map((p) => ({

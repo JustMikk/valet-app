@@ -311,6 +311,8 @@ export const EventDetailDto = z.object({
   openSlots: z.array(str),
   confirmedCount: int,
   cancelled: bool,
+  /** A draft can be published: its crew is told then (ADR-026). */
+  draft: bool,
   /** Editable fields returned so the edit sheet can pre-fill them. */
   editable: z.optional(
     z.object({
