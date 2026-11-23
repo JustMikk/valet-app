@@ -80,7 +80,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm check:fast`; server smoke for each action
   - Files: `src/server/admin/events.ts`, `src/server/admin/live.ts`
 
-- [ ] **T9: Shift reminders** (SC 2, 4)
+- [x] **T9: Shift reminders** (SC 2, 4)
   - Acceptance:
     - A pure `dueReminders(assignments, now)` in `lib/time` (or `src/server/reminders`) picks the 24 h and 1 h offsets, applies the late cut-offs (24 h until start − 1 h; 1 h until start), and skips the 24 h reminder for late assignments.
     - The sweep selects published, uncancelled, assigned shifts with `notify_remind` on. It claims each reminder via `shift_reminders` (`insert … on conflict do nothing returning`). Only the claimed rows get `notifyStaff` (a "Shift reminder" notice) and `textStaff('reminder')`.

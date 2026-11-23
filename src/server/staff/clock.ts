@@ -16,6 +16,7 @@ import { isUniqueViolation } from "../db/errors"
 import { env } from "../env"
 import { badRequest, conflict, notFound } from "../http/handler"
 import { tellDispatch } from "../notify/dispatch"
+import { remindersBackstop } from "../reminders"
 import { sweepExpiredSelfies } from "../retention"
 import { loadShifts, type ShiftRow } from "./shift-data"
 
@@ -167,6 +168,7 @@ export async function punchIn(
   now: Date,
 ): Promise<ClockPunch> {
   await sweepExpiredSelfies(now)
+  remindersBackstop(now)
   const replayed = await replay(staffId, req)
   if (replayed) return replayed
 

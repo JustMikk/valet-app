@@ -20,6 +20,7 @@ import {
 import { rows, sql } from "../db/client"
 import { conflict, notFound } from "../http/handler"
 import { notifyAdmins } from "../notify"
+import { remindersBackstop } from "../reminders"
 import { sweepExpiredSelfies } from "../retention"
 import { textStaff } from "../sms"
 import { adminCtx, firstName, messageStaff, notifyStaff, type AdminCtx } from "./common"
@@ -103,6 +104,7 @@ export function buildLive(slots: SlotRow[], now: Date): Live {
 export async function getLive(adminId: string, now: Date): Promise<Live> {
   const ctx = await adminCtx(adminId)
   await sweepExpiredSelfies(now)
+  remindersBackstop(now)
   const live = buildLive(await loadSlots(ctx.tenantId), now)
   await announceLate(ctx.tenantId, live)
   await recordPulse(ctx.tenantId, pulseOf(live), now)
