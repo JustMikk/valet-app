@@ -27,7 +27,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm test -- src/server/sms/twilio` (stubbed fetch; Twilio's documented signature example)
   - Files: `src/server/sms/twilio.ts`, `twilio.test.ts`
 
-- [ ] **T4: Message copy**
+- [x] **T4: Message copy**
   - Acceptance:
     - Builders produce the seven approved texts (invite, reminder 24 h and 1 h, cancelled, assigned, rescheduled, removed).
     - The invite carries the STOP line.
