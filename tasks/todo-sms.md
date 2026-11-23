@@ -10,7 +10,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm test -- src/lib/contact`
   - Files: `src/lib/contact/contact.ts`, `contact.test.ts`
 
-- [ ] **T2: SMS configuration**
+- [x] **T2: SMS configuration**
   - Acceptance:
     - `env.ts` gains `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET`, `TWILIO_AUTH_TOKEN`, `TWILIO_MESSAGING_SERVICE_SID`, `TWILIO_FROM_NUMBER` and `APP_URL`, all optional.
     - `smsConfig()` returns null unless the account, key pair, token, `APP_URL` and one sender are set.
@@ -132,7 +132,7 @@ SC = the spec's success criteria.
     - ADR-026 records the decisions: scope change, six kinds, alongside push, consent, reminders, external cron, publish.
     - OPEN_QUESTIONS rows are added.
     - The ADR-018 Vercel variable list gains `TWILIO_*`, `APP_URL` and `CRON_SECRET` (now required for reminders).
-    - `.env.example` gains the variables, **only after the owner confirms what to do about its deletion**.
+    - No `.env.example`: the owner removed it (2026-11-23) and keeps a local `.env`. The variables are documented in the setup guide and ADR-018 instead.
     - `docs/guides/twilio-setup.md` walks through, step by step:
       - which values to collect from the Twilio Console;
       - checking A2P 10DLC or toll-free status;

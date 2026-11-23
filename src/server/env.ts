@@ -23,6 +23,17 @@ const Env = z.object({
   PUSHER_KEY: z.optional(z.string()),
   PUSHER_SECRET: z.optional(z.string()),
   PUSHER_CLUSTER: z.optional(z.string()),
+  /** Twilio SMS (ADR-026). Without the account, key pair, Auth Token, APP_URL and a sender, SMS is off. */
+  TWILIO_ACCOUNT_SID: z.optional(z.string()),
+  TWILIO_API_KEY_SID: z.optional(z.string()),
+  TWILIO_API_KEY_SECRET: z.optional(z.string()),
+  /** Signs Twilio's status callbacks (X-Twilio-Signature). */
+  TWILIO_AUTH_TOKEN: z.optional(z.string()),
+  /** The sender: a Messaging Service (preferred) or a single number. */
+  TWILIO_MESSAGING_SERVICE_SID: z.optional(z.string()),
+  TWILIO_FROM_NUMBER: z.optional(z.string()),
+  /** Public origin of this deployment, e.g. https://valet.example.com: links in texts, callback URL. */
+  APP_URL: z.optional(z.string()),
 })
 export type Env = z.infer<typeof Env>
 
