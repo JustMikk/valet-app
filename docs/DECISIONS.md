@@ -317,7 +317,7 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 
 **Decision.** `next.config.ts` treats `VERCEL` as the server target (the API runs, `NEXT_PUBLIC_DATA_SOURCE=api`) and builds into the default `.next` folder Vercel reads. `VALET_TARGET=static` still forces the export. Local `pnpm build` and CI remain the static export.
 
-**Needed on Vercel (Project → Settings → Environment Variables):** `DATABASE_URL`, `SESSION_SECRET` (32+ random bytes), `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`; optional `CRON_SECRET`. Leave `DEMO_MODE` unset. The database needs `pnpm db:setup` once (migrations, seed) and `pnpm admin:create` for the first dispatcher.
+**Needed on Vercel (Project → Settings → Environment Variables):** `DATABASE_URL`, `SESSION_SECRET` (32+ random bytes), `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET` (shift reminders, ADR-026); for texts `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET`, `TWILIO_AUTH_TOKEN`, `TWILIO_MESSAGING_SERVICE_SID` or `TWILIO_FROM_NUMBER`, and `APP_URL` (ADR-026, `docs/guides/twilio-setup.md`). Leave `DEMO_MODE` unset. The database needs `pnpm db:setup` once (migrations, seed) and `pnpm admin:create` for the first dispatcher.
 
 ---
 
@@ -426,3 +426,22 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - **Invites by phone:** the invite sheet has "By email" and "By phone"; by phone takes a name with the number, because a number carries no name. A valet invited by phone has no email (the email index now ignores blanks); lists and payroll show their phone where an email would be.
 - **Admins add their own sign-in phone** in Settings → Your sign-in (or `pnpm admin:create … "Full Name" "Phone"`).
 - **Risk, accepted by the owner:** without a code, anyone who knows a valet's email or number can sign in as them. An SMS or email code can be added later behind the same field without changing what valets see except the code step.
+
+## ADR-026 — SMS for invites and shift changes (Twilio); shift reminders; publishing drafts
+
+**Date:** 2026-11-23 · **Status:** accepted (owner; spec `docs/specs/sms.md`, plan `tasks/plan-sms.md`)
+
+**Context.** The product spec put SMS out of MVP ("in-app chat and push only", §1, §11.3) and named it only as a future hook (§14). The owner changed that: valets miss invites and shift changes when push is off or unseen.
+
+**Decision.**
+
+- **Six kinds of text, nothing else:** a phone invite, shift reminders (24 h and 1 h), and an assignment, reschedule (start or end time changed), removal or cancellation. Texts go **alongside** push and the in-app notification, to every valet with a US number on file, whatever their push setting.
+- **Consent (owner):** valets are the company's own crew, so a number on file is consent; no opt-in step. STOP is still honoured: Twilio refuses sends to a number that replied STOP (error 21610), and admins see "Opted out (replied STOP)".
+- **Twilio over REST, no SDK** (`src/server/sms`), API-key Basic auth, a Messaging Service or a single From number. The status callback (`/api/sms/status`) is verified with `X-Twilio-Signature` against the exact `APP_URL` callback URL, tested with Twilio's documented example; a final status never regresses.
+- **Credentials are environment-only** (`TWILIO_*`, `APP_URL`). Unlike Pusher (ADR-023) nothing is committed: a leaked key sends paid texts. With any value missing SMS is off and nothing fails.
+- **Best effort:** a text never fails the action that caused it; each send is capped at 3 s and logged in `sms_messages` (last 4 digits only, never the body). A repeat of the same text to the same person within 10 minutes is dropped.
+- **Copy** is plain GSM-7 (typographic characters are written plainly so a text stays in 160-character segments). A long shift text shortens the event title or address, never the link; an invite is never shortened.
+- **Shift reminders** are new on every channel: 24 h and 1 h before, in the app, by push and by text, governed by the valet's "Shift reminders" preference. An outside cron calls `GET /api/cron/reminders` (Bearer `CRON_SECRET`) every 5 minutes; a once-a-minute run after Live Board and clock requests (`after()`) is the backstop. `shift_reminders` (assignment, offset, start) claims each send, so concurrent runs send once and a reschedule re-arms them.
+- **Publishing drafts** (fixed here): assignments to a draft were never announced and nothing could publish one. A draft's page now has Publish event; publishing tells the assigned crew (notice, push, text) and posts the open spots.
+
+**Consequences.** Migration 016 (`sms_messages`, `shift_reminders`; the demo reset empties both). `CRON_SECRET` is now needed for reminders. Setup steps for the owner are in `docs/guides/twilio-setup.md`. Status callbacks cannot reach `localhost`; delivery statuses are visible only on a public deploy.

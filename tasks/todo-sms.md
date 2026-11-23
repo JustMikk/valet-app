@@ -127,7 +127,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm check:fast`; `pnpm build`
   - Files: `src/features/staff/onboarding/permission-steps.tsx`, `src/features/staff/account/profile.tsx` (or its preferences source)
 
-- [ ] **T14: Docs and the owner's Twilio guide** (SC 7, 8)
+- [x] **T14: Docs and the owner's Twilio guide** (SC 7, 8)
   - Acceptance:
     - ADR-026 records the decisions: scope change, six kinds, alongside push, consent, reminders, external cron, publish.
     - OPEN_QUESTIONS rows are added.
