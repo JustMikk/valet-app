@@ -99,7 +99,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm check:fast`; `pnpm build:server`; server smoke (publish twice gives a 409)
   - Files: `src/server/admin/events.ts`, `src/app/api/admin/events/[id]/publish/route.api.ts`, `src/lib/data/admin/{repo,http-repo,mock-repo,schemas}.ts`
 
-- [ ] **T11: Publish a draft, UI** (SC 9)
+- [x] **T11: Publish a draft, UI** (SC 9)
   - Acceptance:
     - A draft's event page shows a **Publish event** accent button above Cancel event.
     - A `ConfirmSheet` reads "Publish {title}?" with the approved consequence line.

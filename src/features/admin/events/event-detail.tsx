@@ -18,6 +18,7 @@ import { StaffLocationModal } from "../live/staff-location-modal"
 import { EditEventSheet } from "./edit-event-sheet"
 import { EditInstructionsSheet } from "./edit-instructions-sheet"
 import { FillSheet } from "./fill-sheet"
+import { PublishEvent } from "./publish-event"
 
 function toModalSlot(person: RosterRow): LiveSlot {
   return {
@@ -192,6 +193,7 @@ export function EventOverview({ event }: { event: EventData }) {
               Edit date &amp; time
             </Button>
           )}
+          {event.draft && <PublishEvent event={event} className={SIDE_BUTTON} />}
           {cancel.error && <ErrorNotice message={cancel.error.message} />}
           {!event.cancelled && (
             <Button
