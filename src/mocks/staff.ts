@@ -272,7 +272,11 @@ export const NOTIFICATION_GROUPS: {
 
 export const NOTIFY_PREFS = [
   { key: "open", label: "New open shifts", note: "When a shift you can claim is posted" },
-  { key: "remind", label: "Shift reminders", note: "24 hours and 1 hour before" },
+  {
+    key: "remind",
+    label: "Shift reminders",
+    note: "24 hours and 1 hour before, in the app and by text",
+  },
   { key: "msg", label: "Messages", note: "From admin" },
   {
     key: "change",

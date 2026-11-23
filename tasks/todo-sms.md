@@ -120,7 +120,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm check:fast`; manual in both builds
   - Files: `src/server/admin/staff.ts`, `src/server/admin/settings.ts`, `src/lib/data/admin/schemas.ts`, `src/lib/data/admin/mock-repo.ts`, `src/features/admin/settings/settings.tsx`
 
-- [ ] **T13: Staff copy**
+- [x] **T13: Staff copy**
   - Acceptance:
     - The onboarding push step reads "Turn them on for new shifts and messages. Reminders and cancellations also come by text."
     - The Profile "Shift reminders" helper reads "24 hours and 1 hour before, in the app and by text."
