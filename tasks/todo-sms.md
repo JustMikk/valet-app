@@ -35,7 +35,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm test -- src/server/sms/copy`
   - Files: `src/server/sms/copy.ts`, `copy.test.ts`
 
-- [ ] **T5: Log table and the send entry points**
+- [x] **T5: Log table and the send entry points**
   - Acceptance:
     - Migration `016_sms_and_reminders.sql` creates:
       - `sms_messages`: id, tenant_id, staff_id, kind, to_last4, dedupe_key, body_chars, twilio_sid, status, error_code, created_at, updated_at;

@@ -27,6 +27,8 @@ const TABLES = [
 
 // Every table that points at one being emptied must be emptied with it, or TRUNCATE refuses.
 const WIPE = [
+  "sms_messages",
+  "shift_reminders",
   "staff_notes",
   "pulse_snapshots",
   "hours_adjustments",
