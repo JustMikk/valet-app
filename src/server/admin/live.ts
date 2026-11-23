@@ -21,6 +21,7 @@ import { rows, sql } from "../db/client"
 import { conflict, notFound } from "../http/handler"
 import { notifyAdmins } from "../notify"
 import { sweepExpiredSelfies } from "../retention"
+import { textStaff } from "../sms"
 import { adminCtx, firstName, messageStaff, notifyStaff, type AdminCtx } from "./common"
 import { pulseOf, pulseYesterday, recordPulse } from "./pulse"
 import { classifySlot, loadSlots, type SlotRow } from "./slots"
@@ -256,15 +257,25 @@ export async function removeFromSlot(
               )
               insert into drops (assignment_id, staff_id, reason, late, removed_by)
               select id, ${slot.staff_id}, 'removed', ${late}, ${adminId} from reopened`
-  await notifyStaff([
-    {
-      staffId: slot.staff_id,
-      icon: "event_busy",
-      tone: "warn",
-      title: "Removed from a shift",
-      body: `${slot.title}, ${formatDate(slot.starts_at, slot.timezone)}`,
-      href: "/staff/shifts",
-    },
+  const date = formatDate(slot.starts_at, slot.timezone)
+  await Promise.all([
+    notifyStaff([
+      {
+        staffId: slot.staff_id,
+        icon: "event_busy",
+        tone: "warn",
+        title: "Removed from a shift",
+        body: `${slot.title}, ${date}`,
+        href: "/staff/shifts",
+      },
+    ]),
+    textStaff([
+      {
+        staffId: slot.staff_id,
+        path: "/staff/shifts",
+        copy: { kind: "removed", title: slot.title, date },
+      },
+    ]),
   ])
   return { name: slot.staff_name }
 }

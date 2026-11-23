@@ -70,7 +70,7 @@ SC = the spec's success criteria.
   - Verify: `pnpm check:fast`; server smoke (SMS off gives `notTexted: not set up`)
   - Files: `src/server/admin/staff.ts`, `src/lib/data/admin/schemas.ts`, `src/lib/data/admin/mock-repo.ts`, `src/features/admin/staff/invite-sheet.tsx`
 
-- [ ] **T8: Shift-change texts** (SC 3)
+- [x] **T8: Shift-change texts** (SC 3)
   - Acceptance:
     - `cancelEvent` texts each assigned valet (`cancelled`).
     - `assign` texts when the event is not a draft (`assigned`).

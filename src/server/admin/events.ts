@@ -30,6 +30,7 @@ import {
 import { rows, sql } from "../db/client"
 import { isUniqueViolation } from "../db/errors"
 import { badRequest, conflict, notFound } from "../http/handler"
+import { textStaff, type StaffText } from "../sms"
 import { adminCtx, initialsOf, notifyStaff, type AdminCtx } from "./common"
 import { classifySlot, loadSlots } from "./slots"
 
@@ -390,9 +391,10 @@ export async function assign(
 
   const names: string[] = []
   const notices = []
+  const texts: StaffText[] = []
   for (const staffId of chosen) {
     try {
-      const [done] = await rows<{ name: string }>(
+      const [done] = await rows<{ name: string; assignment_id: string }>(
         sql()`with slot as (
                 select a.id from assignments a
                 where a.event_id = ${eventId} and a.status = 'open'
@@ -404,7 +406,8 @@ export async function assign(
                   from slot where a.id = slot.id
                   returning a.id
               )
-              select s.name from staff s, taken where s.id = ${staffId} and s.tenant_id = ${ctx.tenantId}`,
+              select s.name, taken.id as assignment_id from staff s, taken
+              where s.id = ${staffId} and s.tenant_id = ${ctx.tenantId}`,
       )
       if (!done) break
       names.push(done.name)
@@ -416,13 +419,23 @@ export async function assign(
         body: `${event.title}, ${formatDate(event.starts_at, event.tz)}`,
         href: "/staff/shifts",
       })
+      texts.push({
+        staffId,
+        path: `/staff/shifts/detail?id=${done.assignment_id}`,
+        copy: {
+          kind: "assigned",
+          title: event.title,
+          date: formatDate(event.starts_at, event.tz),
+          range: formatRange(event.starts_at, event.ends_at, event.tz),
+        },
+      })
     } catch (error) {
       // Already on this event: skip them rather than fail the whole batch.
       if (!isUniqueViolation(error)) throw error
     }
   }
   // A draft is not announced: people hear about their spot when the event is published.
-  if (event.status !== "draft") await notifyStaff(notices)
+  if (event.status !== "draft") await Promise.all([notifyStaff(notices), textStaff(texts)])
   if (names.length === 0) throw conflict("no_open_spot", "There is no open spot left to fill.")
   return { assigned: names.length, names }
 }
@@ -489,10 +502,10 @@ export async function cancelEvent(adminId: string, eventId: string): Promise<voi
   )
   if (crew.length === 0) throw notFound("Event not found or already cancelled.")
   await sql()`update events set status = 'cancelled' where id = ${eventId}`
-  await notifyStaff(
-    crew
-      .filter((row) => row.staff_id)
-      .map((row) => ({
+  const assigned = crew.filter((row) => row.staff_id)
+  await Promise.all([
+    notifyStaff(
+      assigned.map((row) => ({
         staffId: row.staff_id,
         icon: "event_busy",
         tone: "warn" as const,
@@ -500,7 +513,15 @@ export async function cancelEvent(adminId: string, eventId: string): Promise<voi
         body: `${row.title}, ${formatDate(row.starts_at, row.tz)}`,
         href: "/staff/shifts",
       })),
-  )
+    ),
+    textStaff(
+      assigned.map((row) => ({
+        staffId: row.staff_id,
+        path: "/staff/shifts",
+        copy: { kind: "cancelled", title: row.title, date: formatDate(row.starts_at, row.tz) },
+      })),
+    ),
+  ])
 }
 
 /** Create an event (draft or published) with its open spots, optionally filling some at once. */
@@ -633,16 +654,37 @@ export async function updateEvent(
         : updates.includes("instructions")
           ? `${current.title}: instructions updated`
           : `${current.title}: details updated`
-    await notifyStaff(
-      crew.map((row) => ({
-        staffId: row.staff_id,
-        icon: "edit_calendar",
-        tone: "warn" as const,
-        title: updates.includes("window") ? "Shift rescheduled" : "Event updated",
-        body,
-        href: `/staff/shifts/detail?id=${row.assignment_id}`,
-      })),
-    )
+    // Only a new time is texted, and only for a published event: a draft's crew has not been told.
+    const reschedule =
+      newStarts && newEnds && current.status !== "draft"
+        ? {
+            kind: "rescheduled" as const,
+            title: current.title,
+            date: formatDate(newStarts, current.timezone),
+            range: formatRange(newStarts, newEnds, current.timezone),
+          }
+        : null
+    await Promise.all([
+      notifyStaff(
+        crew.map((row) => ({
+          staffId: row.staff_id,
+          icon: "edit_calendar",
+          tone: "warn" as const,
+          title: updates.includes("window") ? "Shift rescheduled" : "Event updated",
+          body,
+          href: `/staff/shifts/detail?id=${row.assignment_id}`,
+        })),
+      ),
+      reschedule
+        ? textStaff(
+            crew.map((row) => ({
+              staffId: row.staff_id,
+              path: `/staff/shifts/detail?id=${row.assignment_id}`,
+              copy: reschedule,
+            })),
+          )
+        : Promise.resolve(),
+    ])
   }
 
   const [detail] = await Promise.all([getEvent(adminId, eventId, now), tellCrew()])
