@@ -65,7 +65,7 @@ export function StaffList() {
             ? `${data.total} ${data.total === 1 ? "person" : "people"}${data.invited ? ` · ${data.invited} invite${data.invited === 1 ? "" : "s"} pending` : ""}`
             : "…"
         }
-        cta={{ label: "Invite", icon: "person_add", onClick: () => setInviteOpen(true) }}
+        cta={{ label: "Add staff", icon: "person_add", onClick: () => setInviteOpen(true) }}
         tools={
           <>
             {searchFor(true)}
