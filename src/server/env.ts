@@ -34,6 +34,12 @@ const Env = z.object({
   TWILIO_FROM_NUMBER: z.optional(z.string()),
   /** Public origin of this deployment, e.g. https://valet.example.com: links in texts, callback URL. */
   APP_URL: z.optional(z.string()),
+  /** Resend email (ADR-027). Without the key, a sender and APP_URL, email is off. */
+  RESEND_API_KEY: z.optional(z.string()),
+  /** The sender, e.g. "Regency Parking Service <invoices@example.com>", on a domain verified in Resend. */
+  EMAIL_FROM: z.optional(z.string()),
+  /** Optional: where replies go (the office inbox). Without it replies go to the sender. */
+  EMAIL_REPLY_TO: z.optional(z.string()),
 })
 export type Env = z.infer<typeof Env>
 
