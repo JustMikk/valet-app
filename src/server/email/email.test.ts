@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest"
 
 import { emailConfigFrom, type EmailConfig } from "./config"
 import { escapeHtml, invoiceEmail, inviteEmail } from "./copy"
-import { inviteLink } from "./index"
+import { emailInvoice, inviteLink } from "./index"
+import { EMAIL_LOGO } from "./logo"
 import { parseSendResponse, sendEmail, sendRequest } from "./resend"
 
 const VARS = {
@@ -64,9 +65,15 @@ describe("inviteEmail", () => {
         "Get started: https://valet.example.com/login?role=staff&login=kai%40example.com\n\n" +
         "Sign in with this email address: kai@example.com\n",
     )
-    expect(content.html).toContain(
-      '<a href="https://valet.example.com/login?role=staff&amp;login=kai%40example.com">Get started</a>',
-    )
+  })
+
+  it("is branded: the inline logo, the button and the address, with the link spelled out", () => {
+    const link = "https://valet.example.com/login?role=staff&amp;login=kai%40example.com"
+    expect(content.html).toContain('src="cid:regency-logo"')
+    expect(content.html).toContain(`<a href="${link}"`)
+    expect(content.html).toContain(">Get started</a>")
+    expect(content.html).toContain(">kai@example.com</strong>")
+    expect(content.html).toContain(`>${link}</a>`)
   })
 })
 
@@ -88,6 +95,16 @@ describe("invoiceEmail", () => {
         "Total due: $4,812.50\nDue: Dec 9, 2026\n\n" +
         "Reply to this email with any questions.\n\n" +
         "Regency Parking Service\n",
+    )
+  })
+
+  it("carries the banner's number, the total and the due date in the HTML", () => {
+    expect(content.html).toContain('src="cid:regency-logo"')
+    expect(content.html).toContain(">INV-2026-0142</div>")
+    expect(content.html).toContain(">$4,812.50</td>")
+    expect(content.html).toContain(">Dec 9, 2026</td>")
+    expect(content.html).toContain(
+      "<title>Invoice INV-2026-0142 from Regency Parking Service</title>",
     )
   })
 
@@ -125,7 +142,10 @@ describe("sendRequest", () => {
         subject: "S",
         text: "T",
         html: "H",
-        attachments: [{ filename: "INV-1.pdf", content: "JVBERi0=" }],
+        attachments: [
+          { filename: "logo.png", content: "iVBORw==", contentId: "regency-logo" },
+          { filename: "INV-1.pdf", content: "JVBERi0=" },
+        ],
         idempotencyKey: "invite/1",
       },
     )
@@ -133,8 +153,41 @@ describe("sendRequest", () => {
     expect(JSON.parse(request.body)).toMatchObject({
       cc: ["b@example.com"],
       reply_to: "office@example.com",
-      attachments: [{ filename: "INV-1.pdf", content: "JVBERi0=" }],
+      attachments: [
+        { filename: "logo.png", content: "iVBORw==", content_id: "regency-logo" },
+        { filename: "INV-1.pdf", content: "JVBERi0=" },
+      ],
     })
+  })
+})
+
+describe("emailInvoice", () => {
+  it("attaches the logo inline and the PDF as a file", async () => {
+    const fetcher = vi.fn().mockResolvedValue(Response.json({ id: "abc" }))
+    vi.stubGlobal("fetch", fetcher)
+    try {
+      const result = await emailInvoice(CFG, {
+        company: "Regency Parking Service",
+        number: "INV-2026-0142",
+        venue: "The Grand Hotel",
+        period: "Nov 1 – 15, 2026",
+        totalCents: 100,
+        due: "Dec 9, 2026",
+        to: "billing@grand.com",
+        cc: ["gm@grand.com"],
+        pdf: "JVBERi0=",
+      })
+      expect(result).toEqual({ ok: true, id: "abc" })
+      const body = JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body))
+      expect(body.to).toEqual(["billing@grand.com"])
+      expect(body.cc).toEqual(["gm@grand.com"])
+      expect(body.attachments).toEqual([
+        { filename: "regency-logo.png", content: EMAIL_LOGO.png, content_id: "regency-logo" },
+        { filename: "INV-2026-0142.pdf", content: "JVBERi0=" },
+      ])
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })
 

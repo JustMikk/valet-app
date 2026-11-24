@@ -2,9 +2,17 @@
 // skipped without failing, until Resend is configured.
 import { emailConfig, type EmailConfig } from "./config"
 import { invoiceEmail, inviteEmail, type InvoiceCopy } from "./copy"
-import { sendEmail, type SendResult } from "./resend"
+import { EMAIL_LOGO } from "./logo"
+import { sendEmail, type Attachment, type SendResult } from "./resend"
 
 export { emailConfig, type EmailConfig } from "./config"
+
+/** The banner's logo, attached inline: it shows even where linked images are blocked. */
+const LOGO: Attachment = {
+  filename: EMAIL_LOGO.filename,
+  content: EMAIL_LOGO.png,
+  contentId: EMAIL_LOGO.cid,
+}
 
 export type InviteEmail = { staffId: string; to: string; adminFirst: string; tenantName: string }
 export type InviteEmailResult =
@@ -29,6 +37,7 @@ export async function emailInvite(invite: InviteEmail): Promise<InviteEmailResul
   const result = await sendEmail(cfg, {
     to: [invite.to],
     ...content,
+    attachments: [LOGO],
     idempotencyKey: `invite/${invite.staffId}`,
   })
   if (result.ok) return { emailed: true }
@@ -49,6 +58,6 @@ export function emailInvoice(cfg: EmailConfig, invoice: InvoiceEmail): Promise<S
     to: [invoice.to],
     cc: invoice.cc,
     ...invoiceEmail(invoice),
-    attachments: [{ filename: `${invoice.number}.pdf`, content: invoice.pdf }],
+    attachments: [LOGO, { filename: `${invoice.number}.pdf`, content: invoice.pdf }],
   })
 }

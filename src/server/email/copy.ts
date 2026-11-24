@@ -1,48 +1,37 @@
-// What each email says (ADR-027), as plain text and as simple HTML with the same words. Pure, so the
-// wording is tested without Resend. Everything placed in the HTML is escaped.
+// What each email says (ADR-027), as plain text and as branded HTML with the same words. Pure, so the
+// wording is tested without Resend. Everything placed in the HTML is escaped (layout.ts).
 import { formatMoney } from "@/lib/money/format"
+
+import { button, frame, heading, join, paragraph, smallLink, strong, summary } from "./layout"
+
+export { escapeHtml } from "./layout"
 
 export type EmailContent = { subject: string; text: string; html: string }
 
-const ENTITIES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-}
-export const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (c) => ENTITIES[c] ?? c)
-
-/** One paragraph: lines of text, or a link. */
-type Block = string[] | { link: string; label: string }
-
-function render(blocks: Block[]): Pick<EmailContent, "text" | "html"> {
-  const text = blocks
-    .map((block) => ("link" in block ? `${block.label}: ${block.link}` : block.join("\n")))
-    .join("\n\n")
-  const body = blocks
-    .map((block) =>
-      "link" in block
-        ? `<p><a href="${escapeHtml(block.link)}">${escapeHtml(block.label)}</a></p>`
-        : `<p>${block.map(escapeHtml).join("<br>")}</p>`,
-    )
-    .join("\n")
-  const html = `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5">\n${body}\n</body></html>`
-  return { text: `${text}\n`, html }
-}
+/** Paragraphs of lines, as the plain-text part. */
+const plain = (paragraphs: string[][]) => `${paragraphs.map((p) => p.join("\n")).join("\n\n")}\n`
 
 export type InviteCopy = { adminFirst: string; tenant: string; link: string; email: string }
 
 /** An email invite: the same words as the text invite (ADR-026), and the address to sign in with. */
 export function inviteEmail(copy: InviteCopy): EmailContent {
-  const invited = `${copy.adminFirst} at ${copy.tenant.trim()} invited you to join their valet crew`
+  const tenant = copy.tenant.trim()
+  const invited = `${copy.adminFirst} at ${tenant} invited you to join their valet crew`
+  const signIn = "Sign in with this email address: "
   return {
     subject: invited,
-    ...render([
-      [`${invited}.`],
-      { link: copy.link, label: "Get started" },
-      [`Sign in with this email address: ${copy.email}`],
-    ]),
+    text: plain([[`${invited}.`], [`Get started: ${copy.link}`], [`${signIn}${copy.email}`]]),
+    html: frame({
+      title: invited,
+      preheader: `${signIn}${copy.email}`,
+      body: [
+        heading(`${invited}.`),
+        button("Get started", copy.link),
+        paragraph(join(signIn, strong(copy.email))),
+        smallLink(copy.link),
+      ],
+      footer: tenant,
+    }),
   }
 }
 
@@ -61,14 +50,34 @@ export type InvoiceCopy = {
 /** An invoice email (owner's wording, D47): a short summary; the PDF carries the lines. */
 export function invoiceEmail(copy: InvoiceCopy): EmailContent {
   const company = copy.company.trim()
+  const subject = `Invoice ${copy.number} from ${company}`
+  const total = formatMoney(copy.totalCents)
+  const attached = `Attached is invoice ${copy.number} for ${copy.venue}, ${copy.period}.`
+  const reply = "Reply to this email with any questions."
   return {
-    subject: `Invoice ${copy.number} from ${company}`,
-    ...render([
+    subject,
+    text: plain([
       ["Hello,"],
-      [`Attached is invoice ${copy.number} for ${copy.venue}, ${copy.period}.`],
-      [`Total due: ${formatMoney(copy.totalCents)}`, `Due: ${copy.due}`],
-      ["Reply to this email with any questions."],
+      [attached],
+      [`Total due: ${total}`, `Due: ${copy.due}`],
+      [reply],
       [company],
     ]),
+    html: frame({
+      title: subject,
+      preheader: `Total due: ${total} · Due: ${copy.due}`,
+      banner: { label: "Invoice", value: copy.number },
+      body: [
+        paragraph("Hello,"),
+        paragraph(attached),
+        summary([
+          { label: "Total due", value: total },
+          { label: "Due", value: copy.due },
+        ]),
+        paragraph(reply),
+        paragraph(strong(company)),
+      ],
+      footer: `${company} · Invoice ${copy.number}`,
+    }),
   }
 }

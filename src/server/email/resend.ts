@@ -10,7 +10,13 @@ const API = "https://api.resend.com/emails"
 /** Room for a PDF upload; an admin waiting on an invoice send waits no longer than this. */
 export const SEND_BUDGET_MS = 15_000
 
-export type Attachment = { filename: string; /** Base64. */ content: string }
+export type Attachment = {
+  filename: string
+  /** Base64. */
+  content: string
+  /** Shown inline where the HTML has `<img src="cid:…">`, not as a file. */
+  contentId?: string
+}
 
 export type Email = {
   to: string[]
@@ -44,7 +50,15 @@ export function sendRequest(cfg: EmailConfig, email: Email) {
     subject: email.subject,
     text: email.text,
     html: email.html,
-    ...(email.attachments?.length ? { attachments: email.attachments } : {}),
+    ...(email.attachments?.length
+      ? {
+          attachments: email.attachments.map(({ filename, content, contentId }) => ({
+            filename,
+            content,
+            ...(contentId ? { content_id: contentId } : {}),
+          })),
+        }
+      : {}),
   }
   return { url: API, headers, body: JSON.stringify(body) }
 }
