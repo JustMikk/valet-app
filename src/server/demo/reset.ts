@@ -32,6 +32,7 @@ const WIPE = [
   "staff_notes",
   "pulse_snapshots",
   "hours_adjustments",
+  "invoice_sends",
   "invoice_events",
   "invoice_lines",
   "invoices",

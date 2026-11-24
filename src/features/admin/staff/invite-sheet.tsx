@@ -38,6 +38,7 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
   const [phone, setPhone] = useState("")
   const [skipped, setSkipped] = useState<string[]>([])
   const [texts, setTexts] = useState<Pick<InviteResult, "texted" | "notTexted"> | null>(null)
+  const [emails, setEmails] = useState<Pick<InviteResult, "emailed" | "notEmailed"> | null>(null)
   const invite = useInvite()
 
   const push = (entry: InviteEntry) =>
@@ -65,7 +66,10 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
         // Stay open to say what was texted (ADR-026) or skipped; otherwise there is nothing to add.
         const texted = result.texted > 0 || result.notTexted.length > 0
         setTexts(texted ? { texted: result.texted, notTexted: result.notTexted } : null)
-        if (result.skipped.length === 0 && !texted) onOpenChange(false)
+        // Likewise what was emailed (ADR-027).
+        const emailed = result.emailed > 0 || result.notEmailed.length > 0
+        setEmails(emailed ? { emailed: result.emailed, notEmailed: result.notEmailed } : null)
+        if (result.skipped.length === 0 && !texted && !emailed) onOpenChange(false)
       },
     })
 
@@ -76,6 +80,7 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
         if (!next) {
           setSkipped([])
           setTexts(null)
+          setEmails(null)
         }
         onOpenChange(next)
       }}
@@ -178,6 +183,22 @@ export function InviteSheet({ open, onOpenChange }: InviteSheetProps) {
             <span key={miss.who} className="flex items-center gap-1.5 text-warn">
               <Icon name="error" filled size={18} />
               Not texted to {miss.who}: {miss.reason}.
+            </span>
+          ))}
+        </div>
+      )}
+      {emails && (
+        <div role="status" className="flex flex-col gap-1 text-14 leading-x140 font-medium">
+          {emails.emailed > 0 && (
+            <span className="flex items-center gap-1.5 text-ok">
+              <Icon name="check_circle" filled size={18} />
+              Emailed {emails.emailed} invite{emails.emailed > 1 ? "s" : ""}.
+            </span>
+          )}
+          {emails.notEmailed.map((miss) => (
+            <span key={miss.who} className="flex items-center gap-1.5 text-warn">
+              <Icon name="error" filled size={18} />
+              Not emailed to {miss.who}: {miss.reason}.
             </span>
           ))}
         </div>

@@ -56,6 +56,10 @@ describe("InvoiceDetails", () => {
     notice: null,
     billedTo: "billing@harborpavilion.com",
     sent: false,
+    recipients: { client: "billing@harborpavilion.com", manager: "", accountant: "", others: [] },
+    sends: [],
+    emailReady: false,
+    canResend: false,
     lines: [
       { what: "Wedding", staffCount: 8, minutes: 3510, rateCents: 3800, amountCents: 222_300 },
       { what: "Brunch", staffCount: 5, minutes: 1470, rateCents: 3800, amountCents: 93_100 },

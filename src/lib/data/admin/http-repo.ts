@@ -137,7 +137,8 @@ export const httpAdminRepo: AdminRepo = {
   invoices: () => api("admin/invoices", z.array(InvoiceRowDto), call),
   invoice: (id) => api(`admin/invoices/${id ?? "first"}`, InvoiceDetailDto, call),
   createInvoice: (request) => api("admin/invoices", IdDto, post(request)),
-  sendInvoice: (id) => api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post()),
+  sendInvoice: (id, request) =>
+    api(`admin/invoices/${id}/send`, SendInvoiceResultDto, post(request)),
   payroll: () => api("admin/payroll", PayrollDto, call),
   payrollEvents: () => api("admin/payroll/events", z.array(PayrollEventRowDto), call),
   sendPayroll: () => api("admin/payroll/send", SendPayrollResultDto, post()),

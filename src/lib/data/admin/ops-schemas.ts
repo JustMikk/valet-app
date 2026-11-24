@@ -158,6 +158,17 @@ export const InvoiceRowDto = z.object({
 })
 export type InvoiceRow = z.infer<typeof InvoiceRowDto>
 
+/** Who an invoice is emailed to: saved on its venue, so the venue's next invoice starts with them. */
+export const InvoiceRecipientsDto = z.object({
+  /** The venue's billing email: the invoice goes to them. Blank until someone enters it. */
+  client: str,
+  /** Copied when set, as are the others. */
+  manager: str,
+  accountant: str,
+  others: z.array(str),
+})
+export type InvoiceRecipients = z.infer<typeof InvoiceRecipientsDto>
+
 export const InvoiceDetailDto = z.object({
   id: str,
   number: str,
@@ -173,6 +184,13 @@ export const InvoiceDetailDto = z.object({
   notice: z.nullable(str),
   billedTo: str,
   sent: bool,
+  recipients: InvoiceRecipientsDto,
+  /** Each time it was emailed, latest first. */
+  sends: z.array(z.object({ atLabel: str, to: str, cc: z.array(str) })),
+  /** Whether this server can email; without it Send marks the invoice sent and emails nobody. */
+  emailReady: bool,
+  /** A sent invoice, not yet paid, can be emailed again while email is set up. */
+  canResend: bool,
   /** Set when the system drafted it from one event, so the screen can link back to it. */
   eventId: z.optional(str),
   lines: z.array(
@@ -197,7 +215,33 @@ export const NewInvoiceRequest = z.object({
 })
 export type NewInvoiceRequest = z.infer<typeof NewInvoiceRequest>
 
-export const SendInvoiceResultDto = z.object({ billedTo: str })
+export const EmailAddress = z.email()
+const blankOrEmail = z.union([z.literal(""), EmailAddress])
+/** Copied besides the manager and the accountant, at most. */
+export const MAX_OTHER_RECIPIENTS = 10
+/** A PDF of about 2 MB, base64; an invoice's is far smaller. */
+const MAX_PDF_BASE64 = 3_000_000
+
+export const SendInvoiceRequest = z.object({
+  recipients: z.object({
+    client: EmailAddress,
+    manager: blankOrEmail,
+    accountant: blankOrEmail,
+    others: z.array(EmailAddress).check(z.maxLength(MAX_OTHER_RECIPIENTS)),
+  }),
+  /** The PDF the browser built, the same file Download saves, base64. */
+  pdf: z
+    .string()
+    .check(z.minLength(8), z.maxLength(MAX_PDF_BASE64), z.regex(/^[A-Za-z0-9+/]+={0,2}$/)),
+})
+export type SendInvoiceRequest = z.infer<typeof SendInvoiceRequest>
+
+export const SendInvoiceResultDto = z.object({
+  billedTo: str,
+  /** False when email is not set up: the invoice was marked sent and emailed to nobody. */
+  emailed: bool,
+})
+export type SendInvoiceResult = z.infer<typeof SendInvoiceResultDto>
 
 export const PayrollLineDto = z.object({
   event: str,

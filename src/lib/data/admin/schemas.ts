@@ -255,6 +255,10 @@ export const InviteResultDto = z.object({
   texted: int,
   /** Phone invites that could not be texted, and why, in words. */
   notTexted: z.array(z.object({ who: str, reason: str })),
+  /** Email invites that went out by email (ADR-027). */
+  emailed: int,
+  /** Email invites that could not be emailed, and why, in words. */
+  notEmailed: z.array(z.object({ who: str, reason: str })),
 })
 export type InviteResult = z.infer<typeof InviteResultDto>
 

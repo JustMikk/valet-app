@@ -30,7 +30,7 @@ import { LIVE_EVENTS, TIMELINE } from "@/mocks/admin-live"
 
 import type { Notifications } from "../staff/schemas"
 import type { AdminRepo } from "./repo"
-import type { EventPay, Live, LiveEvent, ThreadMessage } from "./ops-schemas"
+import type { EventPay, InvoiceRecipients, Live, LiveEvent, ThreadMessage } from "./ops-schemas"
 import type {
   EventCard,
   EventDetail,
@@ -150,6 +150,13 @@ const staffRows: StaffRow[] = STAFF_ROWS.map((row) => ({
   hours: row.hours,
 }))
 let sentInvoice = false
+/** The static export has no email: Send keeps the list, as the server does on the venue. */
+let invoiceRecipients: InvoiceRecipients = {
+  client: INVOICE_DETAIL.sentTo,
+  manager: "",
+  accountant: "",
+  others: [],
+}
 let unreadNotices = 2
 let threadMessages: ThreadMessage[] = THREAD_MESSAGES.map((m, i) => ({ id: `m${i}`, ...m }))
 /** Conversations started from the inbox's "New message" picker, keyed by staff id. */
@@ -316,7 +323,14 @@ export const mockAdminRepo: AdminRepo = {
         hours: "—",
       })
     }
-    return { invited: invites.length, skipped: [], texted: 0, notTexted: [] }
+    return {
+      invited: invites.length,
+      skipped: [],
+      texted: 0,
+      notTexted: [],
+      emailed: 0,
+      notEmailed: [],
+    }
   },
   personInsights: async (_id, days) => {
     const scale = days / 90
@@ -635,8 +649,12 @@ export const mockAdminRepo: AdminRepo = {
         cents(INVOICE_DETAIL.total) +
         taxCents(cents(INVOICE_DETAIL.total), settings.billing.salesTaxBp),
       notice: INVOICE_DETAIL.notice,
-      billedTo: INVOICE_DETAIL.sentTo,
+      billedTo: invoiceRecipients.client,
       sent: sentInvoice,
+      recipients: invoiceRecipients,
+      sends: [],
+      emailReady: false,
+      canResend: false,
       lines: [
         {
           what: INVOICE_DETAIL.lines[0].what,
@@ -679,9 +697,10 @@ export const mockAdminRepo: AdminRepo = {
       },
     ]
   },
-  sendInvoice: async () => {
+  sendInvoice: async (_id, request) => {
     sentInvoice = true
-    return { billedTo: INVOICE_DETAIL.sentTo }
+    invoiceRecipients = structuredClone(request.recipients)
+    return { billedTo: invoiceRecipients.client, emailed: false }
   },
   payroll: async () => ({
     period: "Oct 16 – 31",

@@ -17,10 +17,16 @@ import { rows, sql } from "../db/client"
 import { badRequest, conflict, notFound } from "../http/handler"
 import { adminCtx, messageStaff } from "./common"
 import { syncRecentInvoices } from "./event-invoice"
-import { nextInvoiceNumber, totalsOf, writeLines, type InvoiceLineInput } from "./invoice-store"
+import { invoiceEmailFacts } from "./invoice-email"
+import {
+  nextInvoiceNumber,
+  periodLabel,
+  totalsOf,
+  writeLines,
+  type InvoiceLineInput,
+} from "./invoice-store"
 
 const DAY = 24 * 60 * 60_000
-const PAYMENT_TERMS_DAYS = 14
 
 type InvoiceDbRow = {
   id: string
@@ -43,13 +49,7 @@ type InvoiceDbRow = {
   summary: string | null
 }
 
-/** "Oct 16 – 31" within one month, "Oct 28 – Nov 3" across two. */
-export function periodLabel(start: string, end: string): string {
-  const fmt = (date: string) => formatDate(`${date}T12:00:00Z`, "UTC").split(" ")
-  const [, m1, d1] = fmt(start)
-  const [, m2, d2] = fmt(end)
-  return m1 === m2 ? `${m1} ${d1} – ${d2}` : `${m1} ${d1} – ${m2} ${d2}`
-}
+export { periodLabel }
 
 function statusOf(row: InvoiceDbRow, now: Date): StatusSpec {
   if (row.status === "draft") return ADMIN_STATUS.draft
@@ -141,6 +141,7 @@ export async function getInvoice(
     notice: row.status === "draft" && !row.event_id ? await pendingNotice(row) : null,
     billedTo: row.billed_to,
     sent: row.status !== "draft",
+    ...(await invoiceEmailFacts(row)),
     lines: lines.map((line) => ({
       what: line.what,
       detail: line.detail || undefined,
@@ -150,27 +151,6 @@ export async function getInvoice(
       amountCents: line.amount_cents,
     })),
   }
-}
-
-/** Send a draft: it is locked from here on and due in fourteen days. */
-export async function sendInvoice(
-  adminId: string,
-  id: string,
-  now: Date,
-): Promise<{ billedTo: string }> {
-  const ctx = await adminCtx(adminId)
-  const [sent] = await rows<{ billed_to: string }>(
-    sql()`update invoices set status = 'sent', sent_at = ${now.toISOString()},
-                 due_at = ${new Date(now.getTime() + PAYMENT_TERMS_DAYS * DAY).toISOString()}
-          where id = ${id} and tenant_id = ${ctx.tenantId} and status = 'draft'
-          returning billed_to`,
-  )
-  if (!sent) {
-    const existing = await loadInvoices(ctx.tenantId, id)
-    if (existing.length === 0) throw notFound("Invoice not found.")
-    throw conflict("already_sent", "That invoice was already sent.")
-  }
-  return { billedTo: sent.billed_to }
 }
 
 type ApprovedLine = {

@@ -21,6 +21,8 @@ import type {
   Payroll,
   PayrollEventRow,
   RemoveResult,
+  SendInvoiceRequest,
+  SendInvoiceResult,
   ThreadDetail,
   ThreadMessage,
   AddSlotResult,
@@ -119,7 +121,8 @@ export interface AdminRepo {
   invoice(id: string | undefined): Promise<InvoiceDetail>
   /** A draft for one venue and period, from the hours approved so far. */
   createInvoice(request: NewInvoiceRequest): Promise<{ id: string }>
-  sendInvoice(id: string): Promise<{ billedTo: string }>
+  /** Email it (ADR-027): a draft is sent, a sent one emailed again; the list is kept on its venue. */
+  sendInvoice(id: string, request: SendInvoiceRequest): Promise<SendInvoiceResult>
   /** Payroll summary: hours worked per staff member over the current billing period. */
   payroll(): Promise<Payroll>
   /** Payroll by event: the latest finished events where someone clocked in. */

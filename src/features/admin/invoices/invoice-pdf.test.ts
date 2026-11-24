@@ -16,6 +16,10 @@ const invoice: InvoiceDetail = {
   notice: "2 entries from Oct 24 are still in review and not included.",
   billedTo: "billing@harborpavilion.com",
   sent: false,
+  recipients: { client: "billing@harborpavilion.com", manager: "", accountant: "", others: [] },
+  sends: [],
+  emailReady: false,
+  canResend: false,
   lines: [
     {
       what: "Wedding · Sat Oct 24",

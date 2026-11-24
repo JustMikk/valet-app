@@ -14,6 +14,7 @@ import {
   type InviteEntry,
   type NewEventRequest,
   type NewInvoiceRequest,
+  type SendInvoiceRequest,
   type NewVenueRequest,
   type SettingsPatch,
   type VenuePatch,
@@ -244,7 +245,12 @@ export function useCreateInvoice() {
 
 export function useSendInvoice() {
   const refresh = useRefresh()
-  return useMutation({ mutationFn: (id: string) => adminRepo.sendInvoice(id), onSuccess: refresh })
+  return useMutation({
+    // Built inside the mutation, so the button is busy while the PDF is made too.
+    mutationFn: async ({ id, build }: { id: string; build: () => Promise<SendInvoiceRequest> }) =>
+      adminRepo.sendInvoice(id, await build()),
+    onSuccess: refresh,
+  })
 }
 
 export const useInbox = () =>

@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
+import { useState } from "react"
 
 import { Icon, StatusBadge } from "@/components/shared"
 import { Button } from "@/components/ui/button"
@@ -22,6 +23,8 @@ import {
   splitInvoiceNumber,
 } from "./invoice-parts"
 import { invoiceNumber, invoicePdf } from "./invoice-pdf"
+import { InvoiceRecipientsCard } from "./invoice-recipients"
+import { recipientsProblem, sendRequestFor, tidyRecipients } from "./send-invoice"
 import { BRAND_LOGO } from "@/lib/brand"
 
 /** One invoice: lines from approved hours, total and send. `?id=` picks it (default: first draft). */
@@ -43,7 +46,7 @@ export function InvoiceDetail() {
         />
       )}
       <QueryState query={invoice} rows={3}>
-        {(data) => <InvoiceBody invoice={data} />}
+        {(data) => <InvoiceBody key={data.id} invoice={data} />}
       </QueryState>
     </AdminPage>
   )
@@ -61,10 +64,20 @@ async function downloadPdf(invoice: InvoiceData, company: string) {
   URL.revokeObjectURL(url)
 }
 
+/** The send button's words: what it does, what is missing, or where it went. */
+function sendLabel(invoice: InvoiceData, done: boolean, problem: string | null): string {
+  if (done) return `Sent to ${invoice.billedTo}`
+  return problem ?? (invoice.sent ? "Send again" : "Send invoice")
+}
+
 function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
   const send = useSendInvoice()
   const company = useSession().data?.admin.company ?? "Invoice"
   const { number, status } = splitInvoiceNumber(invoice.number)
+  const [recipients, setRecipients] = useState(invoice.recipients)
+  // Nothing more to send: paid, or sent while email is off.
+  const done = invoice.sent && !invoice.canResend
+  const problem = recipientsProblem(recipients)
 
   return (
     <div className="grid w-full max-w-260 items-start gap-5 pb-24 desktop:grid-cols-[minmax(0,1fr)_20rem] desktop:gap-6 desktop:pb-0">
@@ -167,20 +180,30 @@ function InvoiceBody({ invoice }: { invoice: InvoiceData }) {
           </Button>
           <Button
             variant="strong"
-            disabled={invoice.sent || send.isPending}
-            onClick={() => send.mutate(invoice.id)}
+            disabled={done || problem !== null || send.isPending}
+            onClick={() =>
+              send.mutate(
+                { id: invoice.id, build: () => sendRequestFor(invoice, company, recipients) },
+                // As saved: blank extra fields drop out.
+                { onSuccess: () => setRecipients(tidyRecipients(recipients)) },
+              )
+            }
             className={cn(
               "flex-2 gap-1.5 bg-accent-text text-16 text-white transition-colors duration-300",
-              invoice.sent &&
+              done &&
                 "bg-accent-soft text-accent-text disabled:bg-accent-soft disabled:text-accent-text disabled:opacity-100",
             )}
           >
-            <Icon name={invoice.sent ? "check_circle" : "send"} filled size={20} />
-            <span className="truncate">
-              {invoice.sent ? `Sent to ${invoice.billedTo}` : "Send invoice"}
-            </span>
+            <Icon name={done ? "check_circle" : "send"} filled size={20} />
+            <span className="truncate">{sendLabel(invoice, done, problem)}</span>
           </Button>
         </div>
+        <InvoiceRecipientsCard
+          invoice={invoice}
+          value={recipients}
+          onChange={setRecipients}
+          editable={!done}
+        />
         <div className="hidden desktop:block">
           <InvoiceDetails invoice={invoice} status={status} />
         </div>

@@ -1,6 +1,16 @@
-// Writes shared by every way an invoice gets made (a period built by hand, an event drafted by the
-// system): the next number and the stored lines.
+// Shared by every way an invoice gets made (a period built by hand, an event drafted by the system)
+// and sent: the next number, the stored lines and the period's label.
+import { formatDate } from "@/lib/time/labels"
+
 import { rows, sql } from "../db/client"
+
+/** "Oct 16 – 31" within one month, "Oct 28 – Nov 3" across two. */
+export function periodLabel(start: string, end: string): string {
+  const fmt = (date: string) => formatDate(`${date}T12:00:00Z`, "UTC").split(" ")
+  const [, m1, d1] = fmt(start)
+  const [, m2, d2] = fmt(end)
+  return m1 === m2 ? `${m1} ${d1} – ${d2}` : `${m1} ${d1} – ${m2} ${d2}`
+}
 
 export type InvoiceLineInput = {
   what: string

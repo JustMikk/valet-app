@@ -20,6 +20,7 @@ import {
 } from "@/lib/time/labels"
 
 import { rows, sql } from "../db/client"
+import { emailInvite, type InviteEmailResult } from "../email"
 import { notFound } from "../http/handler"
 import { demoEnabled } from "../env"
 import { textInvite, type InviteTextResult } from "../sms"
@@ -219,6 +220,8 @@ export async function inviteStaff(adminId: string, invites: InviteEntry[]): Prom
   const skipped: string[] = []
   let texted = 0
   const notTexted: InviteResult["notTexted"] = []
+  let emailed = 0
+  const notEmailed: InviteResult["notEmailed"] = []
   let tenant: string | undefined
   // In demo mode, immediately mark the new staff as onboarded so they appear in the
   // available-staff picker and can be assigned to events without waiting for sign-up.
@@ -234,6 +237,16 @@ export async function inviteStaff(adminId: string, invites: InviteEntry[]): Prom
               returning id`,
       )
       ;(created ? invited : skipped).push(email)
+      if (!created) continue
+      // An email invite also goes out by email with the sign-in link (ADR-027).
+      const result = await emailInvite({
+        staffId: created.id,
+        to: email,
+        adminFirst: firstName(ctx.name),
+        tenantName: (tenant ??= await tenantName(ctx.tenantId)),
+      })
+      if (result.emailed) emailed += 1
+      else notEmailed.push({ who: email, reason: NOT_EMAILED[result.reason] })
       continue
     }
     const phone = formatPhone(entry.phone)
@@ -261,7 +274,13 @@ export async function inviteStaff(adminId: string, invites: InviteEntry[]): Prom
     if (result.texted) texted += 1
     else notTexted.push({ who: phone, reason: NOT_TEXTED[result.reason] })
   }
-  return { invited: invited.length, skipped, texted, notTexted }
+  return { invited: invited.length, skipped, texted, notTexted, emailed, notEmailed }
+}
+
+/** Why an email invite was not emailed, as the invite sheet says it. */
+const NOT_EMAILED: Record<Exclude<InviteEmailResult, { emailed: true }>["reason"], string> = {
+  not_configured: "email isn't set up yet",
+  failed: "the email didn't go through",
 }
 
 /** Why a phone invite was not texted, as the invite sheet says it. */
