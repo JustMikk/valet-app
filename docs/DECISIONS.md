@@ -445,3 +445,19 @@ Project-specific rules (device APIs, tokens only, component size) are ESLint rul
 - **Publishing drafts** (fixed here): assignments to a draft were never announced and nothing could publish one. A draft's page now has Publish event; publishing tells the assigned crew (notice, push, text) and posts the open spots.
 
 **Consequences.** Migration 016 (`sms_messages`, `shift_reminders`; the demo reset empties both). `CRON_SECRET` is now needed for reminders. Setup steps for the owner are in `docs/guides/twilio-setup.md`. Status callbacks cannot reach `localhost`; delivery statuses are visible only on a public deploy.
+
+## ADR-027 — Email for invites and invoices (Resend); invoice copies saved per venue
+
+**Date:** 2026-11-25 · **Status:** accepted (owner, D47)
+
+**Context.** Inviting by email only added the person, and Send invoice only marked the invoice sent: nobody received anything. The owner asked for real email, the invoice PDF attached, and copies to more people than the client (a manager, an accountant, anyone else).
+
+**Decision.**
+
+- **Resend over REST, no SDK** (`src/server/email`), like the Twilio sender: `POST https://api.resend.com/emails` with a Bearer key and a `User-Agent` (Resend refuses requests without one). `sendEmail` never throws; each caller decides what a failure means.
+- **Configuration is environment-only:** `RESEND_API_KEY`, `EMAIL_FROM` (bare or `Name <address>`, on a domain verified in Resend), optional `EMAIL_REPLY_TO`, and `APP_URL` (shared with ADR-026) for the invite link. With any of the required values missing, email is off and nothing fails. The key sends mail in the company's name, so it is never committed (unlike the demo's Pusher app, ADR-023).
+- **Email invites** go out when the person is added, with the same words as the text invite and the sign-in link with the address filled in (ADR-025). Best effort: a failed email never fails the invite; the invite sheet says what was emailed and what was not, and why. One email per invited person (Resend idempotency key `invite/<staff id>`). Phone invites are unchanged (ADR-026).
+- **Invoices** go to the venue's billing email (the client, in To), copying its manager, accountant and any others (CC, at most 10 others). The list is edited on the invoice page and **saved on the venue** when sending, so the venue's next invoice starts with it; the client is the venue's existing billing email. The email is a short summary (owner's wording: number, venue, period, total, due date) with the PDF attached. The PDF is built in the admin's browser, the same file Download saves (the Regency banner needs a canvas), as it reads once sent: billed to the client, without the draft's in-review notice. The server checks it is a PDF and at most ~2 MB.
+- **A draft is marked sent only after the email went.** If Resend refuses, the admin sees Resend's reason and the invoice stays a draft. A sent, unpaid invoice can be emailed again (Send again) to the current list; a paid one cannot ("Total due" would be wrong). Every email is logged in `invoice_sends` and listed on the invoice. With email off, Send marks a draft sent and emails nobody, as before, and the card says so.
+
+**Consequences.** Migration 017 (`venues.manager_email`, `accountant_email`, `cc_emails`; `invoice_sends`, emptied by the demo reset). The static export has no email: Send keeps the list in memory. Setup steps for the owner are in `docs/guides/resend-setup.md`. A person whose invite email failed is already on the team, so inviting them again does not resend it.
