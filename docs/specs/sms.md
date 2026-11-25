@@ -108,7 +108,7 @@ Today nothing can publish a draft event, so people assigned to a draft are never
 - **Assigned:** `{Tenant short name}: You're assigned to {event title}, {date} {time range}. {link}`
 - **Rescheduled:** `{Tenant short name}: {event title} has a new time: {date} {time range}. {link}`
 - **Removed:** `{Tenant short name}: You were removed from {event title} on {date}. Questions? Reply in the app. {link}`
-- **Length.** A shift text may take up to two GSM-7 segments (306 characters) so the event name stays whole (owner, 2026-11-26); typographic characters (en dash, curly quotes, narrow spaces) are written plainly so a text never falls back to 70-character UCS-2. Past two segments its event title or address is shortened, never the fixed wording or the link. An invite is never shortened and may take two segments (it is rare, and the company name must stay whole).
+- **Length.** Aim for one 160-character GSM-7 segment; typographic characters (en dash, curly quotes, narrow spaces) are written plainly so a text never falls back to 70-character UCS-2. A long shift text has its event title or address shortened, never the fixed wording or the link. An invite is never shortened and may take two segments (it is rare, and the company name must stay whole).
 
 ### Delivery and failure
 

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest"
 
-import { brandOf, isGsm7, SMS_MAX, smsText, toGsm7 } from "./copy"
+import { brandOf, isGsm7, SMS_SEGMENT, smsText, toGsm7 } from "./copy"
 
 const link = "https://valet.example.com/staff/shifts"
 
@@ -89,25 +89,8 @@ describe("staying in one plain-text segment", () => {
     expect(text).toContain("Grand's Gala on Sat, Oct 24")
   })
 
-  it("keeps a real event name whole, taking a second segment for it (owner, 2026-11-26)", () => {
-    const deployed =
-      "https://valet-app-gy1k.vercel.app/staff/shifts/detail?id=707f8150-0caa-47d4-a29c-fe796f77da20"
-    const text = smsText({
-      kind: "rescheduled",
-      brand: "Regency",
-      title: "Hilton Americas-Houston Grand Ballroom",
-      date: "Fri Nov 27",
-      range: "10:00 AM – 3:00 PM",
-      link: deployed,
-    })
-    expect(text).toBe(
-      `Regency: Hilton Americas-Houston Grand Ballroom has a new time: Fri Nov 27 10:00 AM - 3:00 PM. ${deployed}`,
-    )
-  })
-
-  it("shortens a shift text's details only past two segments, and never shortens an invite", () => {
-    const long =
-      "The Extraordinarily Long Annual Charity Gala Dinner And Silent Auction Evening ".repeat(3)
+  it("shortens a shift text's details to fit one segment, and never shortens an invite", () => {
+    const long = "The Extraordinarily Long Annual Charity Gala Dinner And Silent Auction Evening"
     const reminder = smsText({
       kind: "reminder24",
       brand: "Regency",
@@ -117,7 +100,7 @@ describe("staying in one plain-text segment", () => {
       address: "Westfield Centre, Level 4, 865 Market Street, San Francisco, CA 94103",
       link,
     })
-    expect(reminder.length).toBeLessThanOrEqual(SMS_MAX)
+    expect(reminder.length).toBeLessThanOrEqual(SMS_SEGMENT)
     expect(reminder.endsWith(` ${link}`)).toBe(true)
     expect(reminder).toContain("...")
 
