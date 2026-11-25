@@ -55,9 +55,13 @@ describe("links", () => {
     expect(shiftLink("https://valet.example.com", "/staff/shifts")).toBe(
       "https://valet.example.com/staff/shifts",
     )
-    expect(shiftLink("https://valet.example.com", "staff/shifts/detail?id=abc")).toBe(
-      "https://valet.example.com/staff/shifts/detail?id=abc",
-    )
+    // A shift's page goes by its short link, so the event name fits one segment (/s forwards).
+    expect(
+      shiftLink(
+        "https://valet.example.com",
+        "/staff/shifts/detail?id=707f8150-0caa-47d4-a29c-fe796f77da20",
+      ),
+    ).toBe("https://valet.example.com/s?i=707f8150-0caa-47d4-a29c-fe796f77da20")
   })
 })
 

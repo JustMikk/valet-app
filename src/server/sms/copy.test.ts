@@ -89,6 +89,22 @@ describe("staying in one plain-text segment", () => {
     expect(text).toContain("Grand's Gala on Sat, Oct 24")
   })
 
+  it("keeps a real event name whole in one segment with the short link", () => {
+    const short = "https://valet-app-gy1k.vercel.app/s?i=707f8150-0caa-47d4-a29c-fe796f77da20"
+    const text = smsText({
+      kind: "rescheduled",
+      brand: "Regency",
+      title: "Hilton Americas-Houston · ff",
+      date: "Fri Nov 27",
+      range: "10:00 AM – 3:00 PM",
+      link: short,
+    })
+    expect(text).toBe(
+      `Regency: Hilton Americas-Houston - ff has a new time: Fri Nov 27 10:00 AM - 3:00 PM. ${short}`,
+    )
+    expect(text.length).toBeLessThanOrEqual(SMS_SEGMENT)
+  })
+
   it("shortens a shift text's details to fit one segment, and never shortens an invite", () => {
     const long = "The Extraordinarily Long Annual Charity Gala Dinner And Silent Auction Evening"
     const reminder = smsText({

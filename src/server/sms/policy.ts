@@ -34,8 +34,13 @@ export function inviteLink(appUrl: string, to: E164): string {
   return `${appUrl}/login?role=staff&login=${encodeURIComponent(to)}`
 }
 
-/** A page of the staff app; the same paths the notification center links to. */
+/**
+ * A page of the staff app; the same paths the notification center links to. A shift's page goes by
+ * its short link (/s forwards to it): the full one took 94 of a text's 160 characters.
+ */
 export function shiftLink(appUrl: string, path: string): string {
+  const shift = /^\/?staff\/shifts\/detail\?id=([\w-]+)$/.exec(path)
+  if (shift) return `${appUrl}/s?i=${shift[1]}`
   return `${appUrl}/${path.replace(/^\/+/, "")}`
 }
 
