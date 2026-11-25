@@ -1,10 +1,12 @@
 // The texts valets receive (docs/specs/sms.md, copy approved by the owner 2026-11-23). Pure: the
 // caller formats dates and times; this writes the sentence and keeps it in plain GSM-7 characters.
-// A shift text that runs long has its event details shortened, never the fixed wording or the link.
-// An invite is never shortened.
+// A shift text may take two segments so the event name stays whole (owner, 2026-11-26); past that
+// its event details are shortened, never the fixed wording or the link. An invite is never shortened.
 
 /** One SMS segment of GSM-7 text. Longer texts are split and billed per segment. */
 export const SMS_SEGMENT = 160
+/** Two segments: a split text carries 153 characters in each part. */
+export const SMS_MAX = 2 * 153
 /** A shortened field keeps at least this many characters, "..." included. */
 const MIN_FIELD = 12
 
@@ -68,15 +70,15 @@ type Template = {
 const shorten = (value: string, length: number) =>
   value.length <= length ? value : `${value.slice(0, Math.max(0, length - 3)).trimEnd()}...`
 
-/** Shortens the longest flexible field until the text fits one segment, or none can shrink more. */
+/** Shortens the longest flexible field until the text fits two segments, or none can shrink more. */
 function fit({ flex, write, tail }: Template): string {
   const fields = Object.fromEntries(Object.entries(flex).map(([k, v]) => [k, toGsm7(v.trim())]))
   const render = () => `${toGsm7(write(fields))}${tail}`
   let text = render()
-  while (text.length > SMS_SEGMENT) {
+  while (text.length > SMS_MAX) {
     const [name, value] = Object.entries(fields).sort((a, b) => b[1].length - a[1].length)[0] ?? []
     if (!name || value === undefined || value.length <= MIN_FIELD) break
-    fields[name] = shorten(value, Math.max(MIN_FIELD, value.length - (text.length - SMS_SEGMENT)))
+    fields[name] = shorten(value, Math.max(MIN_FIELD, value.length - (text.length - SMS_MAX)))
     text = render()
   }
   return text
