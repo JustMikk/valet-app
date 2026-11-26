@@ -75,10 +75,9 @@ Still expected while building: semantic markup, labels and keyboard-operable con
 
 ## Exceptions
 
-| ID  | Rule                                         | Path                                                                 | Reason                                                                                                                                               | Owner    | Expires    |
-| --- | -------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------- |
-| W1  | Security: deps (`GHSA-vfj7-8cjw-p6xm`, high) | `braces@3.0.3` via `micromatch` ← `eslint-config-next`, `shadcn` CLI | Dev-only tooling, absent from the shipped bundle; no fixed version published. Ignore lives in `osv-scanner.toml` with the same expiry                | @Mikiyas | 2027-01-20 |
-| W2  | Floor guard path exemptions                  | `.constraintsignore`                                                 | Design/spec inputs (`docs/inputs/`, root originals, `designs/`), CLI-vendored skills (`.claude/skills/`, `.agents/`, `skills/`) are not project code | @Mikiyas | 2027-01-20 |
+| ID  | Rule                        | Path                 | Reason                                                                                                                                               | Owner    | Expires    |
+| --- | --------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------- |
+| W2  | Floor guard path exemptions | `.constraintsignore` | Design/spec inputs (`docs/inputs/`, root originals, `designs/`), CLI-vendored skills (`.claude/skills/`, `.agents/`, `skills/`) are not project code | @Mikiyas | 2027-01-20 |
 
 ## Known environment issues
 
