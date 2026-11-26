@@ -11,7 +11,7 @@ const to = e164("(713) 555-0144") as E164
 // Stand-in values in Twilio's formats; none of them is a real credential.
 const cfg: SmsConfig = {
   accountSid: "AC00000000000000000000000000000001",
-  keySid: "SK00000000000000000000000000000001",
+  keySid: "test-api-key-sid",
   keySecret: "test-key-secret",
   authToken: "test-auth-token",
   sender: { kind: "service", sid: "MG00000000000000000000000000000001" },
@@ -25,9 +25,7 @@ describe("sendRequest", () => {
     expect(request.url).toBe(
       "https://api.twilio.com/2010-04-01/Accounts/AC00000000000000000000000000000001/Messages.json",
     )
-    const expected = Buffer.from("SK00000000000000000000000000000001:test-key-secret").toString(
-      "base64",
-    )
+    const expected = Buffer.from("test-api-key-sid:test-key-secret").toString("base64")
     expect(request.headers.authorization).toBe(`Basic ${expected}`)
     expect(Object.fromEntries(request.form)).toEqual({
       To: "+17135550144",

@@ -6,7 +6,7 @@ import { smsConfigFrom } from "./config"
 // Stand-in values in Twilio's formats; none of them is a real credential.
 const base = {
   TWILIO_ACCOUNT_SID: "AC00000000000000000000000000000001",
-  TWILIO_API_KEY_SID: "SK00000000000000000000000000000001",
+  TWILIO_API_KEY_SID: "test-api-key-sid",
   TWILIO_API_KEY_SECRET: "test-key-secret",
   TWILIO_AUTH_TOKEN: "test-auth-token",
   APP_URL: "https://valet.example.com",

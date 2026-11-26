@@ -262,7 +262,7 @@ export function deriveBoard(events: LiveEvent[], messaged: Record<string, true>)
           tone: "info",
           icon: "front_hand",
           title: `${slot.name} asks to clock in`,
-          sub: `${event.venue} · ${f.outsideM ?? 0} m outside fence, ±${f.accuracyM ?? 0} m${f.note ? ` · "${f.note}"` : ""} · waiting ${f.waitedMin ?? 0} min`,
+          sub: `${event.venue} · ${f.outsideM ?? 0} m outside fence, ±${f.accuracyM ?? 0} m${f.note ? ` · “${f.note}”` : ""} · waiting ${f.waitedMin ?? 0} min`,
           short: `${event.venue} · waiting ${f.waitedMin ?? 0} min`,
           selfie: true,
           selfieUrl: slot.selfieUrl,
