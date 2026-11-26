@@ -1,16 +1,16 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { PwaInstallBanner } from "@/components/shared/pwa-install-banner"
-import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { BRAND_LOGO } from "@/lib/brand"
+
+import { LandingInstallBanner, LandingThemeToggle } from "./landing-extras"
 
 /** Public landing page: who this is for and where to sign in. */
 export default function Home() {
   return (
     <div className="min-h-dvh bg-ambient">
-      <PwaInstallBanner className="fixed inset-x-0 top-0 z-30" />
+      <LandingInstallBanner className="fixed inset-x-0 top-0 z-30" />
       <main className="mx-auto flex min-h-dvh w-full max-w-130 flex-col justify-center gap-9 px-5 py-12">
         <div className="flex items-center justify-between gap-4">
           <Image
@@ -20,7 +20,7 @@ export default function Home() {
             height={BRAND_LOGO.height}
             className="h-12 w-auto"
           />
-          <ThemeToggle />
+          <LandingThemeToggle />
         </div>
         <div className="flex flex-col gap-3">
           <h1 className="m-0 font-display text-44 leading-x100 font-bold tracking-n040">

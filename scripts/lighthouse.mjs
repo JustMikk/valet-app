@@ -7,6 +7,7 @@
 import { existsSync, readFileSync } from "node:fs"
 import { createServer } from "node:http"
 import { extname, join, normalize } from "node:path"
+import { gzipSync } from "node:zlib"
 
 import lighthouse from "lighthouse"
 import { chromium } from "@playwright/test"
@@ -49,8 +50,15 @@ const server = createServer((req, res) => {
     if (file.startsWith(normalize(OUT)) && existsSync(file) && !file.endsWith(OUT)) {
       try {
         const body = readFileSync(file)
-        res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream" })
-        return res.end(body)
+        const type = TYPES[extname(file)] ?? "application/octet-stream"
+        // Compressed as the host serves it (Vercel compresses text), so the simulated network
+        // measures the bytes users download. Fonts and images are already compressed.
+        if (!/^(text|application\/json|image\/svg)/.test(type)) {
+          res.writeHead(200, { "content-type": type })
+          return res.end(body)
+        }
+        res.writeHead(200, { "content-type": type, "content-encoding": "gzip" })
+        return res.end(gzipSync(body))
       } catch {
         // A directory path: fall through to the next candidate.
         continue
