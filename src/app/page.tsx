@@ -1,7 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { PwaInstallBanner, ThemeToggle } from "@/components/shared"
+import { PwaInstallBanner } from "@/components/shared/pwa-install-banner"
+import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { BRAND_LOGO } from "@/lib/brand"
 
