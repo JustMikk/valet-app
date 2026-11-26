@@ -26,12 +26,15 @@ const onest = Onest({ subsets: ["latin"], variable: "--font-onest" })
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", preload: false })
 
 // Material Symbols Rounded, subset to src/lib/icons/icon-names.ts (ADR-007).
-// `block` keeps ligature names from flashing as text before the glyphs load.
+// `block` keeps ligature names from flashing as text before the glyphs load. Not preloaded
+// (81 KiB): it loads when a page first shows an icon, so the landing page, which shows none at
+// first paint, meets its LCP budget (owner, 2026-11-26; amends ADR-009).
 const materialSymbols = localFont({
   src: "../fonts/material-symbols-rounded.woff2",
   weight: "400 700",
   display: "block",
   variable: "--font-material-symbols",
+  preload: false,
 })
 
 export const metadata: Metadata = {
