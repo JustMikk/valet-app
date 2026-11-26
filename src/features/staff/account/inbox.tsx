@@ -135,7 +135,7 @@ export function StaffInbox() {
               onClick={send}
               className={cn(
                 "grid size-12 flex-none place-items-center rounded-pill border-0 transition-[background-color,color,transform] duration-200 active:scale-92",
-                canSend ? "bg-accent text-white" : "bg-surface text-fg-3",
+                canSend ? "bg-accent text-accent-ink" : "bg-surface text-fg-3",
               )}
             >
               <Icon name="arrow_upward" size={24} />
